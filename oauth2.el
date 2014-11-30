@@ -58,7 +58,9 @@ It returns the code provided by the service."
                       "&redirect_uri=" (url-hexify-string (or redirect-uri "urn:ietf:wg:oauth:2.0:oob"))
                       (if scope (concat "&scope=" (url-hexify-string scope)) "")
                       (if state (concat "&state=" (url-hexify-string state)) "")))
-  (first (split-string (shell-command-to-string "python oauth2_callback_server.py") "\n")))
+  (first (split-string (shell-command-to-string
+                        (format "python %s"
+                                (locate-library "spotify_oauth2_callback_server.py"))) "\n")))
 
 (defun oauth2-request-access-parse ()
   "Parse the result of an OAuth request."
