@@ -32,7 +32,7 @@
 ;;
 ;; To search for tracks, invoke the `spotify-track-search' function and
 ;; type your query. The results will be shown up in a new buffer. To play the
-;; track under the cursor, just type [return], or type C-[return] to play the
+;; track under the cursor, just type RET, or type M-RET to play the
 ;; track's album from the start.
 
 ;; Code:
@@ -313,8 +313,8 @@ See commands \\[spotify-toggle-repeating] and
 (defvar spotify-track-search-mode-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map tabulated-list-mode-map)
-    (define-key map (kbd "<return>") 'spotify-track-select)
-    (define-key map (kbd "C-<return>") 'spotify-track-select-album)
+    (define-key map (kbd "RET") 'spotify-track-select)
+    (define-key map (kbd "M-RET") 'spotify-track-select-album)
     map)
   "Local keymap for `spotify-track-search-mode' buffers.")
 
