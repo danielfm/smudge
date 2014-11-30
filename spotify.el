@@ -173,7 +173,7 @@
 (defconst spotify-api-endpoint     "https://api.spotify.com/v1")
 (defconst spotify-oauth2-auth-url  "https://accounts.spotify.com/authorize")
 (defconst spotify-oauth2-token-url "https://accounts.spotify.com/api/token")
-(defconst spotify-oauth2-scopes    "playlist-read-private playlist-modify-public playlist-modify-private")
+(defconst spotify-oauth2-scopes    "playlist-read-private playlist-modify-public playlist-modify-private user-read-private")
 (defconst spotify-oauth2-callback  "http://localhost:8591/")
 
 (defcustom spotify-oauth2-client-id ""
@@ -276,7 +276,7 @@ JSON response."
 depending on the `type' argument."
   (let ((escaped-query (url-hexify-string query)))
     (spotify-api-call
-     (format "/search?q=%s&type=%s&limit=%d"
+     (format "/search?q=%s&type=%s&limit=%d&market=from_token"
              escaped-query type spotify-api-search-limit) "GET")))
 
 ;;;
@@ -336,7 +336,7 @@ See commands \\[spotify-toggle-repeating] and
         entries)
     (setq tabulated-list-format
           (vector '("#" 3 nil :right-align t)
-                  `("Name" ,default-width t)
+                  `("Track Name" ,default-width t)
                   `("Artist" ,default-width t)
                   `("Album" ,default-width t)
                   '("Popularity" 10 t)))
