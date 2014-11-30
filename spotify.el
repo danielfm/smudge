@@ -140,12 +140,6 @@
 (defun spotify-apple-player-play ()
   (spotify-apple-command "play"))
 
-(defun spotify-apple-player-current-track ()
-  (let ((track-name  (spotify-apple-command "get name of current track"))
-        (artist-name (spotify-apple-command "get artist of current track"))
-        (album-name  (spotify-apple-command "get album of current track")))
-    (format "%s - %s (%s)" artist-name track-name album-name)))
-
 (defun spotify-apple-toggle-repeating ()
   (spotify-apple-command "set repeating to not repeating"))
 
