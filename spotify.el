@@ -192,7 +192,7 @@ https://developer.spotify.com/web-api/tutorial/."
   :type 'integer)
 
 (defun spotify-api-auth ()
-  ""
+  "Starts the Spotify Oauth2 authentication and authorization workflow."
   (oauth2-auth-and-store spotify-oauth2-auth-url
                          spotify-oauth2-token-url
                          spotify-oauth2-scopes
@@ -201,7 +201,8 @@ https://developer.spotify.com/web-api/tutorial/."
                          spotify-oauth2-callback))
 
 (defun spotify-api-call (uri &optional method data)
-  ""
+  "Makes a request to the given Spotify service endpoint and returns the parsed
+JSON response."
   (let ((url (format "%s%s" spotify-api-endpoint uri)))
     (with-current-buffer (oauth2-url-retrieve-synchronously *spotify-oauth2-token*
                                                             url method data)
@@ -215,10 +216,6 @@ https://developer.spotify.com/web-api/tutorial/."
         (kill-buffer)
         json)))))
 
-(defun spotify-api-get (uri &optional data)
-  ""
-  (spotify-api-call uri "GET" data))
-
 (defun spotify-disconnect ()
   "Clears the Spotify session currently in use."
   (interactive)
@@ -230,7 +227,7 @@ https://developer.spotify.com/web-api/tutorial/."
   "Starts a new Spotify session."
   (interactive)
   (defvar *spotify-oauth2-token* (spotify-api-auth))
-  (defvar *spotify-user* (spotify-api-get "/me"))
+  (defvar *spotify-user* (spotify-api-call "/me" "GET"))
   (when *spotify-user*
     (message "Welcome, %s!" (spotify-current-user-name))))
 
@@ -275,9 +272,12 @@ https://developer.spotify.com/web-api/tutorial/."
   (gethash 'uri json))
 
 (defun spotify-search (type query)
-  ""
+  "Searches artists, albums, tracks or playlists that match a keyword string,
+depending on the `type' argument."
   (let ((escaped-query (url-hexify-string query)))
-    (spotify-api-get (format "/search?q=%s&type=%s&limit=%d" escaped-query type spotify-api-search-limit))))
+    (spotify-api-call
+     (format "/search?q=%s&type=%s&limit=%d"
+             escaped-query type spotify-api-search-limit) "GET")))
 
 ;;;
 ;;; Modes
