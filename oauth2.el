@@ -6,6 +6,11 @@
 ;; Version: 0.8
 ;; Keywords: comm
 
+;; Modified by Daniel Martins <daniel.tritone@gmail.com>
+;; The main change is to use a simple HTTP server in order to receive
+;; the Oauth2 callback instead of having the user to copy and paste
+;; the code by hand.
+
 ;; This file is part of GNU Emacs.
 
 ;; GNU Emacs is free software: you can redistribute it and/or modify
