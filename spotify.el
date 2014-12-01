@@ -211,10 +211,9 @@ JSON response."
       (when (search-forward-regexp "^$" nil t)
         (let* ((json-object-type 'hash-table)
              (json-array-type 'list)
-             (json-key-type 'symbol)
-             (json (json-read)))
-        (kill-buffer)
-        json)))))
+             (json-key-type 'symbol))
+          (prog1 (json-read)
+            (kill-buffer)))))))
 
 (defun spotify-disconnect ()
   "Clears the Spotify session currently in use."
