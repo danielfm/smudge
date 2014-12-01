@@ -286,7 +286,8 @@ depending on the `type' argument."
   "Returns the popularity indicator bar proportional to the given parameter,
 where one bar is low popularity and ten bars is high popularity."
   (let ((num-bars (truncate (/ popularity 10))))
-    (make-string num-bars ?|)))
+    (concat (make-string num-bars ?\u25cf)
+            (make-string (- 10 num-bars) ?\u25cb))))
 
 (defvar spotify-remote-mode-map
   (let ((map (make-sparse-keymap)))
