@@ -284,7 +284,7 @@ depending on the `type' argument."
 
 (defun spotify-popularity-bar (popularity)
   "Returns the popularity indicator bar proportional to the given parameter,
-where one bar is low popularity and ten bars is high popularity."
+which must be a number between 0 and 100."
   (let ((num-bars (truncate (/ popularity 10))))
     (concat (make-string num-bars ?\u25cf)
             (make-string (- 10 num-bars) ?\u25cb))))
