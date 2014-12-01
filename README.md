@@ -74,6 +74,9 @@ The results will be displayed in a separate buffer. To play any of those tracks,
 just navigate to it and type `RET`, or type `M-RET` in order to play the album
 in which that track appears.
 
+When inside the `*Spotify Search*` window, type `R` to toggle repeating or
+`S` to toggle shuffling.
+
 ## License
 
 Copyright (C) Daniel Fernandes Martins
