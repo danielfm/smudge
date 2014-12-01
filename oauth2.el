@@ -39,11 +39,6 @@
 (require 'plstore)
 (require 'json)
 
-(defun oauth2-start-server ()
-  "Starts an asynchronous Python process that spawns a local HTTP server in
-order to capture the Oauth authorization code sent by the Spotify API."
-  )
-
 (defun oauth2-kill-server ()
   "Kills the local Python HTTP server process.")
 
