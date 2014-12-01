@@ -7,19 +7,19 @@
 Spotify.el is a collection of extensions that allows you to control the Spotify
 application from within your favorite text editor.
 
-**Note:** This is _very_ alpha software, and it's tested only in Mac OS X.
+**Note:** This is _very_ alpha software, and it works only in Mac OS X.
 
 ## Features
 
-* Supports Oauth2 authentication/authorization
+* Uses the Spotify API via Oauth2
 * Track search mode that lists the tracks that match the given keywords
 * Toggle Spotify repeating and shuffling with one keystroke
 
-### TODO
+### Planned Features
 
-* Linux support via D-Bus
-* Album search mode
+* Global "remote control" minor mode as an alternative to media keys
 * Add track or album to a new (or existing) playlist
+* Linux support via D-Bus
 
 ## Installation
 
