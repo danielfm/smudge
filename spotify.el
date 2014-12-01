@@ -203,7 +203,7 @@ https://developer.spotify.com/web-api/tutorial/."
 (defun spotify-api-call (uri &optional method data)
   "Makes a request to the given Spotify service endpoint and returns the parsed
 JSON response."
-  (let ((url (format "%s%s" spotify-api-endpoint uri)))
+  (let ((url (concat spotify-api-endpoint uri)))
     (with-current-buffer (oauth2-url-retrieve-synchronously *spotify-oauth2-token*
                                                             url method data)
       (toggle-enable-multibyte-characters t)
