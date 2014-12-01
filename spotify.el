@@ -210,8 +210,8 @@ JSON response."
       (goto-char (point-min))
       (when (search-forward-regexp "^$" nil t)
         (let* ((json-object-type 'hash-table)
-             (json-array-type 'list)
-             (json-key-type 'symbol))
+               (json-array-type 'list)
+               (json-key-type 'symbol))
           (prog1 (json-read)
             (kill-buffer)))))))
 
