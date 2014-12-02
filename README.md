@@ -30,7 +30,7 @@ First, make sure your system satisfies the given dependencies:
 To manually install spotify.el, just clone this project somewhere in your
 disk, add that directory in the `load-path`, and require the `spotify` module:
 
-````lisp
+````el
 (add-to-list 'load-path "<spotify.el-dir>")
 (require 'spotify)
 
@@ -41,7 +41,7 @@ disk, add that directory in the `load-path`, and require the `spotify` module:
 
 Or if you use [el-get](https://github.com/dimitri/el-get):
 
-````lisp
+````el
 (add-to-list
   'el-get-sources
   '(:name spotify.el
@@ -61,18 +61,18 @@ In order to get the the client ID and client secret, you need to create
 ## Usage
 
 In order to connect with the Spotify API and refresh the access token,
-run `M-x spotify-connect`. This will start the Oauth2 authentication and
-authorization workflow.
+run <kbd>M-x spotify-connect</kbd>. This will start the Oauth2 authentication
+and authorization workflow.
 
 You may be asked to type a password since the tokens are securely stored as an
 encrypted file in the local filesystem. After you enter your credentials and
 authorizes the app, you should see a greeting message in the echo area.
 
-To search for tracks, run `M-x spotify-track-search` and type in your query.
-The results will be displayed in a separate buffer.
+To search for tracks, run <kbd>M-x spotify-track-search</kbd> and type in your
+query. The results will be displayed in a separate buffer.
 
-To play any of those tracks, just navigate to it and type `RET`, or type
-`M-RET` in order to play the album in which that track appears.
+To play any of those tracks, just navigate to it and type <kbd>RET</kbd>, or
+type <kbd>M-RET</kbd> in order to play the album in which that track appears.
 
 This buffer also loads the `spotify-remote-mode` by default.
 
@@ -81,13 +81,13 @@ This buffer also loads the `spotify-remote-mode` by default.
 Whenever you enable the `spotify-remote-mode` you get the following key
 bindings:
 
-| Key       | Function                 | Description         |
-|:----------|:-------------------------|:--------------------|
-| `M-p M-s` | `spotify-toggle-shuffle` | Turn shuffle on/off |
-| `M-p M-r` | `potify-toggle-repeat`   | Turn repeat on/off  |
-| `M-p M-p` | `spotify-toggle-play`    | Play/pause          |
-| `M-p M-.` | `spotify-next-track`     | Next track          |
-| `M-p M-,` | `spotify-previous-track` | Previous track      |
+| Key                | Function                 | Description         |
+|:-------------------|:-------------------------|:--------------------|
+| <kbd>M-p M-s</kbd> | `spotify-toggle-shuffle` | Turn shuffle on/off |
+| <kbd>M-p M-r</kbd> | `potify-toggle-repeat`   | Turn repeat on/off  |
+| <kbd>M-p M-p</kbd> | `spotify-toggle-play`    | Play/pause          |
+| <kbd>M-p M-.</kbd> | `spotify-next-track`     | Next track          |
+| <kbd>M-p M-,</kbd> | `spotify-previous-track` | Previous track      |
 
 Feel free to enable this minor mode wherever you want by using `add-hook`.
 
