@@ -64,8 +64,17 @@
   (let ((func-name (format "spotify-%s-%s" spotify-transport suffix)))
     (apply (intern func-name) args)))
 
+(defun spotify-current-track-msg ()
+  ""
+  (sleep-for 0.1)
+  (let ((artist (spotify-current-track-artist))
+        (name (spotify-current-track-name)))
+    (when (spotify-playing-p)
+      (message "Spotify is now playing: %s - %s" artist name))))
+
 (defun spotify-playing-status-msg ()
   "Returns a string that describes whether Spotify is paused or playing."
+  (sleep-for 0.1)
   (message "Spotify is now %s"
            (if (spotify-playing-p) "playing" "paused")))
 
@@ -73,7 +82,7 @@
   "Sends a `play' command to Spotify process passing a context id."
   (interactive)
   (spotify-apply "player-play-track" context-id)
-  (spotify-playing-status-msg))
+  (spotify-current-track-msg))
 
 (defun spotify-toggle-play ()
   "Sends a `playpause' command to Spotify process."
@@ -90,12 +99,14 @@
 (defun spotify-next-track ()
   "Sends a `next track' command to Spotify process."
   (interactive)
-  (spotify-apply "player-next-track"))
+  (spotify-apply "player-next-track")
+  (spotify-current-track-msg))
 
 (defun spotify-previous-track ()
   "Sends a `previous track' command to Spotify process."
   (interactive)
-  (spotify-apply "player-previous-track"))
+  (spotify-apply "player-previous-track")
+  (spotify-current-track-msg))
 
 (defun spotify-pause ()
   "Sends a `pause' command to Spotify process."
@@ -131,6 +142,21 @@
   (spotify-apply "toggle-shuffle")
   (message "Spotify shuffling is %s"
            (if (spotify-shuffling-p) "on" "off")))
+
+(defun spotify-current-track-artist ()
+  "Retrieves the artist name of the track being played in Spotify app."
+  (interactive)
+  (spotify-apply "current-track-artist"))
+
+(defun spotify-current-track-album ()
+  "Retrieves the album name of the track being played in Spotify app."
+  (interactive)
+  (spotify-apply "current-track-album"))
+
+(defun spotify-current-track-name ()
+  "Retrieves the name of the track being played in Spotify app."
+  (interactive)
+  (spotify-apply "current-track-name"))
 
 ;;;
 ;;; D-Bus-specific code
@@ -185,6 +211,15 @@
 
 (defun spotify-apple-player-playing-p ()
   (string= "playing" (spotify-apple-player-state)))
+
+(defun spotify-apple-current-track-artist ()
+  (spotify-apple-command "artist of current track"))
+
+(defun spotify-apple-current-track-album ()
+  (spotify-apple-command "album of current track"))
+
+(defun spotify-apple-current-track-name ()
+  (spotify-apple-command "name of current track"))
 
 ;;;
 ;;; OAuth2 API interface
