@@ -65,16 +65,24 @@
     (apply (intern func-name) args)))
 
 (defun spotify-current-track-msg ()
-  ""
-  (sleep-for 0.1)
+  "Returns a string that describes the track being played in Spotify app."
   (let ((artist (spotify-current-track-artist))
         (name (spotify-current-track-name)))
     (when (spotify-playing-p)
       (message "Spotify is now playing: %s - %s" artist name))))
 
+(defun spotify-shuffling-status-msg ()
+  "Returns a string that describes whether shuffling is enabled in Spotify app."
+  (message "Spotify shuffling is %s"
+           (if (spotify-shuffling-p) "on" "off")))
+
+(defun spotify-repeating-status-msg ()
+  "Returns a string that describes whether repeating is enabled in Spotify app."
+  (message "Spotify repeating is %s"
+           (if (spotify-repeating-p) "on" "off")))
+
 (defun spotify-playing-status-msg ()
   "Returns a string that describes whether Spotify is paused or playing."
-  (sleep-for 0.1)
   (message "Spotify is now %s"
            (if (spotify-playing-p) "playing" "paused")))
 
@@ -82,37 +90,37 @@
   "Sends a `play' command to Spotify process passing a context id."
   (interactive)
   (spotify-apply "player-play-track" context-id)
-  (spotify-current-track-msg))
+  (run-at-time "1 sec" nil 'spotify-current-track-msg))
 
 (defun spotify-toggle-play ()
   "Sends a `playpause' command to Spotify process."
   (interactive)
   (spotify-apply "player-toggle-play")
-  (spotify-playing-status-msg))
+  (run-at-time "1 sec" nil 'spotify-playing-status-msg))
 
 (defun spotify-play ()
   "Sends a `play' command to Spotify process."
   (interactive)
   (spotify-apply "player-play")
-  (spotify-playing-status-msg))
+  (run-at-time "1 sec" nil 'spotify-playing-status-msg))
 
 (defun spotify-next-track ()
   "Sends a `next track' command to Spotify process."
   (interactive)
   (spotify-apply "player-next-track")
-  (spotify-current-track-msg))
+  (run-at-time "1 sec" nil 'spotify-current-track-msg))
 
 (defun spotify-previous-track ()
   "Sends a `previous track' command to Spotify process."
   (interactive)
   (spotify-apply "player-previous-track")
-  (spotify-current-track-msg))
+  (run-at-time "1 sec" nil 'spotify-current-track-msg))
 
 (defun spotify-pause ()
   "Sends a `pause' command to Spotify process."
   (interactive)
   (spotify-apply "player-pause")
-  (spotify-playing-status-msg))
+  (run-at-time "1 sec" nil 'spotify-playing-status-msg))
 
 (defun spotify-playing-p ()
   "Returns whether Spotify is playing."
@@ -128,8 +136,7 @@
   "Sends a command to Spotify process to toggle the repeating flag."
   (interactive)
   (spotify-apply "toggle-repeat")
-  (message "Spotify repeating is %s"
-           (if (spotify-repeating-p) "on" "off")))
+  (run-at-time "1 sec" nil 'spotify-repeating-status-msg))
 
 (defun spotify-shuffling-p ()
   "Returns whether Spotify have shuffling turned on."
@@ -140,8 +147,7 @@
   "Sends a command to Spotify process to toggle the shuffling flag."
   (interactive)
   (spotify-apply "toggle-shuffle")
-  (message "Spotify shuffling is %s"
-           (if (spotify-shuffling-p) "on" "off")))
+  (run-at-time "1 sec" nil 'spotify-shuffling-status-msg))
 
 (defun spotify-current-track-artist ()
   "Retrieves the artist name of the track being played in Spotify app."
