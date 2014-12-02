@@ -45,7 +45,7 @@
   (error "Spotify requires at least GNU Emacs 24.4"))
 
 (defgroup spotify nil
-  "Spotify ckient."
+  "Spotify client."
   :version "0.0.1"
   :group 'multimedia)
 
@@ -335,6 +335,13 @@ See commands \\[spotify-toggle-repeating] and
   :group 'spotify
   :init-value nil
   :lighter " >=")
+
+(defun turn-on-spotify-remote-mode ()
+  "Turns the `spotify-remote-mode' on in the current buffer."
+  (spotify-remote-mode 1))
+
+(define-globalized-minor-mode global-spotify-remote-mode
+  spotify-remote-mode turn-on-spotify-remote-mode)
 
 (defvar spotify-track-search-mode-map
   (let ((map (make-sparse-keymap)))

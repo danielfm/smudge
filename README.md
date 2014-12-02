@@ -89,7 +89,7 @@ bindings:
 | <kbd>M-p M-.</kbd> | `spotify-next-track`     | Next track          |
 | <kbd>M-p M-,</kbd> | `spotify-previous-track` | Previous track      |
 
-Feel free to enable this minor mode wherever you want by using `add-hook`.
+This mode can be enabled globally with `global-spotify-remote-mode`.
 
 ## License
 
