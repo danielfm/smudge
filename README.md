@@ -70,12 +70,27 @@ encrypted file in the local filesystem. After you enter your credentials and
 authorizes the app, you should see a greeting message in the echo area.
 
 To search for tracks, run `M-x spotify-track-search` and type in your query.
-The results will be displayed in a separate buffer. To play any of those tracks,
-just navigate to it and type `RET`, or type `M-RET` in order to play the album
-in which that track appears.
+The results will be displayed in a separate buffer.
 
-When inside the `*Spotify Search*` window, type `R` to toggle repeating or
-`S` to toggle shuffling.
+To play any of those tracks, just navigate to it and type `RET`, or type
+`M-RET` in order to play the album in which that track appears.
+
+This buffer also loads the `spotify-remote-mode` by default.
+
+### Remote Minor Mode
+
+Whenever you enable the `spotify-remote-mode` you get the following key
+bindings:
+
+| Key       | Command          |
+|:----------|:-----------------|
+| `M-p M-s` | Toggle shuffling |
+| `M-p M-r` | Toggle repeating |
+| `M-p M-p` | Play/pause       |
+| `M-p M-.` | Next track       |
+| `M-p M-,` | Previous track   |
+
+Feel free to enable this minor mode wherever you want by using `add-hook`.
 
 ## License
 

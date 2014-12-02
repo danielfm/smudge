@@ -72,13 +72,30 @@
 (defun spotify-play-track (context-id)
   "Sends a `play' command to Spotify process passing a context id."
   (interactive)
-  (spotify-apply "player-play-track" context-id))
+  (spotify-apply "player-play-track" context-id)
+  (spotify-playing-status-msg))
+
+(defun spotify-toggle-play ()
+  "Sends a `playpause' command to Spotify process."
+  (interactive)
+  (spotify-apply "player-toggle-play")
+  (spotify-playing-status-msg))
 
 (defun spotify-play ()
   "Sends a `play' command to Spotify process."
   (interactive)
   (spotify-apply "player-play")
   (spotify-playing-status-msg))
+
+(defun spotify-next-track ()
+  "Sends a `next track' command to Spotify process."
+  (interactive)
+  (spotify-apply "player-next-track"))
+
+(defun spotify-previous-track ()
+  "Sends a `previous track' command to Spotify process."
+  (interactive)
+  (spotify-apply "player-previous-track"))
 
 (defun spotify-pause ()
   "Sends a `pause' command to Spotify process."
@@ -137,8 +154,14 @@
 (defun spotify-apple-player-state ()
   (spotify-apple-command "get player state"))
 
-(defun spotify-apple-player-play ()
-  (spotify-apple-command "play"))
+(defun spotify-apple-player-toggle-play ()
+  (spotify-apple-command "playpause"))
+
+(defun spotify-apple-player-next-track ()
+  (spotify-apple-command "next track"))
+
+(defun spotify-apple-player-previous-track ()
+  (spotify-apple-command "previous track"))
 
 (defun spotify-apple-toggle-repeating ()
   (spotify-apple-command "set repeating to not repeating"))
@@ -291,8 +314,11 @@ which must be a number between 0 and 100."
 
 (defvar spotify-remote-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "R") 'spotify-toggle-repeating)
-    (define-key map (kbd "S") 'spotify-toggle-shuffling)
+    (define-key map (kbd "M-p M-s") 'spotify-toggle-shuffling)
+    (define-key map (kbd "M-p M-r") 'spotify-toggle-repeating)
+    (define-key map (kbd "M-p M-p") 'spotify-toggle-play)
+    (define-key map (kbd "M-p M-,") 'spotify-previous-track)
+    (define-key map (kbd "M-p M-.") 'spotify-next-track)
     map)
   "Local keymap for `spotify-remote-mode' buffers.")
 
@@ -313,10 +339,13 @@ See commands \\[spotify-toggle-repeating] and
 (defvar spotify-track-search-mode-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map tabulated-list-mode-map)
-    (define-key map (kbd "RET") 'spotify-track-select)
+    (define-key map (kbd "RET")   'spotify-track-select)
     (define-key map (kbd "M-RET") 'spotify-track-select-album)
     map)
   "Local keymap for `spotify-track-search-mode' buffers.")
+
+;; Enables the `spotify-remote-mode' the track search buffer
+(add-hook 'spotify-track-search-mode-hook 'spotify-remote-mode)
 
 (define-derived-mode spotify-track-search-mode tabulated-list-mode "Tracks"
   "Major mode for displaying the track listing returned by a Spotify search.")
@@ -361,7 +390,6 @@ See commands \\[spotify-toggle-repeating] and
 	(buffer (get-buffer-create (format "*Spotify Search: %s*" query))))
     (pop-to-buffer buffer)
     (spotify-track-search-mode)
-    (spotify-remote-mode)
     (spotify-track-search-print (spotify-get-search-tracks-items json))
     buffer))
 
