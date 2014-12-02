@@ -113,10 +113,10 @@
   (interactive)
   (spotify-apply "repeating-p"))
 
-(defun spotify-toggle-repeating ()
+(defun spotify-toggle-repeat ()
   "Sends a command to Spotify process to toggle the repeating flag."
   (interactive)
-  (spotify-apply "toggle-repeating")
+  (spotify-apply "toggle-repeat")
   (message "Spotify repeating is %s"
            (if (spotify-repeating-p) "on" "off")))
 
@@ -125,10 +125,10 @@
   (interactive)
   (spotify-apply "shuffling-p"))
 
-(defun spotify-toggle-shuffling ()
+(defun spotify-toggle-shuffle ()
   "Sends a command to Spotify process to toggle the shuffling flag."
   (interactive)
-  (spotify-apply "toggle-shuffling")
+  (spotify-apply "toggle-shuffle")
   (message "Spotify shuffling is %s"
            (if (spotify-shuffling-p) "on" "off")))
 
@@ -163,10 +163,10 @@
 (defun spotify-apple-player-previous-track ()
   (spotify-apple-command "previous track"))
 
-(defun spotify-apple-toggle-repeating ()
+(defun spotify-apple-toggle-repeat ()
   (spotify-apple-command "set repeating to not repeating"))
 
-(defun spotify-apple-toggle-shuffling ()
+(defun spotify-apple-toggle-shuffle ()
   (spotify-apple-command "set shuffling to not shuffling"))
 
 (defun spotify-apple-player-play-track (context-id)
@@ -314,8 +314,8 @@ which must be a number between 0 and 100."
 
 (defvar spotify-remote-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "M-p M-s") 'spotify-toggle-shuffling)
-    (define-key map (kbd "M-p M-r") 'spotify-toggle-repeating)
+    (define-key map (kbd "M-p M-s") 'spotify-toggle-shuffle)
+    (define-key map (kbd "M-p M-r") 'spotify-toggle-repeat)
     (define-key map (kbd "M-p M-p") 'spotify-toggle-play)
     (define-key map (kbd "M-p M-,") 'spotify-previous-track)
     (define-key map (kbd "M-p M-.") 'spotify-next-track)
