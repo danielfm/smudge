@@ -17,7 +17,6 @@ application from within your favorite text editor.
 
 ### Planned Features
 
-* Global "remote control" minor mode as an alternative to media keys
 * Add track or album to a new (or existing) playlist
 * Linux support via D-Bus
 
