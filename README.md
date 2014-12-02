@@ -86,8 +86,8 @@ bindings:
 | <kbd>M-p M-s</kbd> | `spotify-toggle-shuffle` | Turn shuffle on/off |
 | <kbd>M-p M-r</kbd> | `potify-toggle-repeat`   | Turn repeat on/off  |
 | <kbd>M-p M-p</kbd> | `spotify-toggle-play`    | Play/pause          |
-| <kbd>M-p M-.</kbd> | `spotify-next-track`     | Next track          |
-| <kbd>M-p M-,</kbd> | `spotify-previous-track` | Previous track      |
+| <kbd>M-p M-f</kbd> | `spotify-next-track`     | Next track          |
+| <kbd>M-p M-b</kbd> | `spotify-previous-track` | Previous track      |
 
 This mode can be enabled globally with `global-spotify-remote-mode`.
 

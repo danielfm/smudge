@@ -317,8 +317,8 @@ which must be a number between 0 and 100."
     (define-key map (kbd "M-p M-s") 'spotify-toggle-shuffle)
     (define-key map (kbd "M-p M-r") 'spotify-toggle-repeat)
     (define-key map (kbd "M-p M-p") 'spotify-toggle-play)
-    (define-key map (kbd "M-p M-,") 'spotify-previous-track)
-    (define-key map (kbd "M-p M-.") 'spotify-next-track)
+    (define-key map (kbd "M-p M-b") 'spotify-previous-track)
+    (define-key map (kbd "M-p M-f") 'spotify-next-track)
     map)
   "Local keymap for `spotify-remote-mode' buffers.")
 
