@@ -82,13 +82,13 @@ This buffer also loads the `spotify-remote-mode` by default.
 Whenever you enable the `spotify-remote-mode` you get the following key
 bindings:
 
-| Key       | Function                 | Description           |
-|:----------|:-------------------------|:----------------------|
-| `M-p M-s` | `spotify-toggle-shuffle` | Turn shuffling on/off |
-| `M-p M-r` | `potify-toggle-repeat`   | Turn repeat on/off    |
-| `M-p M-p` | `spotify-toggle-play`    | Play/pause            |
-| `M-p M-.` | `spotify-next-track`     | Next track            |
-| `M-p M-,` | `spotify-previous-track` | Previous track        |
+| Key       | Function                 | Description         |
+|:----------|:-------------------------|:--------------------|
+| `M-p M-s` | `spotify-toggle-shuffle` | Turn shuffle on/off |
+| `M-p M-r` | `potify-toggle-repeat`   | Turn repeat on/off  |
+| `M-p M-p` | `spotify-toggle-play`    | Play/pause          |
+| `M-p M-.` | `spotify-next-track`     | Next track          |
+| `M-p M-,` | `spotify-previous-track` | Previous track      |
 
 Feel free to enable this minor mode wherever you want by using `add-hook`.
 
