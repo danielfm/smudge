@@ -68,8 +68,9 @@
   "Returns a string that describes the track being played in Spotify app."
   (let ((artist (spotify-current-track-artist))
         (name (spotify-current-track-name)))
-    (when (spotify-playing-p)
-      (message "Spotify is now playing: %s - %s" artist name))))
+    (if (spotify-playing-p)
+        (message "Spotify is now playing: %s - %s" artist name)
+      (message "Spotify is now paused"))))
 
 (defun spotify-shuffling-status-msg ()
   "Returns a string that describes whether shuffling is enabled in Spotify app."
@@ -85,6 +86,11 @@
   "Returns a string that describes whether Spotify is paused or playing."
   (message "Spotify is now %s"
            (if (spotify-playing-p) "playing" "paused")))
+
+(defun spotify-player-info ()
+  "Returns a string that describes what's being played."
+  (interactive)
+  (spotify-current-track-msg))
 
 (defun spotify-play-track (context-id)
   "Sends a `play' command to Spotify process passing a context id."
