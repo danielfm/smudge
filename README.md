@@ -12,6 +12,7 @@ application from within your favorite text editor.
 ## Features
 
 * Uses the Spotify API via Oauth2
+* List your public and private playlists
 * Search for tracks and playlists that match the given keywords
 * Easily control basic Spotify player features like, play/pause, previous, 
   next, shuffle, and repeat with the Spotify Remote minor mode
