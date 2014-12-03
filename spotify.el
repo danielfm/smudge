@@ -507,7 +507,7 @@ See commands \\[spotify-toggle-repeating] and
 (defun spotify-playlist-search (query)
   "Searches for playlists that match the given query string."
   (interactive "sSpotify Search (Playlists): ")
-  (let ((json (spotify-search 'playlist query))
+  (let ((json (spotify-api-search 'playlist query))
         (buffer (get-buffer-create (format "*Playlist Search: %s*" query))))
     (pop-to-buffer buffer)
     (spotify-playlist-search-mode)
