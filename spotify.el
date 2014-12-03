@@ -308,13 +308,17 @@ JSON response."
   "Returns the user's id of the current Spotify session."
   (gethash 'id *spotify-user*))
 
+(defun spotify-get-items (json)
+  "Returns the list of items from the given json object."
+  (gethash 'items json))
+
 (defun spotify-get-search-track-items (json)
   "Returns track items from the given search results json."
-  (gethash 'items (gethash 'tracks json)))
+  (spotify-get-items (gethash 'tracks json)))
 
 (defun spotify-get-search-playlist-items (json)
   "Returns the playlist items from the given search results json."
-  (gethash 'items (gethash 'playlists json)))
+  (spotify-get-items (gethash 'playlists json)))
 
 (defun spotify-get-track-album (json)
   "Returns the simplified album object from the given track object."
@@ -352,13 +356,18 @@ JSON response."
   "Returns the owner id of the given playlist object."
   (gethash 'id (gethash 'owner json)))
 
-(defun spotify-search (type query)
+(defun spotify-api-search (type query)
   "Searches artists, albums, tracks or playlists that match a keyword string,
 depending on the `type' argument."
   (let ((escaped-query (url-hexify-string query)))
     (spotify-api-call
      (format "/search?q=%s&type=%s&limit=%d&market=from_token"
              escaped-query type spotify-api-search-limit) "GET")))
+
+(defun spotify-api-user-playlists (user-id)
+  "Returns the playlists for the given user."
+  (spotify-api-call
+   (format "/users/%s/playlists" user-id) "GET"))
 
 ;;;
 ;;; Modes
@@ -373,6 +382,7 @@ which must be a number between 0 and 100."
 
 (defvar spotify-remote-mode-map
   (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "M-p M-i")   'spotify-player-info)
     (define-key map (kbd "M-p M-s") 'spotify-toggle-shuffle)
     (define-key map (kbd "M-p M-r") 'spotify-toggle-repeat)
     (define-key map (kbd "M-p M-p") 'spotify-toggle-play)
@@ -502,5 +512,15 @@ See commands \\[spotify-toggle-repeating] and
     (pop-to-buffer buffer)
     (spotify-playlist-search-mode)
     (spotify-playlist-search-print (spotify-get-search-playlist-items json))))
+
+;;;###autoload
+(defun spotify-my-playlists ()
+  "Displays the current user's playlists."
+  (interactive)
+  (let ((json (spotify-api-user-playlists (spotify-current-user-id)))
+        (buffer (get-buffer-create "*My Playlists*")))
+    (pop-to-buffer buffer)
+    (spotify-playlist-search-mode)
+    (spotify-playlist-search-print (spotify-get-items json))))
 
 (provide 'spotify)
