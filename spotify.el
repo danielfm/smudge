@@ -302,9 +302,13 @@ JSON response."
   "Returns the user's id of the current Spotify session."
   (gethash 'id *spotify-user*))
 
-(defun spotify-get-search-tracks-items (json)
+(defun spotify-get-search-track-items (json)
   "Returns track items from the given search results json."
   (gethash 'items (gethash 'tracks json)))
+
+(defun spotify-get-search-playlist-items (json)
+  "Returns the playlist items from the given search results json."
+  (gethash 'items (gethash 'playlists json)))
 
 (defun spotify-get-track-album (json)
   "Returns the simplified album object from the given track object."
@@ -333,6 +337,14 @@ JSON response."
 (defun spotify-get-item-uri (json)
   "Returns the uri from the given track/album/artist object."
   (gethash 'uri json))
+
+(defun spotify-get-playlist-track-count (json)
+  "Returns the number of tracks of the given playlist object."
+  (gethash 'total (gethash 'tracks json)))
+
+(defun spotify-get-playlist-owner-id (json)
+  "Returns the owner id of the given playlist object."
+  (gethash 'id (gethash 'owner json)))
 
 (defun spotify-search (type query)
   "Searches artists, albums, tracks or playlists that match a keyword string,
@@ -395,7 +407,7 @@ See commands \\[spotify-toggle-repeating] and
 ;; Enables the `spotify-remote-mode' the track search buffer
 (add-hook 'spotify-track-search-mode-hook 'spotify-remote-mode)
 
-(define-derived-mode spotify-track-search-mode tabulated-list-mode "Tracks"
+(define-derived-mode spotify-track-search-mode tabulated-list-mode "Track-Search"
   "Major mode for displaying the track listing returned by a Spotify search.")
 
 (defun spotify-track-select ()
@@ -430,15 +442,59 @@ See commands \\[spotify-toggle-repeating] and
     (tabulated-list-init-header)
     (tabulated-list-print)))
 
+(defvar spotify-playlist-search-mode-map
+  (let ((map (make-sparse-keymap)))
+    (set-keymap-parent map tabulated-list-mode-map)
+    (define-key map (kbd "RET") 'spotify-playlist-select)
+    map)
+  "Local keymap for `spotify-playlist-search-mode' buffers.")
+
+;; Enables the `spotify-remote-mode' the track search buffer
+(add-hook 'spotify-playlist-search-mode-hook 'spotify-remote-mode)
+
+(define-derived-mode spotify-playlist-search-mode tabulated-list-mode "Playlist-Search"
+  "Major mode for displaying the playlists returned by a Spotify search.")
+
+(defun spotify-playlist-select ()
+  "Plays the playlist under the cursor."
+  (interactive)
+  (spotify-play-track (tabulated-list-get-id)))
+
+(defun spotify-playlist-search-print (playlists)
+  (let (entries)
+    (setq tabulated-list-format
+          (vector `("Playlist Name" ,(- (window-width) 45) t)
+                  '("Owner Id" 30 t)
+                  '("# Tracks" 8 nil :right-align t)))
+    (dolist (playlist playlists)
+      (push (list (spotify-get-item-uri playlist)
+                  (vector (spotify-get-item-name playlist)
+                          (spotify-get-playlist-owner-id playlist)
+                          (number-to-string (spotify-get-playlist-track-count playlist))))
+            entries))
+    (setq tabulated-list-entries (nreverse entries))
+    (tabulated-list-init-header)
+    (tabulated-list-print)))
+
 ;;;###autoload
 (defun spotify-track-search (query)
   "Searches for tracks that match the given query string."
   (interactive "sSpotify Search (Tracks): ")
   (let ((json (spotify-search 'track query))
-	(buffer (get-buffer-create (format "*Spotify Search: %s*" query))))
+	(buffer (get-buffer-create (format "*Track Search: %s*" query))))
     (pop-to-buffer buffer)
     (spotify-track-search-mode)
-    (spotify-track-search-print (spotify-get-search-tracks-items json))
+    (spotify-track-search-print (spotify-get-search-track-items json))
     buffer))
+
+;;;###autoload
+(defun spotify-playlist-search (query)
+  "Searches for playlists that match the given query string."
+  (interactive "sSpotify Search (Playlists): ")
+  (let ((json (spotify-search 'playlist query))
+        (buffer (get-buffer-create (format "*Playlist Search: %s*" query))))
+    (pop-to-buffer buffer)
+    (spotify-playlist-search-mode)
+    (spotify-playlist-search-print (spotify-get-search-playlist-items json))))
 
 (provide 'spotify)

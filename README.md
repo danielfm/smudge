@@ -60,6 +60,8 @@ In order to get the the client ID and client secret, you need to create
 
 ## Usage
 
+### Starting A New Session
+
 In order to connect with the Spotify API and refresh the access token,
 run <kbd>M-x spotify-connect</kbd>. This will start the Oauth2 authentication
 and authorization workflow.
@@ -68,13 +70,26 @@ You may be asked to type a password since the tokens are securely stored as an
 encrypted file in the local filesystem. After you enter your credentials and
 authorizes the app, you should see a greeting message in the echo area.
 
+### Searching For Tracks
+
 To search for tracks, run <kbd>M-x spotify-track-search</kbd> and type in your
 query. The results will be displayed in a separate buffer.
 
-To play any of those tracks, just navigate to it and type <kbd>RET</kbd>, or
-type <kbd>M-RET</kbd> in order to play the album in which that track appears.
+Then, just navigate to it and type <kbd>RET</kbd> to play the track under the
+cursor, or type <kbd>M-RET</kbd> in order to play the album in which that track
+appears.
 
-This buffer also loads the `spotify-remote-mode` by default.
+The resulting buffer loads the `spotify-remote-mode` by default.
+
+### Searching For Playlists
+
+To search for playlists, run <kbd>M-x spotify-playlist-search</kbd> and type in your
+query. The results will be displayed in a separate buffer.
+
+Then, just navigate to it and type <kbd>RET</kbd> to play the playlist under the
+cursor.
+
+The resulting buffer loads the `spotify-remote-mode` by default.
 
 ### Remote Minor Mode
 
