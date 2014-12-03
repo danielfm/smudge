@@ -496,7 +496,7 @@ See commands \\[spotify-toggle-repeating] and
 (defun spotify-track-search (query)
   "Searches for tracks that match the given query string."
   (interactive "sSpotify Search (Tracks): ")
-  (let ((json (spotify-search 'track query))
+  (let ((json (spotify-api-search 'track query))
 	(buffer (get-buffer-create (format "*Track Search: %s*" query))))
     (pop-to-buffer buffer)
     (spotify-track-search-mode)
