@@ -12,12 +12,13 @@ application from within your favorite text editor.
 ## Features
 
 * Uses the Spotify API via Oauth2
-* Track search mode that lists the tracks that match the given keywords
-* Toggle Spotify repeating and shuffling with one keystroke
+* Search for tracks and playlists that match the given keywords
+* Easily control basic Spotify player features like, play/pause, previous, 
+  next, shuffle, and repeat with the Spotify Remote minor mode
 
 ### Planned Features
 
-* Add track or album to a new (or existing) playlist
+* Support for list/create/modify/remove playlists
 * Linux support via D-Bus
 
 ## Installation
