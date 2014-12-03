@@ -71,6 +71,8 @@ You may be asked to type a password since the tokens are securely stored as an
 encrypted file in the local filesystem. After you enter your credentials and
 authorizes the app, you should see a greeting message in the echo area.
 
+To disconnect, run <kbd>M-x spotify-disconnect</kbd>.
+
 ### Searching For Tracks
 
 To search for tracks, run <kbd>M-x spotify-track-search</kbd> and type in your
