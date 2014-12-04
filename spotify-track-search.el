@@ -4,6 +4,8 @@
 
 ;; Code:
 
+(require 'spotify-api)
+
 (defvar spotify-track-search-mode-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map tabulated-list-mode-map)

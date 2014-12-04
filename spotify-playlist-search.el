@@ -1,8 +1,10 @@
-;; spotify-remote.el --- Spotify.el playlist search major mode
+;; spotify-playlist-search.el --- Spotify.el playlist search major mode
 
 ;; Copyright (C) 2014 Daniel Fernandes Martins
 
 ;; Code:
+
+(require 'spotify-api)
 
 (defvar spotify-playlist-search-mode-map
   (let ((map (make-sparse-keymap)))
