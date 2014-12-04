@@ -6,7 +6,7 @@
 
 (defvar spotify-remote-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "M-p M-i")   'spotify-player-info)
+    (define-key map (kbd "M-p M-i") 'spotify-player-info)
     (define-key map (kbd "M-p M-s") 'spotify-toggle-shuffle)
     (define-key map (kbd "M-p M-r") 'spotify-toggle-repeat)
     (define-key map (kbd "M-p M-p") 'spotify-toggle-play)
