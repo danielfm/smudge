@@ -88,9 +88,10 @@ The resulting buffer loads the `spotify-remote-mode` by default.
 
 ### Searching For Playlists
 
-To list your own playlists, run <kbd>M-x spotify-my-playlists</kbd>, or if you
-want to search for any playlist that matches the given keywords. The results
-will be displayed in a separate buffer.
+To list your own playlists, run <kbd>M-x spotify-my-playlists</kbd>, or
+<kbd>M-x spotify-playlist-search</kbd> if you want to search for any
+playlist that matches the given keywords. The results will be displayed
+in a separate buffer.
 
 Then, just navigate to it and type <kbd>RET</kbd> to play the playlist under the
 cursor.
