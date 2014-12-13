@@ -12,7 +12,7 @@ application from within your favorite text editor.
 ## Features
 
 * Uses the Spotify API via Oauth2
-* List your public and private playlists
+* List your public and private playlists and its tracks
 * Search for tracks and playlists that match the given keywords
 * Easily control basic Spotify player features like, play/pause, previous, 
   next, shuffle, and repeat with the Spotify Remote minor mode
@@ -94,7 +94,8 @@ playlist that matches the given keywords. The results will be displayed
 in a separate buffer.
 
 Then, just navigate to it and type <kbd>RET</kbd> to play the playlist under the
-cursor.
+cursor. If you want to list the tracks of the playlist under the cursor, just
+type <kbd>M-RET</kbd>.
 
 The resulting buffer loads the `spotify-remote-mode` by default.
 

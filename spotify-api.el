@@ -73,7 +73,7 @@ JSON response."
 
 (defun spotify-current-user-id ()
   "Returns the user's id of the current Spotify session."
-  (gethash 'id *spotify-user*))
+  (spotify-get-item-id *spotify-user*))
 
 (defun spotify-get-items (json)
   "Returns the list of items from the given json object."
@@ -82,6 +82,11 @@ JSON response."
 (defun spotify-get-search-track-items (json)
   "Returns track items from the given search results json."
   (spotify-get-items (gethash 'tracks json)))
+
+(defun spotify-get-playlist-tracks (json)
+  (mapcar '(lambda (item)
+             (gethash 'track item))
+          (spotify-get-items json)))
 
 (defun spotify-get-search-playlist-items (json)
   "Returns the playlist items from the given search results json."
@@ -111,6 +116,10 @@ JSON response."
   "Returns the name from the given track/album/artist object."
   (gethash 'name json))
 
+(defun spotify-get-item-id (json)
+  "Returns the id from the givem object."
+  (gethash 'id json))
+
 (defun spotify-get-item-uri (json)
   "Returns the uri from the given track/album/artist object."
   (gethash 'uri json))
@@ -121,7 +130,7 @@ JSON response."
 
 (defun spotify-get-playlist-owner-id (json)
   "Returns the owner id of the given playlist object."
-  (gethash 'id (gethash 'owner json)))
+  (spotify-get-item-id (gethash 'owner json)))
 
 (defun spotify-api-search (type query)
   "Searches artists, albums, tracks or playlists that match a keyword string,
@@ -133,8 +142,15 @@ depending on the `type' argument."
 
 (defun spotify-api-user-playlists (user-id)
   "Returns the playlists for the given user."
-  (spotify-api-call "GET"
+  (spotify-api-call
+   "GET"
    (format "/users/%s/playlists" user-id)))
+
+(defun spotify-api-playlist-tracks (user-id playlist-id)
+  "Returns the tracks of the given user's playlist"
+  (spotify-api-call
+   "GET"
+   (format "/users/%s/playlists/%s/tracks" user-id playlist-id)))
 
 (defun spotify-popularity-bar (popularity)
   "Returns the popularity indicator bar proportional to the given parameter,
