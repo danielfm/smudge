@@ -49,8 +49,7 @@ JSON response."
         (let* ((json-object-type 'hash-table)
                (json-array-type 'list)
                (json-key-type 'symbol))
-          (prog1 (json-read)
-            (kill-buffer)))))))
+          (json-read))))))
 
 (defun spotify-disconnect ()
   "Clears the Spotify session currently in use."
