@@ -19,7 +19,6 @@ application from within your favorite text editor.
 
 ### Planned Features
 
-* Show playlist tracks
 * Add/remove tracks from playlist
 * Linux support via D-Bus
 
