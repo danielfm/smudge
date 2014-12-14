@@ -21,6 +21,7 @@ application from within your favorite text editor.
 
 * Add/remove tracks from playlist
 * Add pagination support
+* Reorder tracks of a playlist
 * Linux support via D-Bus
 
 ## Installation
