@@ -20,6 +20,7 @@ application from within your favorite text editor.
 ### Planned Features
 
 * Add/remove tracks from playlist
+* Add pagination support
 * Linux support via D-Bus
 
 ## Installation
