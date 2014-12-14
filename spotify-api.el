@@ -84,8 +84,8 @@ JSON response."
   (spotify-get-items (gethash 'tracks json)))
 
 (defun spotify-get-playlist-tracks (json)
-  (mapcar '(lambda (item)
-             (gethash 'track item))
+  (mapcar #'(lambda (item)
+              (gethash 'track item))
           (spotify-get-items json)))
 
 (defun spotify-get-search-playlist-items (json)
