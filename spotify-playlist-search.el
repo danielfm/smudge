@@ -11,6 +11,7 @@
     (set-keymap-parent map tabulated-list-mode-map)
     (define-key map (kbd "RET")   'spotify-playlist-select)
     (define-key map (kbd "M-RET") 'spotify-playlist-tracks)
+    (define-key map (kbd "l")     'spotify-playlist-load-more)
     map)
   "Local keymap for `spotify-playlist-search-mode' buffers.")
 
@@ -25,6 +26,35 @@
   (interactive)
   (spotify-play-track (first (tabulated-list-get-id))))
 
+(defun spotify-playlist-load-more ()
+  "Loads the next page of results for the current playlist view."
+  (interactive)
+  (if (boundp 'spotify-query)
+      (spotify-playlist-search-update (1+ spotify-current-page))
+    (spotify-my-playlists-update (1+ spotify-current-page))))
+
+(defun spotify-playlist-search-update (current-page)
+  "Fetches the given page of results using the search endpoint."
+  (let* ((json (spotify-api-search 'playlist spotify-query current-page))
+         (items (spotify-get-search-playlist-items json)))
+    (if items
+        (progn
+          (spotify-playlist-search-print items)
+          (setq-local spotify-current-page current-page)
+          (message "playlist view updated"))
+      (message "No more playlists"))))
+
+(defun spotify-my-playlists-update (current-page)
+  "Fetches the given page of results using the user's playlist endpoint."
+  (let* ((json (spotify-api-user-playlists (spotify-current-user-id) current-page))
+         (items (spotify-get-items json)))
+    (if items
+        (progn
+          (spotify-playlist-search-print items)
+          (setq-local spotify-current-page current-page)
+          (message "Playlist view updated"))
+      (message "No more playlists"))))
+
 (defun spotify-playlist-tracks ()
   "Displays the tracks that belongs to the playlist under the cursor."
   (interactive)
@@ -32,18 +62,28 @@
          (playlist-user-id (second selected-item-id))
          (playlist-name (third selected-item-id))
          (playlist-id (fourth selected-item-id)))
-    (let ((json (spotify-api-playlist-tracks playlist-user-id playlist-id))
-          (buffer (get-buffer-create (format "*Playlist Tracks: %s*" playlist-name))))
-      (pop-to-buffer buffer)
-      (spotify-track-search-mode)
-      (spotify-track-search-print (spotify-get-playlist-tracks json)))))
+    (let ((buffer (get-buffer-create (format "*Playlist Tracks: %s*" playlist-name))))
+      (with-current-buffer buffer
+        (spotify-track-search-mode)
+        (spotify-track-search-set-list-format)
+        (setq-local spotify-playlist-user-id playlist-user-id)
+        (setq-local spotify-playlist-id playlist-id)
+        (setq-local spotify-current-page 1)
+        (setq tabulated-list-entries nil)
+        (spotify-playlist-tracks-update 1)
+        (pop-to-buffer buffer)
+        buffer))))
+
+(defun spotify-playlist-set-list-format ()
+  "Configures the column data for the typical playlist view."
+  (setq tabulated-list-format
+        (vector `("Playlist Name" ,(- (window-width) 45) t)
+                '("Owner Id" 30 t)
+                '("# Tracks" 8 nil :right-align t))))
 
 (defun spotify-playlist-search-print (playlists)
+  "Appends the given playlists to the current playlist view."
   (let (entries)
-    (setq tabulated-list-format
-          (vector `("Playlist Name" ,(- (window-width) 45) t)
-                  '("Owner Id" 30 t)
-                  '("# Tracks" 8 nil :right-align t)))
     (dolist (playlist playlists)
       (let ((user-id (spotify-get-playlist-owner-id playlist))
             (playlist-name (spotify-get-item-name playlist)))
@@ -55,8 +95,8 @@
                             user-id
                             (number-to-string (spotify-get-playlist-track-count playlist))))
               entries)))
-    (setq tabulated-list-entries (nreverse entries))
+    (setq tabulated-list-entries (append tabulated-list-entries (nreverse entries)))
     (tabulated-list-init-header)
-    (tabulated-list-print)))
+    (tabulated-list-print t)))
 
 (provide 'spotify-playlist-search)

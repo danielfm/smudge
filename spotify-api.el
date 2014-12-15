@@ -132,25 +132,30 @@ JSON response."
   "Returns the owner id of the given playlist object."
   (spotify-get-item-id (gethash 'owner json)))
 
-(defun spotify-api-search (type query)
+(defun spotify-api-search (type query page)
   "Searches artists, albums, tracks or playlists that match a keyword string,
 depending on the `type' argument."
-  (let ((escaped-query (url-hexify-string query)))
+  (let ((escaped-query (url-hexify-string query))
+        (offset (* spotify-api-search-limit (1- page))))
     (spotify-api-call "GET"
-     (format "/search?q=%s&type=%s&limit=%d&market=from_token"
-             escaped-query type spotify-api-search-limit))))
+     (format "/search?q=%s&type=%s&limit=%d&offset=%d&market=from_token"
+             escaped-query type spotify-api-search-limit offset))))
 
-(defun spotify-api-user-playlists (user-id)
+(defun spotify-api-user-playlists (user-id page)
   "Returns the playlists for the given user."
-  (spotify-api-call
-   "GET"
-   (format "/users/%s/playlists" user-id)))
+  (let ((offset (* spotify-api-search-limit (1- page))))
+    (spotify-api-call
+     "GET"
+     (format "/users/%s/playlists?limit=%d&offset=%d"
+             user-id spotify-api-search-limit offset))))
 
-(defun spotify-api-playlist-tracks (user-id playlist-id)
+(defun spotify-api-playlist-tracks (user-id playlist-id page)
   "Returns the tracks of the given user's playlist"
-  (spotify-api-call
-   "GET"
-   (format "/users/%s/playlists/%s/tracks" user-id playlist-id)))
+  (let ((offset (* spotify-api-search-limit (1- page))))
+    (spotify-api-call
+     "GET"
+     (format "/users/%s/playlists/%s/tracks?limit=%d&offset=%d"
+             user-id playlist-id spotify-api-search-limit offset))))
 
 (defun spotify-popularity-bar (popularity)
   "Returns the popularity indicator bar proportional to the given parameter,

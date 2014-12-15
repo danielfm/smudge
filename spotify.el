@@ -176,31 +176,44 @@
 (defun spotify-track-search (query)
   "Searches for tracks that match the given query string."
   (interactive "sSpotify Search (Tracks): ")
-  (let ((json (spotify-api-search 'track query))
-	(buffer (get-buffer-create (format "*Track Search: %s*" query))))
-    (pop-to-buffer buffer)
-    (spotify-track-search-mode)
-    (spotify-track-search-print (spotify-get-search-track-items json))
-    buffer))
+  (let ((buffer (get-buffer-create (format "*Track Search: %s*" query))))
+    (with-current-buffer buffer
+      (spotify-track-search-mode)
+      (spotify-track-search-set-list-format)
+      (setq-local spotify-query query)
+      (setq-local spotify-current-page 1)
+      (setq tabulated-list-entries nil)
+      (spotify-track-search-update 1)
+      (pop-to-buffer buffer)
+      buffer)))
 
 ;;;###autoload
 (defun spotify-playlist-search (query)
   "Searches for playlists that match the given query string."
   (interactive "sSpotify Search (Playlists): ")
-  (let ((json (spotify-api-search 'playlist query))
-        (buffer (get-buffer-create (format "*Playlist Search: %s*" query))))
-    (pop-to-buffer buffer)
-    (spotify-playlist-search-mode)
-    (spotify-playlist-search-print (spotify-get-search-playlist-items json))))
+  (let ((buffer (get-buffer-create (format "*Playlist Search: %s*" query))))
+    (with-current-buffer buffer
+      (spotify-playlist-search-mode)
+      (spotify-playlist-set-list-format)
+      (setq-local spotify-query query)
+      (setq-local spotify-current-page 1)
+      (setq tabulated-list-entries nil)
+      (spotify-playlist-search-update 1)
+      (pop-to-buffer buffer)
+      buffer)))
 
 ;;;###autoload
 (defun spotify-my-playlists ()
   "Displays the current user's playlists."
   (interactive)
-  (let ((json (spotify-api-user-playlists (spotify-current-user-id)))
-        (buffer (get-buffer-create "*My Playlists*")))
-    (pop-to-buffer buffer)
-    (spotify-playlist-search-mode)
-    (spotify-playlist-search-print (spotify-get-items json))))
+  (let ((buffer (get-buffer-create "*My Playlists*")))
+    (with-current-buffer buffer
+      (spotify-playlist-search-mode)
+      (spotify-playlist-set-list-format)
+      (setq-local spotify-current-page 1)
+      (setq tabulated-list-entries nil)
+      (spotify-my-playlists-update 1)
+      (pop-to-buffer buffer)
+      buffer)))
 
 (provide 'spotify)

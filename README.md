@@ -19,8 +19,8 @@ application from within your favorite text editor.
 
 ### Planned Features
 
+* Display current page/total pages somewhere in the modeline
 * Add/remove tracks from playlist
-* Add pagination support
 * Reorder tracks of a playlist
 * Linux support via D-Bus
 
@@ -81,9 +81,18 @@ To disconnect, run <kbd>M-x spotify-disconnect</kbd>.
 To search for tracks, run <kbd>M-x spotify-track-search</kbd> and type in your
 query. The results will be displayed in a separate buffer.
 
-Then, just navigate to it and type <kbd>RET</kbd> to play the track under the
-cursor, or type <kbd>M-RET</kbd> in order to play the album in which that track
-appears.
+To customize the number of tracks fetched per page, just change the variable
+`spotify-api-search-limit`:
+
+````el
+;; Do not use values larger than 50 for better compatibility across endpoints
+(setq spotify-api-search-limit 50)
+````
+
+Type <kbd>l</kbd> to load the next page of results until you find what you
+are looking for. Then, just navigate to it and type <kbd>RET</kbd> to play the
+track under the cursor, or type <kbd>M-RET</kbd> in order to play the album in
+which that track appears.
 
 The resulting buffer loads the `spotify-remote-mode` by default.
 
@@ -94,9 +103,10 @@ To list your own playlists, run <kbd>M-x spotify-my-playlists</kbd>, or
 playlist that matches the given keywords. The results will be displayed
 in a separate buffer.
 
-Then, just navigate to it and type <kbd>RET</kbd> to play the playlist under the
-cursor. If you want to list the tracks of the playlist under the cursor, just
-type <kbd>M-RET</kbd>.
+Type <kbd>l</kbd> to load the next page of results until you find what you
+are looking for. Then, just navigate to it and type <kbd>RET</kbd> to play the
+playlist under the cursor. If you want to list the tracks of the playlist under
+the cursor, just type <kbd>M-RET</kbd>.
 
 The resulting buffer loads the `spotify-remote-mode` by default.
 
