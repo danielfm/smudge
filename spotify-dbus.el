@@ -4,7 +4,9 @@
 
 ;; Somehow shuffeling, setting volume and loop status work not as expected.
 ;; Quering the attribute does not return the expected value and setting it
-;; has no effect. I'm not sure if it is not the spotify client.
+;; has no effect.
+;; The dbus interface of spotify seems to be broken.
+;; Play does not have an effect.
 
 ;;; Code:
 (defun spotify-dbus-call (method &rest args)
@@ -69,6 +71,10 @@
 (defun spotify-dbus-shuffling-p ()
   "Check if shuffeling is on."
    (spotify-dbus-get-property "Shuffle"))
+
+(defun spotify-dbus-player-play ()
+  "Resume play."
+  (spotify-dbus-call "Play"))
 
 (defun spotify-dbus-player-pause ()
   "Pause playback."
