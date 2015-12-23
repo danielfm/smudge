@@ -48,13 +48,17 @@
   (spotify-dbus-call "Previous"))
 
 (defun spotify-dbus-toggle-repeat ()
-  "Toggle loop options."
+  "Toggle loop options.
+
+Does nothing.  Spotify client broken."
   (if (spotify-dbus-repeating-p)
       (spotify-dbus-set-property "LoopStatus" nil)
     (spotify-dbus-set-property "LoopStatus" "Playlist")))
 
 (defun spotify-dbus-toggle-shuffle ()
-  "Toggle shuffle."
+  "Toggle shuffle.
+
+Does nothing.  Spotify client broken."
   (if (spotify-dbus-shuffling-p)
       (spotify-dbus-set-property "Shuffle" nil)
     (spotify-dbus-set-property "Shuffle" t)))
@@ -64,16 +68,22 @@
   (spotify-dbus-call "OpenUri" context-id))
 
 (defun spotify-dbus-repeating-p ()
-  "Check if repeating is on."
+  "Check if repeating is on.
+
+Does nothing.  Spotify client broken."
   (string= "Playlist"
    (spotify-dbus-get-property "LoopStatus")))
 
 (defun spotify-dbus-shuffling-p ()
-  "Check if shuffeling is on."
+  "Check if shuffeling is on.
+
+Does nothing.  Spotify client broken."
    (spotify-dbus-get-property "Shuffle"))
 
 (defun spotify-dbus-player-play ()
-  "Resume play."
+  "Resume play.
+
+Does nothing.  Spotify client broken.  Use PlayPause instead."
   (spotify-dbus-call "Play"))
 
 (defun spotify-dbus-player-pause ()
