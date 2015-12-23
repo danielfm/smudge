@@ -7,14 +7,14 @@
 ;; has no effect. I'm not sure if it is not the spotify client.
 
 ;;; Code:
-(defun spotify-dbus-call (method)
-    "Call METHOD via D-Bus on the Spotify service."
-    (dbus-call-method-asynchronously :session
+(defun spotify-dbus-call (method &rest args)
+  "Call METHOD with optional ARGS via D-Bus on the Spotify service."
+    (apply 'dbus-call-method-asynchronously :session
 				     "org.mpris.MediaPlayer2.spotify"
 				     "/org/mpris/MediaPlayer2"
 				     "org.mpris.MediaPlayer2.Player"
 				     method
-				     nil))
+				     nil args))
 
 (defun spotify-dbus-get-property (property)
   "Get value of PROPERTY via D-Bus on the Spotify service."
@@ -59,7 +59,7 @@
 
 (defun spotify-dbus-player-play-track (context-id)
   "Play the given CONTEXT-ID."
-  (spotify-dbus-call (format "OpenUri \"string:%s\"" context-id)))
+  (spotify-dbus-call "OpenUri" context-id))
 
 (defun spotify-dbus-repeating-p ()
   "Check if repeating is on."
@@ -83,11 +83,11 @@
   "Return the artist which is currently playing."
   (car (car (car (cdr (assoc "xesam:artist" (spotify-dbus-get-property "Metadata")))))))
 
-(defun spotify-apple-current-track-album ()
+(defun spotify-dbus-current-track-album ()
   "Return the album which is currently playing."
   (car (car (cdr (assoc "xesam:album" (spotify-dbus-get-property "Metadata"))))))
 
-(defun spotify-apple-current-track-name ()
+(defun spotify-dbus-current-track-name ()
   "Return the current track name."
   (car (car (cdr (assoc "xesam:title" (spotify-dbus-get-property "Metadata"))))))
 
