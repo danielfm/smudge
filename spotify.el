@@ -46,6 +46,7 @@
 (require 'spotify-playlist-search)
 (require 'spotify-remote)
 (require 'spotify-apple)
+(require 'spotify-dbus)
 
 (when (version< emacs-version "24.4")
   (error "Spotify requires at least GNU Emacs 24.4"))
@@ -55,7 +56,6 @@
   :version "0.0.1"
   :group 'multimedia)
 
-;;; TODO: D-Bus support not implemented
 (defcustom spotify-transport 'apple
   "How the commands should be sent to Spotify process."
   :type '(choice (symbol :tag "AppleScript" apple)
