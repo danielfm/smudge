@@ -7,7 +7,7 @@
 Spotify.el is a collection of extensions that allows you to control the Spotify
 application from within your favorite text editor.
 
-**Note:** This is _very_ alpha software, and it works only in Mac OS X.
+**Note:** This is _very_ alpha software, and it works only in Mac OS X and Linux.
 
 ## Features
 
@@ -16,13 +16,13 @@ application from within your favorite text editor.
 * Search for tracks and playlists that match the given keywords
 * Easily control basic Spotify player features like, play/pause, previous, 
   next, shuffle, and repeat with the Spotify Remote minor mode
+* Linux support via D-Bus
 
 ### Planned Features
 
 * Display current page/total pages somewhere in the modeline
 * Add/remove tracks from playlist
 * Reorder tracks of a playlist
-* Linux support via D-Bus
 
 ## Installation
 
