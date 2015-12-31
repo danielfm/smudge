@@ -45,6 +45,12 @@
 (require 'json)
 (require 'url-http)
 
+(defvar url-http-method nil)
+(defvar url-http-data nil)
+(defvar url-http-extra-headers nil)
+(defvar url-callback-function nil)
+(defvar url-callback-arguments nil)
+
 (defun oauth2-request-authorization (auth-url client-id &optional scope state redirect-uri)
   "Request OAuth authorization at AUTH-URL by launching `browse-url'.
 CLIENT-ID is the client id provided by the provider.
@@ -194,7 +200,7 @@ This allows to store the token in an unique way."
           "access_token=" (oauth2-token-access-token token)))
 
 (defvar oauth--url-advice nil)
-(defvar oauth--token-data)
+(defvar oauth--token-data nil)
 
 ;; FIXME: We should change URL so that this can be done without an advice.
 (defadvice url-http-handle-authentication (around oauth-hack activate)
