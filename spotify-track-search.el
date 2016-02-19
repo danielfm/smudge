@@ -22,14 +22,21 @@
   "Major mode for displaying the track listing returned by a Spotify search.")
 
 (defun spotify-track-select ()
-  "Plays the track under the cursor."
+  "Plays the track under the cursor. If the track list represents a playlist,
+the given track is played in the context of that playlist; otherwise, it will
+be played in the context of its album."
   (interactive)
-  (spotify-play-track (car (tabulated-list-get-id))))
+  (if (and (boundp 'spotify-playlist-uri) spotify-playlist-uri)
+      (spotify-play-track (car (tabulated-list-get-id))
+                          spotify-playlist-uri)
+    (spotify-play-track (car (tabulated-list-get-id))
+                        (cdr (tabulated-list-get-id)))))
 
 (defun spotify-track-select-album ()
-  "Plays the album of the track under the cursor."
+  "Plays the album of the track under the cursor in the context of its album."
   (interactive)
-  (spotify-play-track (cdr (tabulated-list-get-id))))
+  (spotify-play-track (car (tabulated-list-get-id))
+                      (cdr (tabulated-list-get-id))))
 
 (defun spotify-track-load-more ()
   "Loads the next page of results for the current track view."

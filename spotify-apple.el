@@ -35,8 +35,8 @@
 (defun spotify-apple-toggle-shuffle ()
   (spotify-apple-command "set shuffling to not shuffling"))
 
-(defun spotify-apple-player-play-track (context-id)
-  (spotify-apple-command (format "play track \"%s\"" context-id)))
+(defun spotify-apple-player-play-track (track-id context-id)
+  (spotify-apple-command (format "play track \"%s\" in context \"%s\"" track-id context-id)))
 
 (defun spotify-apple-repeating-p ()
   (spotify-apple-command-true-output-p

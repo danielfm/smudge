@@ -94,10 +94,10 @@
   (interactive)
   (spotify-current-track-msg))
 
-(defun spotify-play-track (context-id)
+(defun spotify-play-track (track-id context-id)
   "Sends a `play' command to Spotify process passing a context id."
   (interactive)
-  (spotify-apply "player-play-track" context-id)
+  (spotify-apply "player-play-track" track-id context-id)
   (run-at-time "1 sec" nil 'spotify-current-track-msg))
 
 (defun spotify-toggle-play ()

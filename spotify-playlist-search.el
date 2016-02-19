@@ -24,7 +24,7 @@
 (defun spotify-playlist-select ()
   "Plays the playlist under the cursor."
   (interactive)
-  (spotify-play-track (first (tabulated-list-get-id))))
+  (spotify-play-track (first (tabulated-list-get-id)) ""))
 
 (defun spotify-playlist-load-more ()
   "Loads the next page of results for the current playlist view."
@@ -59,6 +59,7 @@
   "Displays the tracks that belongs to the playlist under the cursor."
   (interactive)
   (let* ((selected-item-id (tabulated-list-get-id))
+         (playlist-uri (first selected-item-id))
          (playlist-user-id (second selected-item-id))
          (playlist-name (third selected-item-id))
          (playlist-id (fourth selected-item-id)))
@@ -66,6 +67,7 @@
       (with-current-buffer buffer
         (spotify-track-search-mode)
         (spotify-track-search-set-list-format)
+        (setq-local spotify-playlist-uri playlist-uri)
         (setq-local spotify-playlist-user-id playlist-user-id)
         (setq-local spotify-playlist-id playlist-id)
         (setq-local spotify-current-page 1)
