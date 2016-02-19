@@ -135,6 +135,8 @@ bindings:
 | <kbd>M-p M-f</kbd> | `spotify-next-track`     | Next track                     |
 | <kbd>M-p M-b</kbd> | `spotify-previous-track` | Previous track                 |
 
+This is particularly useful for those using keyboards without media keys.
+
 This mode can be enabled globally with `global-spotify-remote-mode`.
 
 ## License
