@@ -151,6 +151,16 @@ depending on the `type' argument."
      (format "/users/%s/playlists?limit=%d&offset=%d"
              user-id spotify-api-search-limit offset))))
 
+(defun spotify-api-playlist-create (user-id name is-public)
+  "Creates a new playlist with the given name for the given user."
+  (spotify-api-call
+   "POST"
+   (format "/users/%s/playlists"
+           user-id)
+   (format "{\"name\":\"%s\",\"public\":\"%s\"}"
+           name
+           (if is-public "true" "false"))))
+
 (defun spotify-api-playlist-tracks (user-id playlist-id page)
   "Returns the tracks of the given user's playlist"
   (let ((offset (* spotify-api-search-limit (1- page))))
