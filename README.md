@@ -17,13 +17,6 @@ application from within your favorite text editor.
 * Easily control basic Spotify player features like, play/pause, previous, 
   next, shuffle, and repeat with the Spotify Remote minor mode
 
-### Planned Features
-
-* Display current page/total pages somewhere in the modeline
-* Add/remove tracks from playlist
-* Reorder tracks of a playlist
-* Linux support via D-Bus
-
 ## Installation
 
 First, make sure your system satisfies the given dependencies:
