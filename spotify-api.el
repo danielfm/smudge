@@ -30,15 +30,13 @@ https://developer.spotify.com/web-api/tutorial/."
 
 (defun spotify-api-auth ()
   "Starts the Spotify Oauth2 authentication and authorization workflow."
-  (oauth2-auth spotify-oauth2-auth-url
-               spotify-oauth2-token-url
-               spotify-oauth2-client-id
-               spotify-oauth2-client-secret
-               spotify-oauth2-scopes
-               nil
-               spotify-oauth2-callback))
+  (oauth2-auth-and-store spotify-oauth2-auth-url
+                         spotify-oauth2-token-url
+                         spotify-oauth2-scopes
+                         spotify-oauth2-client-id
+                         spotify-oauth2-client-secret
+                         spotify-oauth2-callback))
 
-(defun spotify-api-call (method uri &optional data)
   "Makes a request to the given Spotify service endpoint and returns the parsed
 JSON response."
   (let ((url (concat spotify-api-endpoint uri))
