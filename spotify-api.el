@@ -169,8 +169,17 @@ depending on the `type' argument."
            name
            (if is-public "true" "false"))))
 
+(defun spotify-api-playlist-follow (owner-user-id playlist-id)
+  "Adds the current user as a follower of a playlist."
+  (condition-case err
+      (spotify-api-call
+       "PUT"
+       (format "/users/%s/playlists/%s/followers"
+               owner-user-id playlist-id))
+    (end-of-file t)))
+
 (defun spotify-api-playlist-tracks (user-id playlist-id page)
-  "Returns the tracks of the given user's playlist"
+  "Returns the tracks of the given user's playlist."
   (let ((offset (* spotify-api-search-limit (1- page))))
     (spotify-api-call
      "GET"

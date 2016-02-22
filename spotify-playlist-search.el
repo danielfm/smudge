@@ -12,6 +12,7 @@
     (define-key map (kbd "RET")   'spotify-playlist-select)
     (define-key map (kbd "M-RET") 'spotify-playlist-tracks)
     (define-key map (kbd "l")     'spotify-playlist-load-more)
+    (define-key map (kbd "f")     'spotify-playlist-follow)
     map)
   "Local keymap for `spotify-playlist-search-mode' buffers.")
 
@@ -32,6 +33,16 @@
   (if (boundp 'spotify-query)
       (spotify-playlist-search-update (1+ spotify-current-page))
     (spotify-my-playlists-update (1+ spotify-current-page))))
+
+(defun spotify-playlist-follow ()
+  "Adds the current user as the follower of the playlist under the cursor."
+  (let* ((id-selected (tabulated-list-get-id))
+         (owner-user-id (second id-selected))
+         (playlist-name (third id-selected))
+         (playlist-id (fourth id-selected)))
+    (when (y-or-n-p (format "Follow playlist '%s'?" playlist-name))
+      (when (spotify-api-playlist-follow owner-user-id playlist-id)
+        (message "Followed playlist")))))
 
 (defun spotify-playlist-search-update (current-page)
   "Fetches the given page of results using the search endpoint."
@@ -67,9 +78,10 @@
       (with-current-buffer buffer
         (spotify-track-search-mode)
         (spotify-track-search-set-list-format)
+        (setq-local spotify-playlist-name playlist-name)
+        (setq-local spotify-playlist-id playlist-id)
         (setq-local spotify-playlist-uri playlist-uri)
         (setq-local spotify-playlist-user-id playlist-user-id)
-        (setq-local spotify-playlist-id playlist-id)
         (setq-local spotify-current-page 1)
         (setq tabulated-list-entries nil)
         (spotify-playlist-tracks-update 1)

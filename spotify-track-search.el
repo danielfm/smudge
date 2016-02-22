@@ -12,6 +12,7 @@
     (define-key map (kbd "RET")   'spotify-track-select)
     (define-key map (kbd "M-RET") 'spotify-track-select-album)
     (define-key map (kbd "l")     'spotify-track-load-more)
+    (define-key map (kbd "f")     'spotify-track-playlist-follow)
     map)
   "Local keymap for `spotify-track-search-mode' buffers.")
 
@@ -31,6 +32,14 @@ be played in the context of its album."
                           spotify-playlist-uri)
     (spotify-play-track (car (tabulated-list-get-id))
                         (cdr (tabulated-list-get-id)))))
+
+(defun spotify-track-playlist-follow ()
+  "Adds the current user as the follower of the track's playlist under the cursor."
+  (when (and (boundp 'spotify-playlist-id)
+             (y-or-n-p (format "Follow playlist '%s'?" spotify-playlist-name)))
+    (when (spotify-api-playlist-follow spotify-playlist-user-id
+                                       spotify-playlist-id)
+      (message "Followed playlist"))))
 
 (defun spotify-track-select-album ()
   "Plays the album of the track under the cursor in the context of its album."
