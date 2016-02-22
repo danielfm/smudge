@@ -55,7 +55,8 @@ JSON response."
   "Clears the Spotify session currently in use."
   (interactive)
   (makunbound '*spotify-oauth2-token*)
-  (makunbound '*spotify-user*))
+  (makunbound '*spotify-user*)
+  (message "Spotify session closed"))
 
 ;;;###autoload
 (defun spotify-connect ()
