@@ -46,19 +46,27 @@ JSON response."
                                                             url method data headers)
       (toggle-enable-multibyte-characters t)
       (goto-char (point-min))
-      (when (search-forward-regexp "^$" nil t)
-        (let* ((json-object-type 'hash-table)
-               (json-array-type 'list)
-               (json-key-type 'symbol)
-               (json (json-read))
-               (error-json (gethash 'error json)))
-          (kill-buffer)
-          ; Retries the request when the token expires and gets refreshed
-          (if (and (hash-table-p error-json)
-                   (eq 401 (gethash 'status error-json))
-                   (not is-retry))
-              (spotify-api-call method uri data t)
-            json))))))
+
+      ;; If (json-read) signals 'end-of-file, we still kill the temp buffer
+      ;; and re-signal the error
+      (condition-case err
+          (when (search-forward-regexp "^$" nil t)
+            (let* ((json-object-type 'hash-table)
+                   (json-array-type 'list)
+                   (json-key-type 'symbol)
+                   (json (json-read))
+                   (error-json (gethash 'error json)))
+              (kill-buffer)
+
+              ;; Retries the request when the token expires and gets refreshed
+              (if (and (hash-table-p error-json)
+                       (eq 401 (gethash 'status error-json))
+                       (not is-retry))
+                  (spotify-api-call method uri data t)
+                json)))
+          (end-of-file
+           (kill-buffer)
+           (signal (car err) (cdr err)))))))
 
 (defun spotify-disconnect ()
   "Clears the Spotify session currently in use."
