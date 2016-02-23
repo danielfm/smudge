@@ -35,11 +35,13 @@ be played in the context of its album."
 
 (defun spotify-track-playlist-follow ()
   "Adds the current user as the follower of the track's playlist under the cursor."
-  (when (and (boundp 'spotify-playlist-id)
-             (y-or-n-p (format "Follow playlist '%s'?" spotify-playlist-name)))
-    (when (spotify-api-playlist-follow spotify-playlist-user-id
-                                       spotify-playlist-id)
-      (message "Followed playlist"))))
+  (interactive)
+  (if (boundp 'spotify-playlist-id)
+      (when (and (y-or-n-p (format "Follow playlist '%s'?" spotify-playlist-name))
+                 (spotify-api-playlist-follow spotify-playlist-user-id
+                                              spotify-playlist-id))
+        (message (format "Followed playlist '%s'" spotify-playlist-name)))
+    (message "Cannot follow a playlist from here")))
 
 (defun spotify-track-select-album ()
   "Plays the album of the track under the cursor in the context of its album."

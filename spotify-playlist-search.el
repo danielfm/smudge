@@ -36,13 +36,14 @@
 
 (defun spotify-playlist-follow ()
   "Adds the current user as the follower of the playlist under the cursor."
+  (interactive)
   (let* ((id-selected (tabulated-list-get-id))
          (owner-user-id (second id-selected))
          (playlist-name (third id-selected))
          (playlist-id (fourth id-selected)))
-    (when (y-or-n-p (format "Follow playlist '%s'?" playlist-name))
-      (when (spotify-api-playlist-follow owner-user-id playlist-id)
-        (message "Followed playlist")))))
+    (when (and (y-or-n-p (format "Follow playlist '%s'?" playlist-name))
+               (spotify-api-playlist-follow owner-user-id playlist-id))
+      (message (format "Followed playlist '%s'" playlist-name)))))
 
 (defun spotify-playlist-search-update (current-page)
   "Fetches the given page of results using the search endpoint."
