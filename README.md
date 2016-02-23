@@ -55,6 +55,24 @@ In order to get the the client ID and client secret, you need to create
 [a Spotify app](https://developer.spotify.com/my-applications), specifying
 <http://localhost:8591/> as the redirect URI.
 
+### Creating The Spotify App
+
+Go to [Create an Application](https://developer.spotify.com/my-applications/#!/applications/create)
+and give your application a name and a description:
+
+![Creating a Spotify App 1/2](./img/spotify-app-01.png)
+
+At this point, the client ID and the client secret is already available, so set
+those values to `spotify-oauth2-client-id` and `spotify-oauth2-client-secret`,
+respectively.
+
+Then, scroll down a little bit, type <http://localhost:8591/> as the Redirect
+URI for the application, and click **Add**:
+
+![Creating a Spotify App 2/2](./img/spotify-app-02.png)
+
+Finally, scroll to the end of the page and hit **Save**.
+
 ## Usage
 
 ### Starting A New Session
