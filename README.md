@@ -119,6 +119,7 @@ in a separate buffer with the following key bindings:
 |:-----------------|:------------------------------------------------------|
 | <kbd>l</kbd>     | Loads the next page of results (pagination)           |
 | <kbd>f</kbd>     | Follows the playlist under the cursor                 |
+| <kbd>u</kbd>     | Unfollows the playlist under the cursor               |
 | <kbd>RET</kbd>   | Play the playlist under the cursor from the beginning |
 | <kbd>M-RET</kbd> | Lists the tracks of the playlist under the cursor     |
 
@@ -129,6 +130,7 @@ bindings in the resulting buffer:
 |:-----------------|:----------------------------------------------------------------|
 | <kbd>l</kbd>     | Loads the next page of results (pagination)                     |
 | <kbd>f</kbd>     | Follows the current playlist                                    |
+| <kbd>u</kbd>     | Unfollows the current playlist                                  |
 | <kbd>RET</kbd>   | Plays the track under the cursor in the context of the playlist |
 | <kbd>M-RET</kbd> | Plays the track under the cursor in the context of its album    |
 
