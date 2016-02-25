@@ -8,14 +8,32 @@
   "Path to `osascript' binary."
   :type 'string)
 
-(defun spotify-apple-command-true-output-p (out-str)
-  (string= "true" out-str))
+(defun spotify-apple-command-line (cmd)
+  "Returns a command line prefix for any Spotify command."
+  (format "%s -e 'tell application \"Spotify\" to %s'" spotify-osascript-bin-path cmd))
 
 (defun spotify-apple-command (cmd)
+  "Sends the given command to the Spotify client and returns the resulting
+   status string."
   (replace-regexp-in-string
    "\n$" ""
-   (shell-command-to-string  
-    (format "%s -e 'tell application \"Spotify\" to %s'" spotify-osascript-bin-path cmd))))
+   (shell-command-to-string (spotify-apple-command-line cmd))))
+
+(defun spotify-apple-player-status-command-line ()
+  "Returns the current Spotify player status that is set to the mode line."
+  (format "echo \"%s - %s (%s)\""
+          (format "$(%s)" (spotify-apple-command-line "artist of current track"))
+          (format "$(%s)" (spotify-apple-command-line "name of current track"))
+          (format "$(%s)" (spotify-apple-command-line "get player state"))))
+
+(defun spotify-apple-player-status ()
+  "Updates the mode line to display the current Spotify player status."
+  (let* ((process-name "spotify-player-status")
+         (process-status (process-status process-name)))
+    (if (and (spotify-connected-p) (not process-status))
+        (let ((process (start-process-shell-command process-name "*spotify-player-status*" (spotify-apple-player-status-command-line))))
+          (set-process-filter process 'spotify-set-mode-line))
+      (spotify-update-mode-line ""))))
 
 (defun spotify-apple-player-state ()
   (spotify-apple-command "get player state"))
@@ -39,12 +57,10 @@
   (spotify-apple-command (format "play track \"%s\" in context \"%s\"" track-id context-id)))
 
 (defun spotify-apple-repeating-p ()
-  (spotify-apple-command-true-output-p
-   (spotify-apple-command "get repeating")))
+  (string= "true" (spotify-apple-command "get repeating")))
 
 (defun spotify-apple-shuffling-p ()
-  (spotify-apple-command-true-output-p
-   (spotify-apple-command "get shuffling")))
+  (string= "true" (spotify-apple-command "get shuffling")))
 
 (defun spotify-apple-player-pause ()
   (spotify-apple-command "pause"))

@@ -12,6 +12,7 @@ application from within your favorite text editor.
 ## Features
 
 * Communicates with the Spotify API via Oauth2
+* Displays the current track in mode line
 * List your public and private playlists and its tracks
 * Search for tracks and playlists that match the given keywords
 * Easily control basic Spotify player features like, play/pause, previous, 
@@ -152,7 +153,18 @@ bindings:
 
 This is particularly useful for those using keyboards without media keys.
 
-This mode can be enabled globally with `global-spotify-remote-mode`.
+Also, the current song being played by the Spotify client is displayed at the
+mode line along with the player status (playing, paused). The interval in which
+the mode line is updated can be configured via the
+`spotify-mode-line-refresh-interval` variable:
+
+````el
+;; Updates the mode line every second (set to 0 to disable this feature)
+(setq spotify-mode-line-refresh-interval 1)
+````
+
+This mode can be enabled globally by running
+<kbd>M-x global-spotify-remote-mode</kbd>.
 
 ## License
 

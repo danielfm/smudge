@@ -44,6 +44,7 @@
 (require 'spotify-api)
 (require 'spotify-track-search)
 (require 'spotify-playlist-search)
+(require 'spotify-controller)
 (require 'spotify-remote)
 (require 'spotify-apple)
 
@@ -54,123 +55,6 @@
   "Spotify client."
   :version "0.0.1"
   :group 'multimedia)
-
-;;; TODO: D-Bus support not implemented
-(defcustom spotify-transport 'apple
-  "How the commands should be sent to Spotify process."
-  :type '(choice (symbol :tag "AppleScript" apple)
-                 (symbol :tag "D-Bus" dbus)))
-
-;; simple facility to emulate multimethods
-(defun spotify-apply (suffix &rest args)
-  (let ((func-name (format "spotify-%s-%s" spotify-transport suffix)))
-    (apply (intern func-name) args)))
-
-(defun spotify-current-track-msg ()
-  "Returns a string that describes the track being played in Spotify app."
-  (let ((artist (spotify-current-track-artist))
-        (name (spotify-current-track-name)))
-    (if (spotify-playing-p)
-        (message "Spotify is now playing: %s - %s" artist name)
-      (message "Spotify is now paused"))))
-
-(defun spotify-shuffling-status-msg ()
-  "Returns a string that describes whether shuffling is enabled in Spotify app."
-  (message "Spotify shuffling is %s"
-           (if (spotify-shuffling-p) "on" "off")))
-
-(defun spotify-repeating-status-msg ()
-  "Returns a string that describes whether repeating is enabled in Spotify app."
-  (message "Spotify repeating is %s"
-           (if (spotify-repeating-p) "on" "off")))
-
-(defun spotify-playing-status-msg ()
-  "Returns a string that describes whether Spotify is paused or playing."
-  (message "Spotify is now %s"
-           (if (spotify-playing-p) "playing" "paused")))
-
-(defun spotify-player-info ()
-  "Returns a string that describes what's being played."
-  (interactive)
-  (spotify-current-track-msg))
-
-(defun spotify-play-track (track-id context-id)
-  "Sends a `play' command to Spotify process passing a context id."
-  (interactive)
-  (spotify-apply "player-play-track" track-id context-id)
-  (run-at-time "1 sec" nil 'spotify-current-track-msg))
-
-(defun spotify-toggle-play ()
-  "Sends a `playpause' command to Spotify process."
-  (interactive)
-  (spotify-apply "player-toggle-play")
-  (run-at-time "1 sec" nil 'spotify-playing-status-msg))
-
-(defun spotify-play ()
-  "Sends a `play' command to Spotify process."
-  (interactive)
-  (spotify-apply "player-play")
-  (run-at-time "1 sec" nil 'spotify-playing-status-msg))
-
-(defun spotify-next-track ()
-  "Sends a `next track' command to Spotify process."
-  (interactive)
-  (spotify-apply "player-next-track")
-  (run-at-time "1 sec" nil 'spotify-current-track-msg))
-
-(defun spotify-previous-track ()
-  "Sends a `previous track' command to Spotify process."
-  (interactive)
-  (spotify-apply "player-previous-track")
-  (run-at-time "1 sec" nil 'spotify-current-track-msg))
-
-(defun spotify-pause ()
-  "Sends a `pause' command to Spotify process."
-  (interactive)
-  (spotify-apply "player-pause")
-  (run-at-time "1 sec" nil 'spotify-playing-status-msg))
-
-(defun spotify-playing-p ()
-  "Returns whether Spotify is playing."
-  (interactive)
-  (spotify-apply "player-playing-p"))
-
-(defun spotify-repeating-p ()
-  "Returns whether Spotify have repeating turned on."
-  (interactive)
-  (spotify-apply "repeating-p"))
-
-(defun spotify-toggle-repeat ()
-  "Sends a command to Spotify process to toggle the repeating flag."
-  (interactive)
-  (spotify-apply "toggle-repeat")
-  (run-at-time "1 sec" nil 'spotify-repeating-status-msg))
-
-(defun spotify-shuffling-p ()
-  "Returns whether Spotify have shuffling turned on."
-  (interactive)
-  (spotify-apply "shuffling-p"))
-
-(defun spotify-toggle-shuffle ()
-  "Sends a command to Spotify process to toggle the shuffling flag."
-  (interactive)
-  (spotify-apply "toggle-shuffle")
-  (run-at-time "1 sec" nil 'spotify-shuffling-status-msg))
-
-(defun spotify-current-track-artist ()
-  "Retrieves the artist name of the track being played in Spotify app."
-  (interactive)
-  (spotify-apply "current-track-artist"))
-
-(defun spotify-current-track-album ()
-  "Retrieves the album name of the track being played in Spotify app."
-  (interactive)
-  (spotify-apply "current-track-album"))
-
-(defun spotify-current-track-name ()
-  "Retrieves the name of the track being played in Spotify app."
-  (interactive)
-  (spotify-apply "current-track-name"))
 
 ;;;###autoload
 (defun spotify-track-search (query)

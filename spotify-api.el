@@ -64,15 +64,16 @@ JSON response."
                        (not is-retry))
                   (spotify-api-call method uri data t)
                 json)))
-          (end-of-file
-           (kill-buffer)
-           (signal (car err) (cdr err)))))))
+        (end-of-file
+         (kill-buffer)
+         (signal (car err) (cdr err)))))))
 
 (defun spotify-disconnect ()
   "Clears the Spotify session currently in use."
   (interactive)
   (makunbound '*spotify-oauth2-token*)
   (makunbound '*spotify-user*)
+  (stop-mode-line-timer)
   (message "Spotify session closed"))
 
 ;;;###autoload
@@ -83,7 +84,12 @@ JSON response."
   (defvar *spotify-oauth2-token* (spotify-api-auth))
   (defvar *spotify-user* (spotify-api-call "GET" "/me"))
   (when *spotify-user*
-    (message "Welcome, %s!" (spotify-current-user-name))))
+    (message "Welcome, %s!" (spotify-current-user-name))
+    (start-mode-line-timer)))
+
+(defun spotify-connected-p ()
+  "Returns whether there's an established session with Spotify API."
+  (and (boundp '*spotify-user*) (not (null *spotify-user*))))
 
 (defun spotify-current-user-name ()
   "Returns the user's display name of the current Spotify session."
@@ -156,8 +162,8 @@ depending on the `type' argument."
   (let ((escaped-query (url-hexify-string query))
         (offset (* spotify-api-search-limit (1- page))))
     (spotify-api-call "GET"
-     (format "/search?q=%s&type=%s&limit=%d&offset=%d&market=from_token"
-             escaped-query type spotify-api-search-limit offset))))
+                      (format "/search?q=%s&type=%s&limit=%d&offset=%d&market=from_token"
+                              escaped-query type spotify-api-search-limit offset))))
 
 (defun spotify-api-user-playlists (user-id page)
   "Returns the playlists for the given user."
