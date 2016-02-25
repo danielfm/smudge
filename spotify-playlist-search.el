@@ -1,6 +1,6 @@
 ;; spotify-playlist-search.el --- Spotify.el playlist search major mode
 
-;; Copyright (C) 2014 Daniel Fernandes Martins
+;; Copyright (C) 2014-2016 Daniel Fernandes Martins
 
 ;; Code:
 

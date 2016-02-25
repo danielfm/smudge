@@ -1,6 +1,6 @@
 ;;; spotify.el --- control the Spotify app from Emacs
 
-;; Copyright (C) 2014 Daniel Fernandes Martins
+;; Copyright (C) 2014-2016 Daniel Fernandes Martins
 
 ;; Keywords: multimedia, music, spotify
 ;; Package: spotify

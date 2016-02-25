@@ -1,6 +1,6 @@
 ;; spotify-remote.el --- Spotify.el remote minor mode
 
-;; Copyright (C) 2014 Daniel Fernandes Martins
+;; Copyright (C) 2014-2016 Daniel Fernandes Martins
 
 ;; Code:
 
