@@ -100,4 +100,13 @@
       (pop-to-buffer buffer)
       buffer)))
 
+;;;###autoload
+(defun spotify-create-playlist (name is-public)
+  "Creates an empty playlist owned by the current user."
+  (interactive
+   (list (read-string "Playlist name: ")
+         (y-or-n-p "Make the playlist public? ")))
+  (let ((new-playlist (spotify-api-playlist-create (spotify-current-user-id) name is-public)))
+    (message (format "Playlist '%s' created" (spotify-get-item-name new-playlist)))))
+
 (provide 'spotify)

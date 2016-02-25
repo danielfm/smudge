@@ -13,6 +13,7 @@ application from within your favorite text editor.
 
 * Communicates with the Spotify API via Oauth2
 * Displays the current track in mode line
+* Create playlists (public or private)
 * List your public and private playlists and its tracks
 * Search for tracks and playlists that match the given keywords
 * Easily control basic Spotify player features like, play/pause, previous, 
@@ -108,6 +109,14 @@ the variable `spotify-api-search-limit`:
 ;; Do not use values larger than 50 for better compatibility across endpoints
 (setq spotify-api-search-limit 50)
 ````
+
+### Creating Playlists
+
+To create new playlists, run <kbd>M-x spotify-create-playlist</kbd> and follow
+the prompts.
+
+Currently it's not possible to add tracks to a playlist you own, or to remove
+tracks from them.
 
 ### Searching For Playlists
 
