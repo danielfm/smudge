@@ -37,7 +37,9 @@ See commands \\[spotify-toggle-repeating] and
   (let ((normalized-str (replace-regexp-in-string "\n$" "" str)))
     (if (eq "" normalized-str)
         (setq spotify-mode-line spotify-mode-line-prefix)
-      (setq spotify-mode-line (concat spotify-mode-line-prefix " " normalized-str)))))
+      (setq spotify-mode-line (concat spotify-mode-line-prefix " " normalized-str)))
+    (when (bound-and-true-p spotify-remote-mode)
+      (force-mode-line-update))))
 
 (defun turn-on-spotify-remote-mode ()
   "Turns the `spotify-remote-mode' on in the current buffer."
