@@ -8,6 +8,22 @@
   "Path to `osascript' binary."
   :type 'string)
 
+;; Do not change this unless you know what you're doing
+(defvar spotify-player-status-script "
+tell application \"Spotify\"
+  set trackId         to id of current track as string
+  set trackArtist     to artist of current track as string
+  set trackName       to name of current track as string
+  set trackNumber     to track number of current track as string
+  set trackDiscNumber to disc number of current track as string
+  set trackDuration   to duration of current track as string
+
+  set playerState     to get player state as string
+  set playerPosition  to get player position as string
+
+  return trackId & \"\n\" & trackArtist & \"\n\" & trackName & \"\n\" & trackNumber & \"\n\" & trackDiscNumber & \"\n\" & trackDuration & \"\n\" & playerState & \"\n\" & playerPosition & \"\n\"
+end tell")
+
 (defun spotify-apple-command-line (cmd)
   "Returns a command line prefix for any Spotify command."
   (format "%s -e 'tell application \"Spotify\" to %s'" spotify-osascript-bin-path cmd))
@@ -21,10 +37,9 @@
 
 (defun spotify-apple-player-status-command-line ()
   "Returns the current Spotify player status that is set to the mode line."
-  (format "echo \"%s - %s (%s)\""
-          (format "$(%s)" (spotify-apple-command-line "artist of current track"))
-          (format "$(%s)" (spotify-apple-command-line "name of current track"))
-          (format "$(%s)" (spotify-apple-command-line "get player state"))))
+  (format "echo %s | %s"
+          (shell-quote-argument spotify-player-status-script)
+          spotify-osascript-bin-path))
 
 (defun spotify-apple-player-status ()
   "Updates the mode line to display the current Spotify player status."

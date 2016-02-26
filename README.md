@@ -172,6 +172,25 @@ the mode line is updated can be configured via the
 (setq spotify-mode-line-refresh-interval 1)
 ````
 
+#### Customizing The Mode Line
+
+The information displayed in the mode line can be customized by setting the
+desired format in `spotify-mode-line-format`. The following placeholders are
+supported:
+
+* `%u` - Track URI (i.e. `spotify:track:<ID>`)
+* `%a` - Artist name
+* `%t` - Track name
+* `%n` - Track #
+* `%d` - Track disc #
+* `%s` - Player state (i.e. `playing`, `paused`, `stopped`)
+* `%l` - Track duration, in minutes (i.e. `01:35`)
+* `%p` - Player position in current track, in minutes (i.e. `01:35`)
+
+The default format is `"%a - %t (%s)"`.
+
+#### Global Remote Mode
+
 This mode can be enabled globally by running
 <kbd>M-x global-spotify-remote-mode</kbd>.
 

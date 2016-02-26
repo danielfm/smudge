@@ -15,6 +15,19 @@
    disable this feature."
   :type 'integer)
 
+(defcustom spotify-mode-line-format "%a - %t (%s)"
+  "Format used to display the current Spotify client player status. The
+following placeholders are supported:
+
+* %u - Track URI (i.e. spotify:track:<ID>)
+* %a - Artist name
+* %t - Track name
+* %n - Track #
+* %d - Track disc #
+* %s - Player state (i.e. playing, paused, stopped)
+* %l - Track duration, in minutes (i.e. 01:35)
+* %p - Player position in current track, in minutes (i.e. 01:35)")
+
 (defvar spotify-timer nil)
 
 ;; simple facility to emulate multimethods
@@ -24,9 +37,20 @@
 
 (defun spotify-set-mode-line (process output)
   "Sets the output of the player status process to the mode line."
-  (spotify-update-mode-line output)
-  (with-current-buffer (process-buffer process)
-    (delete-region (point-min) (point-max))))
+  (let ((mode-line spotify-mode-line-format)
+        (fields (split-string output "\n"))
+        (duration-format "%02m:%02s"))
+    (setq mode-line (replace-regexp-in-string "%u" (first fields) mode-line))
+    (setq mode-line (replace-regexp-in-string "%a" (second fields) mode-line))
+    (setq mode-line (replace-regexp-in-string "%t" (third fields) mode-line))
+    (setq mode-line (replace-regexp-in-string "%n" (fourth fields) mode-line))
+    (setq mode-line (replace-regexp-in-string "%d" (fifth fields) mode-line))
+    (setq mode-line (replace-regexp-in-string "%s" (seventh fields) mode-line))
+    (setq mode-line (replace-regexp-in-string "%l" (format-seconds duration-format (/ (string-to-number (sixth fields)) 1000)) mode-line))
+    (setq mode-line (replace-regexp-in-string "%p" (format-seconds duration-format (string-to-number (eighth fields))) mode-line))
+    (spotify-update-mode-line mode-line)
+    (with-current-buffer (process-buffer process)
+      (delete-region (point-min) (point-max)))))
 
 (defun start-mode-line-timer ()
   "Starts the timer that updates the mode line according to the Spotify
