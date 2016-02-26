@@ -136,6 +136,10 @@ JSON response."
   "Returns the popularity from the given track/album/artist object."
   (gethash 'popularity json))
 
+(defun spotify-is-track-playable (json)
+  "Returns whether the given track is playable by the current user."
+  (not (eq :json-false (gethash 'is_playable json))))
+
 (defun spotify-get-item-name (json)
   "Returns the name from the given track/album/artist object."
   (gethash 'name json))
@@ -206,7 +210,7 @@ depending on the `type' argument."
   (let ((offset (* spotify-api-search-limit (1- page))))
     (spotify-api-call
      "GET"
-     (format "/users/%s/playlists/%s/tracks?limit=%d&offset=%d"
+     (format "/users/%s/playlists/%s/tracks?limit=%d&offset=%d&market=from_token"
              user-id playlist-id spotify-api-search-limit offset))))
 
 (defun spotify-popularity-bar (popularity)
