@@ -39,7 +39,7 @@ following placeholders are supported:
   "Sets the output of the player status process to the mode line."
   (let ((mode-line spotify-mode-line-format)
         (fields (split-string output "\n"))
-        (duration-format "%02m:%02s"))
+        (duration-format "%m:%02s"))
     (setq mode-line (replace-regexp-in-string "%u" (first fields) mode-line))
     (setq mode-line (replace-regexp-in-string "%a" (second fields) mode-line))
     (setq mode-line (replace-regexp-in-string "%t" (third fields) mode-line))

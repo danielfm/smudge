@@ -178,14 +178,16 @@ The information displayed in the mode line can be customized by setting the
 desired format in `spotify-mode-line-format`. The following placeholders are
 supported:
 
-* `%u` - Track URI (i.e. `spotify:track:<ID>`)
-* `%a` - Artist name
-* `%t` - Track name
-* `%n` - Track #
-* `%d` - Track disc #
-* `%s` - Player state (i.e. `playing`, `paused`, `stopped`)
-* `%l` - Track duration, in minutes (i.e. `01:35`)
-* `%p` - Player position in current track, in minutes (i.e. `01:35`)
+| Symbol | Description                         | Example                        |
+|:-------|:------------------------------------|:-------------------------------|
+|  `%u`  | Track URI                           | `spotify:track:<id>`           |
+|  `%a`  | Artist name                         | `Pink Floyd`                   |
+|  `%t`  | Track name                          | `Us and Them`                  |
+|  `%n`  | Track #                             | `7`                            |
+|  `%d`  | Track disc #                        | `1`                            |
+|  `%s`  | Player state                        | `playing`, `paused`, `stopped` |
+|  `%l`  | Track duration, in minutes          | `7:49`                         |
+|  `%p`  | Current player position, in minutes | `2:23`                         |
 
 The default format is `"%a - %t (%s)"`.
 
