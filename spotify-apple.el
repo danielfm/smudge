@@ -11,6 +11,13 @@
 ;; Do not change this unless you know what you're doing
 (defvar spotify-player-status-script "
 tell application \"Spotify\"
+  set playerState     to get player state as string
+
+  # Empty data in order to avoid returning an error
+  if (playerState = \"stopped\") then
+    return \"\n\n\n\n\n\nstopped\n\"
+  end if
+
   set trackId         to id of current track as string
   set trackArtist     to artist of current track as string
   set trackName       to name of current track as string
@@ -18,7 +25,6 @@ tell application \"Spotify\"
   set trackDiscNumber to disc number of current track as string
   set trackDuration   to duration of current track as string
 
-  set playerState     to get player state as string
   set playerPosition  to get player position as string
 
   return trackId & \"\n\" & trackArtist & \"\n\" & trackName & \"\n\" & trackNumber & \"\n\" & trackDiscNumber & \"\n\" & trackDuration & \"\n\" & playerState & \"\n\" & playerPosition & \"\n\"
