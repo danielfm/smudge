@@ -26,36 +26,33 @@
 (defun spotify-playlist-select ()
   "Plays the playlist under the cursor."
   (interactive)
-  (spotify-play-track (first (tabulated-list-get-id)) ""))
+  (let ((selected-playlist (tabulated-list-get-id)))
+    (spotify-play-track selected-playlist)))
 
 (defun spotify-playlist-load-more ()
   "Loads the next page of results for the current playlist view."
   (interactive)
-  (if (boundp 'spotify-query)
+  (if (bound-and-true-p spotify-query)
       (spotify-playlist-search-update (1+ spotify-current-page))
     (spotify-my-playlists-update (1+ spotify-current-page))))
 
 (defun spotify-playlist-follow ()
   "Adds the current user as the follower of the playlist under the cursor."
   (interactive)
-  (let* ((id-selected (tabulated-list-get-id))
-         (owner-user-id (second id-selected))
-         (playlist-name (third id-selected))
-         (playlist-id (fourth id-selected)))
-    (when (and (y-or-n-p (format "Follow playlist '%s'?" playlist-name))
-               (spotify-api-playlist-follow owner-user-id playlist-id))
-      (message (format "Followed playlist '%s'" playlist-name)))))
+  (let* ((selected-playlist (tabulated-list-get-id))
+         (name (spotify-get-item-name selected-playlist)))
+    (when (and (y-or-n-p (format "Follow playlist '%s'?" name))
+               (spotify-api-playlist-follow selected-playlist))
+      (message (format "Followed playlist '%s'" name)))))
 
 (defun spotify-playlist-unfollow ()
   "Removes the current user as the follower of the playlist under the cursor."
   (interactive)
-  (let* ((id-selected (tabulated-list-get-id))
-         (owner-user-id (second id-selected))
-         (playlist-name (third id-selected))
-         (playlist-id (fourth id-selected)))
-    (when (and (y-or-n-p (format "Unfollow playlist '%s'?" playlist-name))
-               (spotify-api-playlist-unfollow owner-user-id playlist-id))
-      (message (format "Unfollow playlist '%s'" playlist-name)))))
+  (let* ((selected-playlist (tabulated-list-get-id))
+         (name (spotify-get-item-name selected-playlist)))
+    (when (and (y-or-n-p (format "Unfollow playlist '%s'?" name))
+               (spotify-api-playlist-unfollow selected-playlist))
+      (message (format "Unfollow playlist '%s'" name)))))
 
 (defun spotify-playlist-search-update (current-page)
   "Fetches the given page of results using the search endpoint."
@@ -82,21 +79,14 @@
 (defun spotify-playlist-tracks ()
   "Displays the tracks that belongs to the playlist under the cursor."
   (interactive)
-  (let* ((selected-item-id (tabulated-list-get-id))
-         (playlist-uri (first selected-item-id))
-         (playlist-user-id (second selected-item-id))
-         (playlist-name (third selected-item-id))
-         (playlist-id (fourth selected-item-id)))
-    (let ((buffer (get-buffer-create (format "*Playlist Tracks: %s*" playlist-name))))
+  (let* ((selected-playlist (tabulated-list-get-id))
+         (name (spotify-get-item-name selected-playlist)))
+    (let ((buffer (get-buffer-create (format "*Playlist Tracks: %s*" name))))
       (with-current-buffer buffer
         (spotify-track-search-mode)
         (spotify-track-search-set-list-format)
-        (setq-local spotify-playlist-name playlist-name)
-        (setq-local spotify-playlist-id playlist-id)
-        (setq-local spotify-playlist-uri playlist-uri)
-        (setq-local spotify-playlist-user-id playlist-user-id)
-        (setq-local spotify-current-page 1)
-        (setq tabulated-list-entries nil)
+        (setq-local spotify-selected-playlist selected-playlist)
+        (setq-local tabulated-list-entries nil)
         (spotify-playlist-tracks-update 1)
         (pop-to-buffer buffer)
         buffer))))
@@ -114,10 +104,7 @@
     (dolist (playlist playlists)
       (let ((user-id (spotify-get-playlist-owner-id playlist))
             (playlist-name (spotify-get-item-name playlist)))
-        (push (list (list (spotify-get-item-uri playlist)
-                          user-id
-                          playlist-name
-                          (spotify-get-item-id playlist))
+        (push (list playlist
                     (vector playlist-name
                             user-id
                             (number-to-string (spotify-get-playlist-track-count playlist))))

@@ -80,10 +80,14 @@ following placeholders are supported:
   "Starts the player status process in order to update the mode line."
   (spotify-apply "player-status"))
 
-(defun spotify-play-track (track-id context-id)
+(defun spotify-play-track (track &optional context)
   "Sends a `play' command to Spotify process passing a context id."
   (interactive)
-  (spotify-apply "player-play-track" track-id context-id))
+  (spotify-apply "player-play-track"
+                 (spotify-get-item-uri track)
+                 (if (null context)
+                     ""
+                   (spotify-get-item-uri context))))
 
 (defun spotify-toggle-play ()
   "Sends a `playpause' command to Spotify process."

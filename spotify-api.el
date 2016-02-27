@@ -187,31 +187,35 @@ depending on the `type' argument."
            name
            (if is-public "true" "false"))))
 
-(defun spotify-api-playlist-follow (owner-user-id playlist-id)
+(defun spotify-api-playlist-follow (playlist)
   "Adds the current user as a follower of a playlist."
   (condition-case err
-      (spotify-api-call
-       "PUT"
-       (format "/users/%s/playlists/%s/followers"
-               owner-user-id playlist-id))
+      (let ((owner (spotify-get-playlist-owner-id playlist))
+            (id (spotify-get-item-id playlist)))
+        (spotify-api-call
+         "PUT"
+         (format "/users/%s/playlists/%s/followers" owner id)))
     (end-of-file t)))
 
-(defun spotify-api-playlist-unfollow (owner-user-id playlist-id)
+(defun spotify-api-playlist-unfollow (playlist)
   "Removes the current user as a follower of a playlist."
   (condition-case err
-      (spotify-api-call
-       "DELETE"
-       (format "/users/%s/playlists/%s/followers"
-               owner-user-id playlist-id))
+      (let ((owner (spotify-get-playlist-owner-id playlist))
+            (id (spotify-get-item-id playlist)))
+        (spotify-api-call
+         "DELETE"
+         (format "/users/%s/playlists/%s/followers" owner id)))
     (end-of-file t)))
 
-(defun spotify-api-playlist-tracks (user-id playlist-id page)
+(defun spotify-api-playlist-tracks (playlist page)
   "Returns the tracks of the given user's playlist."
-  (let ((offset (* spotify-api-search-limit (1- page))))
+  (let ((owner (spotify-get-playlist-owner-id playlist))
+        (id (spotify-get-item-id playlist))
+        (offset (* spotify-api-search-limit (1- page))))
     (spotify-api-call
      "GET"
      (format "/users/%s/playlists/%s/tracks?limit=%d&offset=%d&market=from_token"
-             user-id playlist-id spotify-api-search-limit offset))))
+             owner id spotify-api-search-limit offset))))
 
 (defun spotify-popularity-bar (popularity)
   "Returns the popularity indicator bar proportional to the given parameter,

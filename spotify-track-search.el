@@ -13,6 +13,7 @@
     (define-key map (kbd "M-RET") 'spotify-track-select-album)
     (define-key map (kbd "l")     'spotify-track-load-more)
     (define-key map (kbd "f")     'spotify-track-playlist-follow)
+    (define-key map (kbd "u")     'spotify-track-playlist-unfollow)
     map)
   "Local keymap for `spotify-track-search-mode' buffers.")
 
@@ -27,32 +28,42 @@
 the given track is played in the context of that playlist; otherwise, it will
 be played in the context of its album."
   (interactive)
-  (if (and (boundp 'spotify-playlist-uri) spotify-playlist-uri)
-      (spotify-play-track (car (tabulated-list-get-id))
-                          spotify-playlist-uri)
-    (spotify-play-track (car (tabulated-list-get-id))
-                        (cdr (tabulated-list-get-id)))))
+  (let ((selected-track (tabulated-list-get-id)))
+    (if (bound-and-true-p spotify-selected-playlist)
+        (spotify-play-track selected-track
+                            spotify-selected-playlist)
+      (spotify-play-track selected-track
+                          (spotify-get-track-album selected-track)))))
 
 (defun spotify-track-playlist-follow ()
   "Adds the current user as the follower of the track's playlist under the cursor."
   (interactive)
-  (if (boundp 'spotify-playlist-id)
-      (when (and (y-or-n-p (format "Follow playlist '%s'?" spotify-playlist-name))
-                 (spotify-api-playlist-follow spotify-playlist-user-id
-                                              spotify-playlist-id))
-        (message (format "Followed playlist '%s'" spotify-playlist-name)))
+  (if (bound-and-true-p spotify-selected-playlist)
+      (when (and (y-or-n-p (format "Follow playlist '%s'?" (spotify-get-item-name spotify-selected-playlist)))
+                 (spotify-api-playlist-follow spotify-selected-playlist))
+        (message (format "Followed playlist '%s'" (spotify-get-item-name spotify-selected-playlist))))
     (message "Cannot follow a playlist from here")))
+
+(defun spotify-track-playlist-unfollow ()
+  "Removes the current user as the follower of the track's playlist under the cursor."
+  (interactive)
+  (if (bound-and-true-p spotify-selected-playlist)
+      (when (and (y-or-n-p (format "Unfollow playlist '%s'?" (spotify-get-item-name spotify-selected-playlist)))
+                 (spotify-api-playlist-unfollow spotify-selected-playlist))
+        (message (format "Unfollowed playlist '%s'" (spotify-get-item-name spotify-selected-playlist))))
+    (message "Cannot unfollow a playlist from here")))
 
 (defun spotify-track-select-album ()
   "Plays the album of the track under the cursor in the context of its album."
   (interactive)
-  (spotify-play-track (car (tabulated-list-get-id))
-                      (cdr (tabulated-list-get-id))))
+  (let ((selected-track (tabulated-list-get-id)))
+    (spotify-play-track selected-track
+                        (spotify-get-track-album selected-track))))
 
 (defun spotify-track-load-more ()
   "Loads the next page of results for the current track view."
   (interactive)
-  (if (boundp 'spotify-query)
+  (if (bound-and-true-p spotify-query)
       (spotify-track-search-update (1+ spotify-current-page))
     (spotify-playlist-tracks-update (1+ spotify-current-page))))
 
@@ -69,14 +80,15 @@ be played in the context of its album."
 
 (defun spotify-playlist-tracks-update (current-page)
   "Fetches the given page of results for the current playlist."
-  (let* ((json (spotify-api-playlist-tracks spotify-playlist-user-id spotify-playlist-id current-page))
-         (items (spotify-get-playlist-tracks json)))
-    (if items
-        (progn
-          (spotify-track-search-print items)
-          (setq-local spotify-current-page current-page)
-          (message "Track view updated"))
-      (message "No more tracks"))))
+  (when (bound-and-true-p spotify-selected-playlist)
+    (let* ((json (spotify-api-playlist-tracks spotify-selected-playlist current-page))
+           (items (spotify-get-playlist-tracks json)))
+      (if items
+          (progn
+            (spotify-track-search-print items)
+            (setq-local spotify-current-page current-page)
+            (message "Track view updated"))
+        (message "No more tracks")))))
 
 (defun spotify-track-search-set-list-format ()
   "Configures the column data for the typical track view."
@@ -93,15 +105,14 @@ be played in the context of its album."
   (let (entries)
     (dolist (song songs)
       (when (spotify-is-track-playable song)
-        (push (list (cons (spotify-get-item-uri song)
-                          (spotify-get-item-uri (spotify-get-track-album song)))
+        (push (list song
                     (vector (number-to-string (spotify-get-track-number song))
                             (spotify-get-item-name song)
                             (spotify-get-track-artist song)
                             (spotify-get-track-album-name song)
                             (spotify-popularity-bar (spotify-get-track-popularity song))))
               entries)))
-    (setq tabulated-list-entries (append tabulated-list-entries (nreverse entries)))
+    (setq-local tabulated-list-entries (append tabulated-list-entries (nreverse entries)))
     (tabulated-list-init-header)
     (tabulated-list-print t)))
 
