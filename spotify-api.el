@@ -1,6 +1,6 @@
 ;; spotify-api.el --- Spotify.el API integration layer
 
-;; Copyright (C) 2014 Daniel Fernandes Martins
+;; Copyright (C) 2014-2016 Daniel Fernandes Martins
 
 ;; Code:
 
