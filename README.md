@@ -98,6 +98,7 @@ key bindings:
 | Key              | Description                                                  |
 |:-----------------|:-------------------------------------------------------------|
 | <kbd>l</kbd>     | Loads the next page of results (pagination)                  |
+| <kbd>L</kbd>     | Clears the results and reloads the first page of results     |
 | <kbd>RET</kbd>   | Plays the track under the cursor in the context of its album |
 
 The resulting buffer loads the `spotify-remote-mode` by default.
@@ -125,13 +126,14 @@ To list your own playlists, run <kbd>M-x spotify-my-playlists</kbd>, or
 playlist that matches the given keywords. The results will be displayed
 in a separate buffer with the following key bindings:
 
-| Key              | Description                                           |
-|:-----------------|:------------------------------------------------------|
-| <kbd>l</kbd>     | Loads the next page of results (pagination)           |
-| <kbd>f</kbd>     | Follows the playlist under the cursor                 |
-| <kbd>u</kbd>     | Unfollows the playlist under the cursor               |
-| <kbd>RET</kbd>   | Play the playlist under the cursor from the beginning |
-| <kbd>M-RET</kbd> | Lists the tracks of the playlist under the cursor     |
+| Key              | Description                                              |
+|:-----------------|:---------------------------------------------------------|
+| <kbd>l</kbd>     | Loads the next page of results (pagination)              |
+| <kbd>L</kbd>     | Clears the results and reloads the first page of results |
+| <kbd>f</kbd>     | Follows the playlist under the cursor                    |
+| <kbd>u</kbd>     | Unfollows the playlist under the cursor                  |
+| <kbd>RET</kbd>   | Play the playlist under the cursor from the beginning    |
+| <kbd>M-RET</kbd> | Lists the tracks of the playlist under the cursor        |
 
 Once you opened the list of tracks of a playlist, you get the following key
 bindings in the resulting buffer:
@@ -139,6 +141,7 @@ bindings in the resulting buffer:
 | Key              | Description                                                     |
 |:-----------------|:----------------------------------------------------------------|
 | <kbd>l</kbd>     | Loads the next page of results (pagination)                     |
+| <kbd>L</kbd>     | Clears the results and reloads the first page of results        |
 | <kbd>f</kbd>     | Follows the current playlist                                    |
 | <kbd>u</kbd>     | Unfollows the current playlist                                  |
 | <kbd>RET</kbd>   | Plays the track under the cursor in the context of the playlist |

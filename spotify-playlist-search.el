@@ -12,6 +12,7 @@
     (define-key map (kbd "RET")   'spotify-playlist-select)
     (define-key map (kbd "M-RET") 'spotify-playlist-tracks)
     (define-key map (kbd "l")     'spotify-playlist-load-more)
+    (define-key map (kbd "L")     'spotify-playlist-reload)
     (define-key map (kbd "f")     'spotify-playlist-follow)
     (define-key map (kbd "u")     'spotify-playlist-unfollow)
     map)
@@ -28,6 +29,13 @@
   (interactive)
   (let ((selected-playlist (tabulated-list-get-id)))
     (spotify-play-track selected-playlist)))
+
+(defun spotify-playlist-reload ()
+  "Reloads the first page of results for the current playlist view."
+  (interactive)
+  (if (bound-and-true-p spotify-query)
+      (spotify-playlist-search-update 1)
+    (spotify-my-playlists-update 1)))
 
 (defun spotify-playlist-load-more ()
   "Loads the next page of results for the current playlist view."
@@ -60,7 +68,7 @@
          (items (spotify-get-search-playlist-items json)))
     (if items
         (progn
-          (spotify-playlist-search-print items)
+          (spotify-playlist-search-print items current-page)
           (setq-local spotify-current-page current-page)
           (message "playlist view updated"))
       (message "No more playlists"))))
@@ -71,7 +79,7 @@
          (items (spotify-get-items json)))
     (if items
         (progn
-          (spotify-playlist-search-print items)
+          (spotify-playlist-search-print items current-page)
           (setq-local spotify-current-page current-page)
           (message "Playlist view updated"))
       (message "No more playlists"))))
@@ -86,7 +94,6 @@
         (spotify-track-search-mode)
         (spotify-track-search-set-list-format)
         (setq-local spotify-selected-playlist selected-playlist)
-        (setq-local tabulated-list-entries nil)
         (spotify-playlist-tracks-update 1)
         (pop-to-buffer buffer)
         buffer))))
@@ -98,7 +105,7 @@
                 '("Owner Id" 30 t)
                 '("# Tracks" 8 nil :right-align t))))
 
-(defun spotify-playlist-search-print (playlists)
+(defun spotify-playlist-search-print (playlists current-page)
   "Appends the given playlists to the current playlist view."
   (let (entries)
     (dolist (playlist playlists)
@@ -109,6 +116,8 @@
                             user-id
                             (number-to-string (spotify-get-playlist-track-count playlist))))
               entries)))
+    (when (eq 1 current-page)
+      (setq-local tabulated-list-entries nil))
     (setq tabulated-list-entries (append tabulated-list-entries (nreverse entries)))
     (tabulated-list-init-header)
     (tabulated-list-print t)))

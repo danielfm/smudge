@@ -12,6 +12,7 @@
     (define-key map (kbd "RET")   'spotify-track-select)
     (define-key map (kbd "M-RET") 'spotify-track-select-album)
     (define-key map (kbd "l")     'spotify-track-load-more)
+    (define-key map (kbd "L")     'spotify-track-reload)
     (define-key map (kbd "f")     'spotify-track-playlist-follow)
     (define-key map (kbd "u")     'spotify-track-playlist-unfollow)
     map)
@@ -60,6 +61,13 @@ be played in the context of its album."
     (spotify-play-track selected-track
                         (spotify-get-track-album selected-track))))
 
+(defun spotify-track-reload ()
+  "Reloads the first page of results for the current track view."
+  (interactive)
+  (if (bound-and-true-p spotify-query)
+      (spotify-track-search-update 1)
+    (spotify-playlist-tracks-update 1)))
+
 (defun spotify-track-load-more ()
   "Loads the next page of results for the current track view."
   (interactive)
@@ -85,7 +93,7 @@ be played in the context of its album."
            (items (spotify-get-playlist-tracks json)))
       (if items
           (progn
-            (spotify-track-search-print items)
+            (spotify-track-search-print items current-page)
             (setq-local spotify-current-page current-page)
             (message "Track view updated"))
         (message "No more tracks")))))
@@ -100,7 +108,7 @@ be played in the context of its album."
                   `("Album" ,default-width t)
                   '("Popularity" 10 t)))))
 
-(defun spotify-track-search-print (songs)
+(defun spotify-track-search-print (songs current-page)
   "Appens the given songs to the current track view."
   (let (entries)
     (dolist (song songs)
@@ -112,6 +120,8 @@ be played in the context of its album."
                             (spotify-get-track-album-name song)
                             (spotify-popularity-bar (spotify-get-track-popularity song))))
               entries)))
+    (when (eq 1 current-page)
+      (setq-local tabulated-list-entries nil))
     (setq-local tabulated-list-entries (append tabulated-list-entries (nreverse entries)))
     (tabulated-list-init-header)
     (tabulated-list-print t)))
