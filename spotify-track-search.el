@@ -81,7 +81,7 @@ be played in the context of its album."
          (items (spotify-get-search-track-items json)))
     (if items
         (progn
-          (spotify-track-search-print items)
+          (spotify-track-search-print items current-page)
           (setq-local spotify-current-page current-page)
           (message "Track view updated"))
       (message "No more tracks"))))
