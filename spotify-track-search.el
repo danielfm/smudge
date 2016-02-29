@@ -109,7 +109,7 @@ be played in the context of its album."
                   '("Popularity" 10 t)))))
 
 (defun spotify-track-search-print (songs current-page)
-  "Appens the given songs to the current track view."
+  "Appends the given songs to the current track view."
   (let (entries)
     (dolist (song songs)
       (when (spotify-is-track-playable song)
