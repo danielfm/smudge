@@ -94,8 +94,8 @@
       (spotify-playlist-search-mode)
       (setq-local spotify-current-page 1)
       (setq tabulated-list-entries nil)
-      (spotify-my-playlists-update 1)
       (pop-to-buffer buffer)
+      (spotify-my-playlists-update 1)
       buffer)))
 
 ;;;###autoload
