@@ -67,8 +67,8 @@
       (setq-local spotify-query query)
       (setq-local spotify-current-page 1)
       (setq tabulated-list-entries nil)
-      (spotify-track-search-update 1)
       (pop-to-buffer buffer)
+      (spotify-track-search-update 1)
       buffer)))
 
 ;;;###autoload
@@ -78,12 +78,11 @@
   (let ((buffer (get-buffer-create (format "*Playlist Search: %s*" query))))
     (with-current-buffer buffer
       (spotify-playlist-search-mode)
-      (spotify-playlist-set-list-format)
       (setq-local spotify-query query)
       (setq-local spotify-current-page 1)
       (setq tabulated-list-entries nil)
-      (spotify-playlist-search-update 1)
       (pop-to-buffer buffer)
+      (spotify-playlist-search-update 1)
       buffer)))
 
 ;;;###autoload
@@ -93,7 +92,6 @@
   (let ((buffer (get-buffer-create "*My Playlists*")))
     (with-current-buffer buffer
       (spotify-playlist-search-mode)
-      (spotify-playlist-set-list-format)
       (setq-local spotify-current-page 1)
       (setq tabulated-list-entries nil)
       (spotify-my-playlists-update 1)

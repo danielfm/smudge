@@ -119,6 +119,7 @@
     (when (eq 1 current-page)
       (setq-local tabulated-list-entries nil))
     (setq tabulated-list-entries (append tabulated-list-entries (nreverse entries)))
+    (spotify-playlist-set-list-format)
     (tabulated-list-init-header)
     (tabulated-list-print t)))
 
