@@ -27,7 +27,7 @@ tell application \"Spotify\"
 
   set playerPosition  to get player position as string
 
-  return trackId & \"\n\" & trackArtist & \"\n\" & trackName & \"\n\" & trackNumber & \"\n\" & trackDiscNumber & \"\n\" & trackDuration & \"\n\" & playerState & \"\n\" & playerPosition & \"\n\"
+  return trackId & \"\n\" & trackArtist & \"\n\" & trackName & \"\n\" & trackNumber & \"\n\" & trackDiscNumber & \"\n\" & trackDuration & \"\n\" & playerState & \"\n\" & playerPosition
 end tell")
 
 (defun spotify-apple-command-line (cmd)

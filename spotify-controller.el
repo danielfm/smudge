@@ -40,7 +40,8 @@ following placeholders are supported:
   (let ((mode-line spotify-mode-line-format)
         (fields (split-string output "\n"))
         (duration-format "%m:%02s"))
-    (if (string= "stopped" (seventh fields))
+    (if (or (< (length fields) 8)
+            (string= "stopped" (seventh fields)))
         (setq mode-line "")
       (progn
         (setq mode-line (replace-regexp-in-string "%u" (first fields) mode-line))
