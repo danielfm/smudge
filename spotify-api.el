@@ -28,6 +28,20 @@ https://developer.spotify.com/web-api/tutorial/."
   "Number of items returned when searching for something using the Spotify API."
   :type 'integer)
 
+(defcustom spotify-api-locale "en_US"
+  "Optional. The desired language, consisting of an ISO 639 language code and
+an ISO 3166-1 alpha-2 country code, joined by an underscore.
+For example: es_MX, meaning Spanish (Mexico). Provide this parameter if you
+want the category metadata returned in a particular language."
+  :type 'string)
+
+(defcustom spotify-api-country "US"
+  "Optional. A country: an ISO 3166-1 alpha-2 country code. Provide this
+parameter if you want to narrow the list of returned categories to those
+relevant to a particular country. If omitted, the returned items will be
+globally relevant."
+  :type 'string)
+
 (defun spotify-api-auth ()
   "Starts the Spotify Oauth2 authentication and authorization workflow."
   (oauth2-auth-and-store spotify-oauth2-auth-url
