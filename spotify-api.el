@@ -163,26 +163,30 @@ JSON response."
 (defun spotify-api-search (type query page)
   "Searches artists, albums, tracks or playlists that match a keyword string,
 depending on the `type' argument."
-  (let ((escaped-query (url-hexify-string query))
-        (offset (* spotify-api-search-limit (1- page))))
+  (let ((offset (* spotify-api-search-limit (1- page))))
     (spotify-api-call "GET"
-                      (format "/search?q=%s&type=%s&limit=%d&offset=%d&market=from_token"
-                              escaped-query type spotify-api-search-limit offset))))
+                      (concat "/search?"
+                              (url-build-query-string `((q      ,query)
+                                                        (type   ,type)
+                                                        (limit  ,spotify-api-search-limit)
+                                                        (offset ,offset)
+                                                        (market from_token)))))))
 
 (defun spotify-api-user-playlists (user-id page)
   "Returns the playlists for the given user."
   (let ((offset (* spotify-api-search-limit (1- page))))
     (spotify-api-call
      "GET"
-     (format "/users/%s/playlists?limit=%d&offset=%d"
-             user-id spotify-api-search-limit offset))))
+     (concat (format "/users/%s/playlists?" (url-hexify-string user-id))
+             (url-build-query-string `((limit  ,spotify-api-search-limit)
+                                       (offset ,offset)))))))
 
 (defun spotify-api-playlist-create (user-id name is-public)
   "Creates a new playlist with the given name for the given user."
   (spotify-api-call
    "POST"
    (format "/users/%s/playlists"
-           user-id)
+           (url-hexify-string user-id))
    (format "{\"name\":\"%s\",\"public\":\"%s\"}"
            name
            (if is-public "true" "false"))))
@@ -194,7 +198,9 @@ depending on the `type' argument."
             (id (spotify-get-item-id playlist)))
         (spotify-api-call
          "PUT"
-         (format "/users/%s/playlists/%s/followers" owner id)))
+         (format "/users/%s/playlists/%s/followers"
+                 (url-hexify-string owner)
+                 (url-hexify-string id))))
     (end-of-file t)))
 
 (defun spotify-api-playlist-unfollow (playlist)
@@ -204,7 +210,9 @@ depending on the `type' argument."
             (id (spotify-get-item-id playlist)))
         (spotify-api-call
          "DELETE"
-         (format "/users/%s/playlists/%s/followers" owner id)))
+         (format "/users/%s/playlists/%s/followers"
+                 (url-hexify-string owner)
+                 (url-hexify-string id))))
     (end-of-file t)))
 
 (defun spotify-api-playlist-tracks (playlist page)
@@ -214,8 +222,12 @@ depending on the `type' argument."
         (offset (* spotify-api-search-limit (1- page))))
     (spotify-api-call
      "GET"
-     (format "/users/%s/playlists/%s/tracks?limit=%d&offset=%d&market=from_token"
-             owner id spotify-api-search-limit offset))))
+     (concat (format "/users/%s/playlists/%s/tracks?"
+                     (url-hexify-string owner)
+                     (url-hexify-string id)  offset)
+             (url-build-query-string `((limit  ,spotify-api-search-limit)
+                                       (offset ,offset)
+                                       (market from_token)))))))
 
 (defun spotify-popularity-bar (popularity)
   "Returns the popularity indicator bar proportional to the given parameter,
