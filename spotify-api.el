@@ -121,6 +121,14 @@ JSON response."
   "Returns track items from the given search results json."
   (spotify-get-items (gethash 'tracks json)))
 
+(defun spotify-get-search-playlist-items (json)
+  "Returns playlist items from the given search results json."
+  (spotify-get-items (gethash 'playlists json)))
+
+(defun spotify-get-message (json)
+  "Returns the message from the featured playlists response."
+  (gethash 'message json))
+
 (defun spotify-get-playlist-tracks (json)
   (mapcar #'(lambda (item)
               (gethash 'track item))
@@ -192,7 +200,20 @@ depending on the `type' argument."
                                                         (type   ,type)
                                                         (limit  ,spotify-api-search-limit)
                                                         (offset ,offset)
-                                                        (market from_token)))))))
+                                                        (market from_token))
+                                                      nil t)))))
+
+(defun spotify-api-featured-playlists (page)
+  "Returns the given page of Spotify's featured playlists."
+  (let ((offset (* spotify-api-search-limit (1- page))))
+    (spotify-api-call
+     "GET"
+     (concat "/browse/featured-playlists?"
+             (url-build-query-string `((locale  ,spotify-browse-locale)
+                                       (country ,spotify-browse-country)
+                                       (limit   ,spotify-api-search-limit)
+                                       (offset  ,offset))
+                                     nil t)))))
 
 (defun spotify-api-user-playlists (user-id page)
   "Returns the playlists for the given user."
@@ -201,7 +222,8 @@ depending on the `type' argument."
      "GET"
      (concat (format "/users/%s/playlists?" (url-hexify-string user-id))
              (url-build-query-string `((limit  ,spotify-api-search-limit)
-                                       (offset ,offset)))))))
+                                       (offset ,offset))
+                                     nil t)))))
 
 (defun spotify-api-playlist-create (user-id name is-public)
   "Creates a new playlist with the given name for the given user."
@@ -249,7 +271,8 @@ depending on the `type' argument."
                      (url-hexify-string id)  offset)
              (url-build-query-string `((limit  ,spotify-api-search-limit)
                                        (offset ,offset)
-                                       (market from_token)))))))
+                                       (market from_token))
+                                     nil t)))))
 
 (defun spotify-popularity-bar (popularity)
   "Returns the popularity indicator bar proportional to the given parameter,

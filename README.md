@@ -14,7 +14,7 @@ application from within your favorite text editor.
 * Communicates with the Spotify API via Oauth2
 * Displays the current track in mode line
 * Create playlists (public or private)
-* List your public and private playlists and its tracks
+* Browse the Spotify featured playlists, your own playlists, and their tracks
 * Search for tracks and playlists that match the given keywords
 * Easily control basic Spotify player features like, play/pause, previous, 
   next, shuffle, and repeat with the Spotify Remote minor mode
@@ -123,8 +123,20 @@ tracks from them.
 
 To list your own playlists, run <kbd>M-x spotify-my-playlists</kbd>, or
 <kbd>M-x spotify-playlist-search</kbd> if you want to search for any
-playlist that matches the given keywords. The results will be displayed
-in a separate buffer with the following key bindings:
+playlist that matches the given keywords. Also, to browse the featured playlists
+from Spotify en_US, run <kbd>M-x spotify-featured-playlists</kbd>.
+
+Set these variables if you want to customize the locale and region for the
+featured playlists endpoint:
+
+````el
+;; Spanish (Mexico)
+(setq spotify-api-locale "es_MX")
+(setq spotify-api-country "MX")
+````
+
+The results will be displayed in a separate buffer with the following key
+bindings:
 
 | Key              | Description                                              |
 |:-----------------|:---------------------------------------------------------|

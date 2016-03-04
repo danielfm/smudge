@@ -33,16 +33,18 @@
 (defun spotify-playlist-reload ()
   "Reloads the first page of results for the current playlist view."
   (interactive)
-  (if (bound-and-true-p spotify-query)
-      (spotify-playlist-search-update 1)
-    (spotify-my-playlists-update 1)))
+  (let ((page 1))
+    (cond ((bound-and-true-p spotify-query)          (spotify-playlist-search-update page))
+          ((bound-and-true-p spotify-browse-message) (spotify-featured-playlists-update page))
+          (t                                         (spotify-my-playlists-update page)))))
 
 (defun spotify-playlist-load-more ()
   "Loads the next page of results for the current playlist view."
   (interactive)
-  (if (bound-and-true-p spotify-query)
-      (spotify-playlist-search-update (1+ spotify-current-page))
-    (spotify-my-playlists-update (1+ spotify-current-page))))
+  (let ((next-page (1+ spotify-current-page)))
+    (cond ((bound-and-true-p spotify-query)          (spotify-playlist-search-update next-page))
+          ((bound-and-true-p spotify-browse-message) (spotify-featured-playlists-update next-page))
+          (t                                         (spotify-my-playlists-update next-page)))))
 
 (defun spotify-playlist-follow ()
   "Adds the current user as the follower of the playlist under the cursor."
@@ -80,6 +82,18 @@
         (progn
           (spotify-playlist-search-print items current-page)
           (message "Playlist view updated"))
+      (message "No more playlists"))))
+
+(defun spotify-featured-playlists-update (current-page)
+  "Fetches the given page of results of Spotify's featured playlists."
+  (let* ((json (spotify-api-featured-playlists current-page))
+         (msg (spotify-get-message json))
+         (items (spotify-get-search-playlist-items json)))
+    (if items
+        (progn
+          (spotify-playlist-search-print items current-page)
+          (setq-local spotify-browse-message msg)
+          (message msg))
       (message "No more playlists"))))
 
 (defun spotify-playlist-tracks ()

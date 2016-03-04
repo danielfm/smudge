@@ -99,6 +99,19 @@
       buffer)))
 
 ;;;###autoload
+(defun spotify-featured-playlists ()
+  "Displays Spotify's featured playlists."
+  (interactive)
+  (let ((buffer (get-buffer-create "*Featured Playlists*")))
+    (with-current-buffer buffer
+      (spotify-playlist-search-mode)
+      (setq-local spotify-current-page 1)
+      (setq tabulated-list-entries nil)
+      (pop-to-buffer buffer)
+      (spotify-featured-playlists-update 1)
+      buffer)))
+
+;;;###autoload
 (defun spotify-create-playlist (name is-public)
   "Creates an empty playlist owned by the current user."
   (interactive
