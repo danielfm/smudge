@@ -69,7 +69,6 @@
     (if items
         (progn
           (spotify-playlist-search-print items current-page)
-          (setq-local spotify-current-page current-page)
           (message "playlist view updated"))
       (message "No more playlists"))))
 
@@ -80,7 +79,6 @@
     (if items
         (progn
           (spotify-playlist-search-print items current-page)
-          (setq-local spotify-current-page current-page)
           (message "Playlist view updated"))
       (message "No more playlists"))))
 
@@ -118,7 +116,8 @@
               entries)))
     (when (eq 1 current-page)
       (setq-local tabulated-list-entries nil))
-    (setq tabulated-list-entries (append tabulated-list-entries (nreverse entries)))
+    (setq-local tabulated-list-entries (append tabulated-list-entries (nreverse entries)))
+    (setq-local spotify-current-page current-page)
     (spotify-playlist-set-list-format)
     (tabulated-list-init-header)
     (tabulated-list-print t)))

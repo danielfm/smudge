@@ -82,7 +82,6 @@ be played in the context of its album."
     (if items
         (progn
           (spotify-track-search-print items current-page)
-          (setq-local spotify-current-page current-page)
           (message "Track view updated"))
       (message "No more tracks"))))
 
@@ -94,7 +93,6 @@ be played in the context of its album."
       (if items
           (progn
             (spotify-track-search-print items current-page)
-            (setq-local spotify-current-page current-page)
             (message "Track view updated"))
         (message "No more tracks")))))
 
@@ -123,6 +121,7 @@ be played in the context of its album."
     (when (eq 1 current-page)
       (setq-local tabulated-list-entries nil))
     (setq-local tabulated-list-entries (append tabulated-list-entries (nreverse entries)))
+    (setq-local spotify-current-page current-page)
     (spotify-track-search-set-list-format)
     (tabulated-list-init-header)
     (tabulated-list-print t)))
