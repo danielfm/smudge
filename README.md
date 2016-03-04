@@ -170,7 +170,7 @@ bindings:
 |:-------------------|:-------------------------|:-------------------------------|
 | <kbd>M-p M-i</kbd> | `spotify-player-info`    | Display the track being played |
 | <kbd>M-p M-s</kbd> | `spotify-toggle-shuffle` | Turn shuffle on/off            |
-| <kbd>M-p M-r</kbd> | `potify-toggle-repeat`   | Turn repeat on/off             |
+| <kbd>M-p M-r</kbd> | `spotify-toggle-repeat`  | Turn repeat on/off             |
 | <kbd>M-p M-p</kbd> | `spotify-toggle-play`    | Play/pause                     |
 | <kbd>M-p M-f</kbd> | `spotify-next-track`     | Next track                     |
 | <kbd>M-p M-b</kbd> | `spotify-previous-track` | Previous track                 |
