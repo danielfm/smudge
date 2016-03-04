@@ -98,7 +98,7 @@ key bindings:
 | Key              | Description                                                  |
 |:-----------------|:-------------------------------------------------------------|
 | <kbd>l</kbd>     | Loads the next page of results (pagination)                  |
-| <kbd>L</kbd>     | Clears the results and reloads the first page of results     |
+| <kbd>g</kbd>     | Clears the results and reloads the first page of results     |
 | <kbd>RET</kbd>   | Plays the track under the cursor in the context of its album |
 
 The resulting buffer loads the `spotify-remote-mode` by default.
@@ -129,7 +129,7 @@ in a separate buffer with the following key bindings:
 | Key              | Description                                              |
 |:-----------------|:---------------------------------------------------------|
 | <kbd>l</kbd>     | Loads the next page of results (pagination)              |
-| <kbd>L</kbd>     | Clears the results and reloads the first page of results |
+| <kbd>g</kbd>     | Clears the results and reloads the first page of results |
 | <kbd>f</kbd>     | Follows the playlist under the cursor                    |
 | <kbd>u</kbd>     | Unfollows the playlist under the cursor                  |
 | <kbd>RET</kbd>   | Play the playlist under the cursor from the beginning    |
@@ -141,7 +141,7 @@ bindings in the resulting buffer:
 | Key              | Description                                                     |
 |:-----------------|:----------------------------------------------------------------|
 | <kbd>l</kbd>     | Loads the next page of results (pagination)                     |
-| <kbd>L</kbd>     | Clears the results and reloads the first page of results        |
+| <kbd>g</kbd>     | Clears the results and reloads the first page of results        |
 | <kbd>f</kbd>     | Follows the current playlist                                    |
 | <kbd>u</kbd>     | Unfollows the current playlist                                  |
 | <kbd>RET</kbd>   | Plays the track under the cursor in the context of the playlist |

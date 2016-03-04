@@ -12,7 +12,7 @@
     (define-key map (kbd "RET")   'spotify-track-select)
     (define-key map (kbd "M-RET") 'spotify-track-select-album)
     (define-key map (kbd "l")     'spotify-track-load-more)
-    (define-key map (kbd "L")     'spotify-track-reload)
+    (define-key map (kbd "g")     'spotify-track-reload)
     (define-key map (kbd "f")     'spotify-track-playlist-follow)
     (define-key map (kbd "u")     'spotify-track-playlist-unfollow)
     map)
