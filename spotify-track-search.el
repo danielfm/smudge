@@ -98,13 +98,16 @@ be played in the context of its album."
 
 (defun spotify-track-search-set-list-format ()
   "Configures the column data for the typical track view."
-  (let ((default-width (truncate (/ (- (window-width) 20) 3))))
+  (let ((default-width (truncate (/ (- (window-width) 30) 3))))
     (setq tabulated-list-format
           (vector '("#" 3 nil :right-align t)
                   `("Track Name" ,default-width t)
                   `("Artist" ,default-width t)
-                  `("Album" ,default-width t)
-                  '("Popularity" 10 t)))))
+                  `("Album" ,default-widtho t)
+                  `("Time" 8 (lambda (row-1 row-2)
+                                (< (spotify-get-track-duration (first row-1))
+                                   (spotify-get-track-duration (first row-2)))))
+                  '("Popularity" 14 t)))))
 
 (defun spotify-track-search-print (songs current-page)
   "Appends the given songs to the current track view."
@@ -116,6 +119,7 @@ be played in the context of its album."
                             (spotify-get-item-name song)
                             (spotify-get-track-artist song)
                             (spotify-get-track-album-name song)
+                            (spotify-get-track-duration-formatted song)
                             (spotify-popularity-bar (spotify-get-track-popularity song))))
               entries)))
     (when (eq 1 current-page)

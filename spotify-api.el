@@ -138,6 +138,14 @@ JSON response."
   "Returns the track number from the given track object."
   (gethash 'track_number json))
 
+(defun spotify-get-track-duration (json)
+  "Returns the track duration, in milliseconds, from the given track object."
+  (gethash 'duration_ms json))
+
+(defun spotify-get-track-duration-formatted (json)
+  "Returns the formatted track duration from the given track object."
+  (format-seconds "%m:%02s" (/ (spotify-get-track-duration json) 1000)))
+
 (defun spotify-get-track-album-name (json)
   "Returns the album name from the given track object."
   (spotify-get-item-name (spotify-get-track-album json)))
