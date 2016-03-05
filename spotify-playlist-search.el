@@ -1,6 +1,6 @@
 ;; spotify-playlist-search.el --- Spotify.el playlist search major mode
 
-;; Copyright (C) 2014 Daniel Fernandes Martins
+;; Copyright (C) 2014-2016 Daniel Fernandes Martins
 
 ;; Code:
 
@@ -12,6 +12,9 @@
     (define-key map (kbd "RET")   'spotify-playlist-select)
     (define-key map (kbd "M-RET") 'spotify-playlist-tracks)
     (define-key map (kbd "l")     'spotify-playlist-load-more)
+    (define-key map (kbd "g")     'spotify-playlist-reload)
+    (define-key map (kbd "f")     'spotify-playlist-follow)
+    (define-key map (kbd "u")     'spotify-playlist-unfollow)
     map)
   "Local keymap for `spotify-playlist-search-mode' buffers.")
 
@@ -24,14 +27,42 @@
 (defun spotify-playlist-select ()
   "Plays the playlist under the cursor."
   (interactive)
-  (spotify-play-track (first (tabulated-list-get-id))))
+  (let ((selected-playlist (tabulated-list-get-id)))
+    (spotify-play-track selected-playlist)))
+
+(defun spotify-playlist-reload ()
+  "Reloads the first page of results for the current playlist view."
+  (interactive)
+  (let ((page 1))
+    (cond ((bound-and-true-p spotify-query)          (spotify-playlist-search-update page))
+          ((bound-and-true-p spotify-browse-message) (spotify-featured-playlists-update page))
+          (t                                         (spotify-my-playlists-update page)))))
 
 (defun spotify-playlist-load-more ()
   "Loads the next page of results for the current playlist view."
   (interactive)
-  (if (boundp 'spotify-query)
-      (spotify-playlist-search-update (1+ spotify-current-page))
-    (spotify-my-playlists-update (1+ spotify-current-page))))
+  (let ((next-page (1+ spotify-current-page)))
+    (cond ((bound-and-true-p spotify-query)          (spotify-playlist-search-update next-page))
+          ((bound-and-true-p spotify-browse-message) (spotify-featured-playlists-update next-page))
+          (t                                         (spotify-my-playlists-update next-page)))))
+
+(defun spotify-playlist-follow ()
+  "Adds the current user as the follower of the playlist under the cursor."
+  (interactive)
+  (let* ((selected-playlist (tabulated-list-get-id))
+         (name (spotify-get-item-name selected-playlist)))
+    (when (and (y-or-n-p (format "Follow playlist '%s'?" name))
+               (spotify-api-playlist-follow selected-playlist))
+      (message (format "Followed playlist '%s'" name)))))
+
+(defun spotify-playlist-unfollow ()
+  "Removes the current user as the follower of the playlist under the cursor."
+  (interactive)
+  (let* ((selected-playlist (tabulated-list-get-id))
+         (name (spotify-get-item-name selected-playlist)))
+    (when (and (y-or-n-p (format "Unfollow playlist '%s'?" name))
+               (spotify-api-playlist-unfollow selected-playlist))
+      (message (format "Unfollow playlist '%s'" name)))))
 
 (defun spotify-playlist-search-update (current-page)
   "Fetches the given page of results using the search endpoint."
@@ -39,8 +70,7 @@
          (items (spotify-get-search-playlist-items json)))
     (if items
         (progn
-          (spotify-playlist-search-print items)
-          (setq-local spotify-current-page current-page)
+          (spotify-playlist-search-print items current-page)
           (message "playlist view updated"))
       (message "No more playlists"))))
 
@@ -50,26 +80,32 @@
          (items (spotify-get-items json)))
     (if items
         (progn
-          (spotify-playlist-search-print items)
-          (setq-local spotify-current-page current-page)
+          (spotify-playlist-search-print items current-page)
           (message "Playlist view updated"))
+      (message "No more playlists"))))
+
+(defun spotify-featured-playlists-update (current-page)
+  "Fetches the given page of results of Spotify's featured playlists."
+  (let* ((json (spotify-api-featured-playlists current-page))
+         (msg (spotify-get-message json))
+         (items (spotify-get-search-playlist-items json)))
+    (if items
+        (progn
+          (spotify-playlist-search-print items current-page)
+          (setq-local spotify-browse-message msg)
+          (message msg))
       (message "No more playlists"))))
 
 (defun spotify-playlist-tracks ()
   "Displays the tracks that belongs to the playlist under the cursor."
   (interactive)
-  (let* ((selected-item-id (tabulated-list-get-id))
-         (playlist-user-id (second selected-item-id))
-         (playlist-name (third selected-item-id))
-         (playlist-id (fourth selected-item-id)))
-    (let ((buffer (get-buffer-create (format "*Playlist Tracks: %s*" playlist-name))))
+  (let* ((selected-playlist (tabulated-list-get-id))
+         (name (spotify-get-item-name selected-playlist)))
+    (let ((buffer (get-buffer-create (format "*Playlist Tracks: %s*" name))))
       (with-current-buffer buffer
         (spotify-track-search-mode)
         (spotify-track-search-set-list-format)
-        (setq-local spotify-playlist-user-id playlist-user-id)
-        (setq-local spotify-playlist-id playlist-id)
-        (setq-local spotify-current-page 1)
-        (setq tabulated-list-entries nil)
+        (setq-local spotify-selected-playlist selected-playlist)
         (spotify-playlist-tracks-update 1)
         (pop-to-buffer buffer)
         buffer))))
@@ -81,21 +117,22 @@
                 '("Owner Id" 30 t)
                 '("# Tracks" 8 nil :right-align t))))
 
-(defun spotify-playlist-search-print (playlists)
+(defun spotify-playlist-search-print (playlists current-page)
   "Appends the given playlists to the current playlist view."
   (let (entries)
     (dolist (playlist playlists)
       (let ((user-id (spotify-get-playlist-owner-id playlist))
             (playlist-name (spotify-get-item-name playlist)))
-        (push (list (list (spotify-get-item-uri playlist)
-                          user-id
-                          playlist-name
-                          (spotify-get-item-id playlist))
+        (push (list playlist
                     (vector playlist-name
                             user-id
                             (number-to-string (spotify-get-playlist-track-count playlist))))
               entries)))
-    (setq tabulated-list-entries (append tabulated-list-entries (nreverse entries)))
+    (when (eq 1 current-page)
+      (setq-local tabulated-list-entries nil))
+    (setq-local tabulated-list-entries (append tabulated-list-entries (nreverse entries)))
+    (setq-local spotify-current-page current-page)
+    (spotify-playlist-set-list-format)
     (tabulated-list-init-header)
     (tabulated-list-print t)))
 

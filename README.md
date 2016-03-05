@@ -12,7 +12,9 @@ application from within your favorite text editor.
 ## Features
 
 * Communicates with the Spotify API via Oauth2
-* List your public and private playlists and its tracks
+* Displays the current track in mode line
+* Create playlists (public or private)
+* Browse the Spotify featured playlists, your own playlists, and their tracks
 * Search for tracks and playlists that match the given keywords
 * Easily control basic Spotify player features like, play/pause, previous, 
   next, shuffle, and repeat with the Spotify Remote minor mode
@@ -62,6 +64,24 @@ In order to get the the client ID and client secret, you need to create
 [a Spotify app](https://developer.spotify.com/my-applications), specifying
 <http://localhost:8591/> as the redirect URI.
 
+### Creating The Spotify App
+
+Go to [Create an Application](https://developer.spotify.com/my-applications/#!/applications/create)
+and give your application a name and a description:
+
+![Creating a Spotify App 1/2](./img/spotify-app-01.png)
+
+At this point, the client ID and the client secret is already available, so set
+those values to `spotify-oauth2-client-id` and `spotify-oauth2-client-secret`,
+respectively.
+
+Then, scroll down a little bit, type <http://localhost:8591/> as the Redirect
+URI for the application, and click **Add**:
+
+![Creating a Spotify App 2/2](./img/spotify-app-02.png)
+
+Finally, scroll to the end of the page and hit **Save**.
+
 ## Usage
 
 ### Starting A New Session
@@ -79,36 +99,74 @@ To disconnect, run <kbd>M-x spotify-disconnect</kbd>.
 ### Searching For Tracks
 
 To search for tracks, run <kbd>M-x spotify-track-search</kbd> and type in your
-query. The results will be displayed in a separate buffer.
+query. The results will be displayed in a separate buffer with the following
+key bindings:
 
-To customize the number of tracks fetched per page, just change the variable
-`spotify-api-search-limit`:
+| Key              | Description                                                  |
+|:-----------------|:-------------------------------------------------------------|
+| <kbd>l</kbd>     | Loads the next page of results (pagination)                  |
+| <kbd>g</kbd>     | Clears the results and reloads the first page of results     |
+| <kbd>RET</kbd>   | Plays the track under the cursor in the context of its album |
+
+The resulting buffer loads the `spotify-remote-mode` by default.
+
+**Tip:** In order to customize the number of items fetched per page, just change
+the variable `spotify-api-search-limit`:
 
 ````el
 ;; Do not use values larger than 50 for better compatibility across endpoints
 (setq spotify-api-search-limit 50)
 ````
 
-Type <kbd>l</kbd> to load the next page of results until you find what you
-are looking for. Then, just navigate to it and type <kbd>RET</kbd> to play the
-track under the cursor, or type <kbd>M-RET</kbd> in order to play the album in
-which that track appears.
+### Creating Playlists
 
-The resulting buffer loads the `spotify-remote-mode` by default.
+To create new playlists, run <kbd>M-x spotify-create-playlist</kbd> and follow
+the prompts.
+
+Currently it's not possible to add tracks to a playlist you own, or to remove
+tracks from them.
 
 ### Searching For Playlists
 
 To list your own playlists, run <kbd>M-x spotify-my-playlists</kbd>, or
 <kbd>M-x spotify-playlist-search</kbd> if you want to search for any
-playlist that matches the given keywords. The results will be displayed
-in a separate buffer.
+playlist that matches the given keywords. Also, to browse the featured playlists
+from Spotify en_US, run <kbd>M-x spotify-featured-playlists</kbd>.
 
-Type <kbd>l</kbd> to load the next page of results until you find what you
-are looking for. Then, just navigate to it and type <kbd>RET</kbd> to play the
-playlist under the cursor. If you want to list the tracks of the playlist under
-the cursor, just type <kbd>M-RET</kbd>.
+Set these variables if you want to customize the locale and region for the
+featured playlists endpoint:
 
-The resulting buffer loads the `spotify-remote-mode` by default.
+````el
+;; Spanish (Mexico)
+(setq spotify-api-locale "es_MX")
+(setq spotify-api-country "MX")
+````
+
+The results will be displayed in a separate buffer with the following key
+bindings:
+
+| Key              | Description                                              |
+|:-----------------|:---------------------------------------------------------|
+| <kbd>l</kbd>     | Loads the next page of results (pagination)              |
+| <kbd>g</kbd>     | Clears the results and reloads the first page of results |
+| <kbd>f</kbd>     | Follows the playlist under the cursor                    |
+| <kbd>u</kbd>     | Unfollows the playlist under the cursor                  |
+| <kbd>RET</kbd>   | Play the playlist under the cursor from the beginning    |
+| <kbd>M-RET</kbd> | Lists the tracks of the playlist under the cursor        |
+
+Once you opened the list of tracks of a playlist, you get the following key
+bindings in the resulting buffer:
+
+| Key              | Description                                                     |
+|:-----------------|:----------------------------------------------------------------|
+| <kbd>l</kbd>     | Loads the next page of results (pagination)                     |
+| <kbd>g</kbd>     | Clears the results and reloads the first page of results        |
+| <kbd>f</kbd>     | Follows the current playlist                                    |
+| <kbd>u</kbd>     | Unfollows the current playlist                                  |
+| <kbd>RET</kbd>   | Plays the track under the cursor in the context of the playlist |
+| <kbd>M-RET</kbd> | Plays the track under the cursor in the context of its album    |
+
+Both buffers load the `spotify-remote-mode` by default.
 
 ### Remote Minor Mode
 
@@ -119,12 +177,46 @@ bindings:
 |:-------------------|:-------------------------|:-------------------------------|
 | <kbd>M-p M-i</kbd> | `spotify-player-info`    | Display the track being played |
 | <kbd>M-p M-s</kbd> | `spotify-toggle-shuffle` | Turn shuffle on/off            |
-| <kbd>M-p M-r</kbd> | `potify-toggle-repeat`   | Turn repeat on/off             |
+| <kbd>M-p M-r</kbd> | `spotify-toggle-repeat`  | Turn repeat on/off             |
 | <kbd>M-p M-p</kbd> | `spotify-toggle-play`    | Play/pause                     |
 | <kbd>M-p M-f</kbd> | `spotify-next-track`     | Next track                     |
 | <kbd>M-p M-b</kbd> | `spotify-previous-track` | Previous track                 |
 
-This mode can be enabled globally with `global-spotify-remote-mode`.
+This is particularly useful for those using keyboards without media keys.
+
+Also, the current song being played by the Spotify client is displayed at the
+mode line along with the player status (playing, paused). The interval in which
+the mode line is updated can be configured via the
+`spotify-mode-line-refresh-interval` variable:
+
+````el
+;; Updates the mode line every second (set to 0 to disable this feature)
+(setq spotify-mode-line-refresh-interval 1)
+````
+
+#### Customizing The Mode Line
+
+The information displayed in the mode line can be customized by setting the
+desired format in `spotify-mode-line-format`. The following placeholders are
+supported:
+
+| Symbol | Description                         | Example                        |
+|:-------|:------------------------------------|:-------------------------------|
+|  `%u`  | Track URI                           | `spotify:track:<id>`           |
+|  `%a`  | Artist name                         | `Pink Floyd`                   |
+|  `%t`  | Track name                          | `Us and Them`                  |
+|  `%n`  | Track #                             | `7`                            |
+|  `%d`  | Track disc #                        | `1`                            |
+|  `%s`  | Player state                        | `playing`, `paused`, `stopped` |
+|  `%l`  | Track duration, in minutes          | `7:49`                         |
+|  `%p`  | Current player position, in minutes | `2:23`                         |
+
+The default format is `"%a - %t (%s)"`.
+
+#### Global Remote Mode
+
+This mode can be enabled globally by running
+<kbd>M-x global-spotify-remote-mode</kbd>.
 
 ## License
 
