@@ -14,7 +14,7 @@
     map)
   "Local keymap for `spotify-remote-mode' buffers.")
 
-(defvar spotify-mode-line-prefix " >=")
+(defvar spotify-mode-line-prefix " \u266b")
 (defvar spotify-mode-line spotify-mode-line-prefix)
 
 (define-minor-mode spotify-remote-mode
