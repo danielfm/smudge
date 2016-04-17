@@ -47,13 +47,19 @@ end tell")
           (shell-quote-argument spotify-player-status-script)
           spotify-osascript-bin-path))
 
+(defun spotify-apple-set-mode-line-from-process-output (process output)
+  "Sets the output of the player status process to the mode line."
+  (spotify-replace-mode-line-flags output)
+  (with-current-buffer (process-buffer process)
+    (delete-region (point-min) (point-max))))
+
 (defun spotify-apple-player-status ()
   "Updates the mode line to display the current Spotify player status."
   (let* ((process-name "spotify-player-status")
          (process-status (process-status process-name)))
     (if (and (spotify-connected-p) (not process-status))
         (let ((process (start-process-shell-command process-name "*spotify-player-status*" (spotify-apple-player-status-command-line))))
-          (set-process-filter process 'spotify-set-mode-line))
+          (set-process-filter process 'spotify-apple-set-mode-line-from-process-output))
       (spotify-update-mode-line ""))))
 
 (defun spotify-apple-player-state ()
@@ -77,25 +83,7 @@ end tell")
 (defun spotify-apple-player-play-track (track-id context-id)
   (spotify-apple-command (format "play track \"%s\" in context \"%s\"" track-id context-id)))
 
-(defun spotify-apple-repeating-p ()
-  (string= "true" (spotify-apple-command "get repeating")))
-
-(defun spotify-apple-shuffling-p ()
-  (string= "true" (spotify-apple-command "get shuffling")))
-
 (defun spotify-apple-player-pause ()
   (spotify-apple-command "pause"))
-
-(defun spotify-apple-player-playing-p ()
-  (string= "playing" (spotify-apple-player-state)))
-
-(defun spotify-apple-current-track-artist ()
-  (spotify-apple-command "artist of current track"))
-
-(defun spotify-apple-current-track-album ()
-  (spotify-apple-command "album of current track"))
-
-(defun spotify-apple-current-track-name ()
-  (spotify-apple-command "name of current track"))
 
 (provide 'spotify-apple)

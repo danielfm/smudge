@@ -1,21 +1,27 @@
-;; spotify-controller.el --- TODO
+;; spotify-controller.el --- Generic player controller interface for Spotify.el
 
 ;; Copyright (C) 2014-2016 Daniel Fernandes Martins
 
 ;; Code:
 
-;;; TODO: D-Bus support not implemented
-(defcustom spotify-transport 'apple
-  "How the commands should be sent to Spotify process."
+(defmacro if-gnu-linux (then else)
+  "Evaluates `then' form if Emacs is running in gnu/linux, otherwise evaluates
+`else' form."
+  `(if (eq system-type 'gnu/linux) ,then ,else))
+
+(defcustom spotify-transport (if-gnu-linux 'dbus 'apple)
+  "How the commands should be sent to Spotify process. Defaults for `dbus' for
+GNU/Linux, `apple' otherwise."
   :type '(choice (symbol :tag "AppleScript" apple)
                  (symbol :tag "D-Bus" dbus)))
 
-(defcustom spotify-mode-line-refresh-interval 1
+;; TODO: No modeline support for linux just yet
+(defcustom spotify-mode-line-refresh-interval (if-gnu-linux 0 1)
   "The interval, in seconds, that the mode line must be updated. Set to 0 to
    disable this feature."
   :type 'integer)
 
-(defcustom spotify-mode-line-format "%a - %t (%s)"
+(defcustom spotify-mode-line-format "%a - %t (%l)"
   "Format used to display the current Spotify client player status. The
 following placeholders are supported:
 
@@ -35,10 +41,10 @@ following placeholders are supported:
   (let ((func-name (format "spotify-%s-%s" spotify-transport suffix)))
     (apply (intern func-name) args)))
 
-(defun spotify-set-mode-line (process output)
-  "Sets the output of the player status process to the mode line."
+(defun spotify-replace-mode-line-flags (metadata)
+  ""
   (let ((mode-line spotify-mode-line-format)
-        (fields (split-string output "\n"))
+        (fields (split-string metadata "\n"))
         (duration-format "%m:%02s"))
     (if (or (< (length fields) 8)
             (string= "stopped" (seventh fields)))
@@ -52,9 +58,7 @@ following placeholders are supported:
         (setq mode-line (replace-regexp-in-string "%s" (seventh fields) mode-line))
         (setq mode-line (replace-regexp-in-string "%l" (format-seconds duration-format (/ (string-to-number (sixth fields)) 1000)) mode-line))
         (setq mode-line (replace-regexp-in-string "%p" (format-seconds duration-format (string-to-number (eighth fields))) mode-line))))
-    (spotify-update-mode-line mode-line)
-    (with-current-buffer (process-buffer process)
-      (delete-region (point-min) (point-max)))))
+    (spotify-update-mode-line mode-line)))
 
 (defun start-mode-line-timer ()
   "Starts the timer that updates the mode line according to the Spotify
@@ -85,10 +89,8 @@ following placeholders are supported:
   "Sends a `play' command to Spotify process passing a context id."
   (interactive)
   (spotify-apply "player-play-track"
-                 (spotify-get-item-uri track)
-                 (if (null context)
-                     ""
-                   (spotify-get-item-uri context))))
+                 (when track (spotify-get-item-uri track))
+                 (when context (spotify-get-item-uri context))))
 
 (defun spotify-toggle-play ()
   "Sends a `playpause' command to Spotify process."
@@ -115,44 +117,14 @@ following placeholders are supported:
   (interactive)
   (spotify-apply "player-pause"))
 
-(defun spotify-playing-p ()
-  "Returns whether Spotify is playing."
-  (interactive)
-  (spotify-apply "player-playing-p"))
-
-(defun spotify-repeating-p ()
-  "Returns whether Spotify have repeating turned on."
-  (interactive)
-  (spotify-apply "repeating-p"))
-
 (defun spotify-toggle-repeat ()
   "Sends a command to Spotify process to toggle the repeating flag."
   (interactive)
   (spotify-apply "toggle-repeat"))
 
-(defun spotify-shuffling-p ()
-  "Returns whether Spotify have shuffling turned on."
-  (interactive)
-  (spotify-apply "shuffling-p"))
-
 (defun spotify-toggle-shuffle ()
   "Sends a command to Spotify process to toggle the shuffling flag."
   (interactive)
   (spotify-apply "toggle-shuffle"))
-
-(defun spotify-current-track-artist ()
-  "Retrieves the artist name of the track being played in Spotify app."
-  (interactive)
-  (spotify-apply "current-track-artist"))
-
-(defun spotify-current-track-album ()
-  "Retrieves the album name of the track being played in Spotify app."
-  (interactive)
-  (spotify-apply "current-track-album"))
-
-(defun spotify-current-track-name ()
-  "Retrieves the name of the track being played in Spotify app."
-  (interactive)
-  (spotify-apply "current-track-name"))
 
 (provide 'spotify-controller)

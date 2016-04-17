@@ -31,10 +31,8 @@ be played in the context of its album."
   (interactive)
   (let ((selected-track (tabulated-list-get-id)))
     (if (bound-and-true-p spotify-selected-playlist)
-        (spotify-play-track selected-track
-                            spotify-selected-playlist)
-      (spotify-play-track selected-track
-                          (spotify-get-track-album selected-track)))))
+        (spotify-play-track selected-track spotify-selected-playlist)
+      (spotify-play-track selected-track (spotify-get-track-album selected-track)))))
 
 (defun spotify-track-playlist-follow ()
   "Adds the current user as the follower of the track's playlist under the cursor."

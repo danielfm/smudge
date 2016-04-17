@@ -11,6 +11,7 @@ application from within your favorite text editor.
 
 ## Features
 
+* Spotify client integration for GNU/Linux (via D-Bus) and OS X (via AppleScript)
 * Communicates with the Spotify API via Oauth2
 * Displays the current track in mode line
 * Create playlists (public or private)
@@ -18,13 +19,6 @@ application from within your favorite text editor.
 * Search for tracks and playlists that match the given keywords
 * Easily control basic Spotify player features like, play/pause, previous, 
   next, shuffle, and repeat with the Spotify Remote minor mode
-* Linux support via D-Bus
-
-### Planned Features
-
-* Display current page/total pages somewhere in the modeline
-* Add/remove tracks from playlist
-* Reorder tracks of a playlist
 
 ## Installation
 
@@ -145,28 +139,30 @@ featured playlists endpoint:
 The results will be displayed in a separate buffer with the following key
 bindings:
 
-| Key              | Description                                              |
-|:-----------------|:---------------------------------------------------------|
-| <kbd>l</kbd>     | Loads the next page of results (pagination)              |
-| <kbd>g</kbd>     | Clears the results and reloads the first page of results |
-| <kbd>f</kbd>     | Follows the playlist under the cursor                    |
-| <kbd>u</kbd>     | Unfollows the playlist under the cursor                  |
-| <kbd>RET</kbd>   | Play the playlist under the cursor from the beginning    |
-| <kbd>M-RET</kbd> | Lists the tracks of the playlist under the cursor        |
+| Key              | Description                                                |
+|:-----------------|:-----------------------------------------------------------|
+| <kbd>l</kbd>     | Loads the next page of results (pagination)                |
+| <kbd>g</kbd>     | Clears the results and reloads the first page of results   |
+| <kbd>f</kbd>     | Follows the playlist under the cursor                      |
+| <kbd>u</kbd>     | Unfollows the playlist under the cursor                    |
+| <kbd>RET</kbd>   | Plays the playlist under the cursor from the beginning (*) |
+| <kbd>M-RET</kbd> | Lists the tracks of the playlist under the cursor          |
 
 Once you opened the list of tracks of a playlist, you get the following key
 bindings in the resulting buffer:
 
-| Key              | Description                                                     |
-|:-----------------|:----------------------------------------------------------------|
-| <kbd>l</kbd>     | Loads the next page of results (pagination)                     |
-| <kbd>g</kbd>     | Clears the results and reloads the first page of results        |
-| <kbd>f</kbd>     | Follows the current playlist                                    |
-| <kbd>u</kbd>     | Unfollows the current playlist                                  |
-| <kbd>RET</kbd>   | Plays the track under the cursor in the context of the playlist |
-| <kbd>M-RET</kbd> | Plays the track under the cursor in the context of its album    |
+| Key              | Description                                                         |
+|:-----------------|:--------------------------------------------------------------------|
+| <kbd>l</kbd>     | Loads the next page of results (pagination)                         |
+| <kbd>g</kbd>     | Clears the results and reloads the first page of results            |
+| <kbd>f</kbd>     | Follows the current playlist                                        |
+| <kbd>u</kbd>     | Unfollows the current playlist                                      |
+| <kbd>RET</kbd>   | Plays the track under the cursor in the context of the playlist (*) |
+| <kbd>M-RET</kbd> | Plays the track under the cursor in the context of its album        |
 
 Both buffers load the `spotify-remote-mode` by default.
+
+(*) No proper support for this in Spotify client for GNU/Linux
 
 ### Remote Minor Mode
 
@@ -175,9 +171,8 @@ bindings:
 
 | Key                | Function                 | Description                    |
 |:-------------------|:-------------------------|:-------------------------------|
-| <kbd>M-p M-i</kbd> | `spotify-player-info`    | Display the track being played |
-| <kbd>M-p M-s</kbd> | `spotify-toggle-shuffle` | Turn shuffle on/off            |
-| <kbd>M-p M-r</kbd> | `spotify-toggle-repeat`  | Turn repeat on/off             |
+| <kbd>M-p M-s</kbd> | `spotify-toggle-shuffle` | Turn shuffle on/off (*)        |
+| <kbd>M-p M-r</kbd> | `spotify-toggle-repeat`  | Turn repeat on/off (*)         |
 | <kbd>M-p M-p</kbd> | `spotify-toggle-play`    | Play/pause                     |
 | <kbd>M-p M-f</kbd> | `spotify-next-track`     | Next track                     |
 | <kbd>M-p M-b</kbd> | `spotify-previous-track` | Previous track                 |
@@ -194,24 +189,28 @@ the mode line is updated can be configured via the
 (setq spotify-mode-line-refresh-interval 1)
 ````
 
+(*) No proper support for this in Spotify client for GNU/Linux
+
 #### Customizing The Mode Line
 
 The information displayed in the mode line can be customized by setting the
 desired format in `spotify-mode-line-format`. The following placeholders are
 supported:
 
-| Symbol | Description                         | Example                        |
-|:-------|:------------------------------------|:-------------------------------|
-|  `%u`  | Track URI                           | `spotify:track:<id>`           |
-|  `%a`  | Artist name                         | `Pink Floyd`                   |
-|  `%t`  | Track name                          | `Us and Them`                  |
-|  `%n`  | Track #                             | `7`                            |
-|  `%d`  | Track disc #                        | `1`                            |
-|  `%s`  | Player state                        | `playing`, `paused`, `stopped` |
-|  `%l`  | Track duration, in minutes          | `7:49`                         |
-|  `%p`  | Current player position, in minutes | `2:23`                         |
+| Symbol | Description                             | Example                        |
+|:-------|:----------------------------------------|:-------------------------------|
+|  `%u`  | Track URI                               | `spotify:track:<id>`           |
+|  `%a`  | Artist name                             | `Pink Floyd`                   |
+|  `%t`  | Track name                              | `Us and Them`                  |
+|  `%n`  | Track #                                 | `7`                            |
+|  `%d`  | Track disc #                            | `1`                            |
+|  `%s`  | Player state (*)                        | `playing`, `paused`, `stopped` |
+|  `%l`  | Track duration, in minutes              | `7:49`                         |
+|  `%p`  | Current player position, in minutes (*) | `2:23`                         |
 
-The default format is `"%a - %t (%s)"`.
+The default format is `"%a - %t (%l)"`.
+
+(*) No proper support for this in Spotify client for GNU/Linux
 
 #### Global Remote Mode
 

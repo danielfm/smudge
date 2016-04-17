@@ -28,7 +28,7 @@
   "Plays the playlist under the cursor."
   (interactive)
   (let ((selected-playlist (tabulated-list-get-id)))
-    (spotify-play-track selected-playlist)))
+    (spotify-play-track nil selected-playlist)))
 
 (defun spotify-playlist-reload ()
   "Reloads the first page of results for the current playlist view."
