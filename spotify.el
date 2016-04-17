@@ -46,8 +46,10 @@
 (require 'spotify-playlist-search)
 (require 'spotify-controller)
 (require 'spotify-remote)
-(require 'spotify-apple)
-(require 'spotify-dbus)
+
+(if-darwin    (require 'spotify-apple) nil)
+(if-gnu-linux (require 'spotify-dbus) nil)
+
 
 (when (version< emacs-version "24.4")
   (error "Spotify requires at least GNU Emacs 24.4"))
