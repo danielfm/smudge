@@ -37,6 +37,9 @@
 
 ;; Code:
 
+(when (version< emacs-version "24.4")
+  (error "Spotify requires at least GNU Emacs 24.4"))
+
 (require 'json)
 (require 'oauth2)
 (require 'tabulated-list)
@@ -51,8 +54,6 @@
 (if-gnu-linux (require 'spotify-dbus) nil)
 
 
-(when (version< emacs-version "24.4")
-  (error "Spotify requires at least GNU Emacs 24.4"))
 
 (defgroup spotify nil
   "Spotify client."
