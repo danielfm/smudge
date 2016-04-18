@@ -50,10 +50,8 @@
 (require 'spotify-controller)
 (require 'spotify-remote)
 
-(if-darwin    (require 'spotify-apple) nil)
-(if-gnu-linux (require 'spotify-dbus) nil)
-
-
+(when-darwin    (require 'spotify-apple))
+(when-gnu-linux (require 'spotify-dbus))
 
 (defgroup spotify nil
   "Spotify client."

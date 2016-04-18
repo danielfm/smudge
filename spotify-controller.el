@@ -9,10 +9,18 @@
 `else' form."
   `(if (eq system-type 'gnu/linux) ,then ,else))
 
+(defmacro when-gnu-linux (then)
+  "Evaluates `then' form if Emacs is running in GNU/Linux."
+  `(if-gnu-linux ,then nil))
+
 (defmacro if-darwin (then else)
   "Evaluates `then' form if Emacs is running in OS X, otherwise evaluates
 `else' form."
   `(if (eq system-type 'darwin) ,then ,else))
+
+(defmacro when-darwin (then)
+  "Evaluates `then' form if Emacs is running in OS X."
+  `(if-darwin ,then nil))
 
 (defcustom spotify-transport (if-gnu-linux 'dbus 'apple)
   "How the commands should be sent to Spotify process. Defaults for `dbus' for
