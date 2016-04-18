@@ -208,7 +208,7 @@ supported:
 |  `%l`  | Track duration, in minutes              | `7:49`                         |
 |  `%p`  | Current player position, in minutes (*) | `2:23`                         |
 
-The default format is `"%a - %t (%l)"`.
+The default format is `"%a - %t [%l]"`.
 
 (*) No proper support for this in Spotify client for GNU/Linux
 

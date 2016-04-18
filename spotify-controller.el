@@ -26,7 +26,7 @@ GNU/Linux, `apple' otherwise."
    disable this feature."
   :type 'integer)
 
-(defcustom spotify-mode-line-format "%a - %t (%l)"
+(defcustom spotify-mode-line-format "%a - %t [%l]"
   "Format used to display the current Spotify client player status. The
 following placeholders are supported:
 
