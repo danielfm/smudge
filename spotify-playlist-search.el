@@ -115,7 +115,9 @@
   (setq tabulated-list-format
         (vector `("Playlist Name" ,(- (window-width) 45) t)
                 '("Owner Id" 30 t)
-                '("# Tracks" 8 nil :right-align t))))
+                '("# Tracks" 8 (lambda (row-1 row-2)
+                                 (< (spotify-get-playlist-track-count (first row-1))
+                                    (spotify-get-playlist-track-count (first row-2)))) :right-align t))))
 
 (defun spotify-playlist-search-print (playlists current-page)
   "Appends the given playlists to the current playlist view."
