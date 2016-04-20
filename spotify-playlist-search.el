@@ -128,7 +128,9 @@
         (push (list playlist
                     (vector playlist-name
                             (cons user-id
-                                  (list 'action `(lambda (_) (spotify-user-playlists ,user-id))
+                                  (list 'face 'link
+                                        'follow-link t
+                                        'action `(lambda (_) (spotify-user-playlists ,user-id))
                                         'help-echo (format "Show %s's public playlists" user-id)))
                             (number-to-string (spotify-get-playlist-track-count playlist))))
               entries)))
