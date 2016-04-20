@@ -142,14 +142,14 @@ the featuerd playlists endpoint:
 All these commands will display results in a separate buffer with the following
 key bindings:
 
-| Key              | Description                                                |
-|:-----------------|:-----------------------------------------------------------|
-| <kbd>l</kbd>     | Loads the next page of results (pagination)                |
-| <kbd>g</kbd>     | Clears the results and reloads the first page of results   |
-| <kbd>f</kbd>     | Follows the playlist under the cursor                      |
-| <kbd>u</kbd>     | Unfollows the playlist under the cursor                    |
-| <kbd>RET</kbd>   | Plays the playlist under the cursor from the beginning (*) |
-| <kbd>M-RET</kbd> | Lists the tracks of the playlist under the cursor          |
+| Key            | Description                                                |
+|:---------------|:-----------------------------------------------------------|
+| <kbd>l</kbd>   | Loads the next page of results (pagination)                |
+| <kbd>g</kbd>   | Clears the results and reloads the first page of results   |
+| <kbd>f</kbd>   | Follows the playlist under the cursor                      |
+| <kbd>u</kbd>   | Unfollows the playlist under the cursor                    |
+| <kbd>t</kbd>   | Lists the tracks of the playlist under the cursor          |
+| <kbd>RET</kbd> | Plays the playlist under the cursor from the beginning (*) |
 
 Once you opened the list of tracks of a playlist, you get the following key
 bindings in the resulting buffer:

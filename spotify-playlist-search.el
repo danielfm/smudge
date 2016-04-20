@@ -9,12 +9,12 @@
 (defvar spotify-playlist-search-mode-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map tabulated-list-mode-map)
-    (define-key map (kbd "RET")   'spotify-playlist-select)
-    (define-key map (kbd "M-RET") 'spotify-playlist-tracks)
-    (define-key map (kbd "l")     'spotify-playlist-load-more)
-    (define-key map (kbd "g")     'spotify-playlist-reload)
-    (define-key map (kbd "f")     'spotify-playlist-follow)
-    (define-key map (kbd "u")     'spotify-playlist-unfollow)
+    (define-key map (kbd "RET") 'spotify-playlist-select)
+    (define-key map (kbd "t")   'spotify-playlist-tracks)
+    (define-key map (kbd "l")   'spotify-playlist-load-more)
+    (define-key map (kbd "g")   'spotify-playlist-reload)
+    (define-key map (kbd "f")   'spotify-playlist-follow)
+    (define-key map (kbd "u")   'spotify-playlist-unfollow)
     map)
   "Local keymap for `spotify-playlist-search-mode' buffers.")
 
