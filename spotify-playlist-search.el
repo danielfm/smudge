@@ -36,7 +36,7 @@
   (let ((page 1))
     (cond ((bound-and-true-p spotify-query)          (spotify-playlist-search-update page))
           ((bound-and-true-p spotify-browse-message) (spotify-featured-playlists-update page))
-          (t                                         (spotify-my-playlists-update page)))))
+          (t                                         (spotify-user-playlists-update spotify-user-id page)))))
 
 (defun spotify-playlist-load-more ()
   "Loads the next page of results for the current playlist view."
@@ -44,7 +44,7 @@
   (let ((next-page (1+ spotify-current-page)))
     (cond ((bound-and-true-p spotify-query)          (spotify-playlist-search-update next-page))
           ((bound-and-true-p spotify-browse-message) (spotify-featured-playlists-update next-page))
-          (t                                         (spotify-my-playlists-update next-page)))))
+          (t                                         (spotify-user-playlists-update spotify-user-id next-page)))))
 
 (defun spotify-playlist-follow ()
   "Adds the current user as the follower of the playlist under the cursor."
@@ -74,9 +74,9 @@
           (message "playlist view updated"))
       (message "No more playlists"))))
 
-(defun spotify-my-playlists-update (current-page)
+(defun spotify-user-playlists-update (user-id current-page)
   "Fetches the given page of results using the user's playlist endpoint."
-  (let* ((json (spotify-api-user-playlists (spotify-current-user-id) current-page))
+  (let* ((json (spotify-api-user-playlists user-id current-page))
          (items (spotify-get-items json)))
     (if items
         (progn

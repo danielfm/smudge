@@ -91,13 +91,20 @@
 (defun spotify-my-playlists ()
   "Displays the current user's playlists."
   (interactive)
-  (let ((buffer (get-buffer-create "*My Playlists*")))
+  (spotify-user-playlists (spotify-current-user-id)))
+
+;;;###autoload
+(defun spotify-user-playlists (user-id)
+  "Displays the public playlists of the given user."
+  (interactive "sSpotify User ID: ")
+  (let ((buffer (get-buffer-create (format "*Playlists: %s*" user-id))))
     (with-current-buffer buffer
       (spotify-playlist-search-mode)
+      (setq-local spotify-user-id user-id)
       (setq-local spotify-current-page 1)
       (setq tabulated-list-entries nil)
       (pop-to-buffer buffer)
-      (spotify-my-playlists-update 1)
+      (spotify-user-playlists-update user-id 1)
       buffer)))
 
 ;;;###autoload

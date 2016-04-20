@@ -122,13 +122,22 @@ tracks from them.
 
 ### Searching For Playlists
 
-To list your own playlists, run <kbd>M-x spotify-my-playlists</kbd>, or
-<kbd>M-x spotify-playlist-search</kbd> if you want to search for any
-playlist that matches the given keywords. Also, to browse the featured playlists
-from Spotify en_US, run <kbd>M-x spotify-featured-playlists</kbd>.
+<kbd>M-x spotify-my-playlists</kbd>
 
-Set these variables if you want to customize the locale and region for the
-featured playlists endpoint:
+Lists the playlists for the current user.
+
+<kbd>M-x spotify-user-playlists USER-ID</kbd>
+
+Lists the public playlists for the given `USER-ID`.
+
+<kbd>M-x spotify-playlist-search CRITERIA</kbd>
+
+Searches for playlists that matches the given search `CRITERIA`.
+
+<kbd>M-x spotify-featured-playlists</kbd>
+
+Browse the featured playlists from Spotify en_US. Change the following variables
+in order to customize the locale and region for the featuerd playlists endpoint:
 
 ````el
 ;; Spanish (Mexico)
@@ -136,8 +145,8 @@ featured playlists endpoint:
 (setq spotify-api-country "MX")
 ````
 
-The results will be displayed in a separate buffer with the following key
-bindings:
+All these commands will display results in a separate buffer with the following
+key bindings:
 
 | Key              | Description                                                |
 |:-----------------|:-----------------------------------------------------------|
