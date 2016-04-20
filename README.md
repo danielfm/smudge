@@ -125,9 +125,7 @@ tracks from them.
 To return the playlists for the current user, run
 <kbd>M-x spotify-my-playlists</kbd>, or
 <kbd>M-x spotify-user-playlists</kbd> to list the public playlists for some
-given user.
-
-To search playlists that match the given search criteria, run
+given user. To search playlists that match the given search criteria, run
 <kbd>M-x spotify-playlist-search CRITERIA</kbd>. Also, run
 <kbd>M-x spotify-featured-playlists</kbd> in order to browse the featured
 playlists from Spotify en_US.
