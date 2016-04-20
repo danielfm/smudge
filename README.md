@@ -122,22 +122,18 @@ tracks from them.
 
 ### Searching For Playlists
 
-<kbd>M-x spotify-my-playlists</kbd>
+To return the playlists for the current user, run
+<kbd>M-x spotify-my-playlists</kbd>, or
+<kbd>M-x spotify-user-playlists</kbd> to list the public playlists for some
+given user.
 
-Lists the playlists for the current user.
+To search playlists that match the given search criteria, run
+<kbd>M-x spotify-playlist-search CRITERIA</kbd>. Also, run
+<kbd>M-x spotify-featured-playlists</kbd> in order to browse the featured
+playlists from Spotify en_US.
 
-<kbd>M-x spotify-user-playlists USER-ID</kbd>
-
-Lists the public playlists for the given `USER-ID`.
-
-<kbd>M-x spotify-playlist-search CRITERIA</kbd>
-
-Searches for playlists that matches the given search `CRITERIA`.
-
-<kbd>M-x spotify-featured-playlists</kbd>
-
-Browse the featured playlists from Spotify en_US. Change the following variables
-in order to customize the locale and region for the featuerd playlists endpoint:
+Change the following variables in order to customize the locale and region for
+the featuerd playlists endpoint:
 
 ````el
 ;; Spanish (Mexico)
