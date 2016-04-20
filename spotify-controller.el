@@ -98,6 +98,11 @@ following placeholders are supported:
   "Starts the player status process in order to update the mode line."
   (spotify-apply "player-status"))
 
+(defun spotify-play-uri (uri)
+  "Sends a `play' command to Spotify process passing the given URI."
+  (interactive "SSpotify URI: ")
+  (spotify-apply "player-play-track" uri nil))
+
 (defun spotify-play-track (track &optional context)
   "Sends a `play' command to Spotify process passing a context id."
   (interactive)

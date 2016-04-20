@@ -112,6 +112,11 @@ the variable `spotify-api-search-limit`:
 (setq spotify-api-search-limit 50)
 ````
 
+### Playing a Spotify URI
+
+To ask the Spotify client to play a resource by URI, run
+<kbd>M-x spotify-play-uri</kbd> and enter the resource URI.
+
 ### Creating Playlists
 
 To create new playlists, run <kbd>M-x spotify-create-playlist</kbd> and follow
