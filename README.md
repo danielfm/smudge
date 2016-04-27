@@ -209,14 +209,23 @@ supported:
 |:-------|:----------------------------------------|:-------------------------------|
 |  `%u`  | Track URI                               | `spotify:track:<id>`           |
 |  `%a`  | Artist name                             | `Pink Floyd`                   |
+|  `%at` | Artist name (truncated)                 | `Pink Floyd`                   |
 |  `%t`  | Track name                              | `Us and Them`                  |
+|  `%tt` | Track name (truncated)                  | `Us and Them`                  |
 |  `%n`  | Track #                                 | `7`                            |
 |  `%d`  | Track disc #                            | `1`                            |
 |  `%s`  | Player state (*)                        | `playing`, `paused`, `stopped` |
 |  `%l`  | Track duration, in minutes              | `7:49`                         |
 |  `%p`  | Current player position, in minutes (*) | `2:23`                         |
 
-The default format is `"%a - %t [%l]"`.
+The default format is `"%at - %tt [%l]"`.
+
+The number of characters to be shown in truncated fields can be configured via
+the `spotify-mode-line-truncate-length` variable.
+
+````el
+(setq spotify-mode-line-truncate-length 10) ; default: 15
+````
 
 (*) No proper support for this in Spotify client for GNU/Linux
 

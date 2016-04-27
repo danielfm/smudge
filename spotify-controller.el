@@ -34,18 +34,25 @@ GNU/Linux, `apple' otherwise."
    disable this feature."
   :type 'integer)
 
-(defcustom spotify-mode-line-format "%a - %t [%l]"
+(defcustom spotify-mode-line-truncate-length 15
+  "The maximum number of characters to truncated fields in
+`spotify-mode-line-format'.")
+
+(defcustom spotify-mode-line-format "%at - %t [%l]"
   "Format used to display the current Spotify client player status. The
 following placeholders are supported:
 
-* %u - Track URI (i.e. spotify:track:<ID>)
-* %a - Artist name
-* %t - Track name
-* %n - Track #
-* %d - Track disc #
-* %s - Player state (i.e. playing, paused, stopped)
-* %l - Track duration, in minutes (i.e. 01:35)
-* %p - Player position in current track, in minutes (i.e. 01:35)")
+* %u  - Track URI (i.e. spotify:track:<ID>)
+* %a  - Artist name
+* %at - Artist name (truncated)
+* %t  - Track name
+* %tt - Track name (truncated)
+* %n  - Track #
+* %d  - Track disc #
+* %s  - Player state (i.e. playing, paused, stopped)
+* %l  - Track duration, in minutes (i.e. 01:35)
+* %p  - Player position in current track, in minutes (i.e. 01:35)
+")
 
 (defvar spotify-timer nil)
 
@@ -64,7 +71,9 @@ following placeholders are supported:
         (setq mode-line "")
       (progn
         (setq mode-line (replace-regexp-in-string "%u" (first fields) mode-line))
+        (setq mode-line (replace-regexp-in-string "%at" (truncate-string-to-width (second fields) spotify-mode-line-truncate-length 0 nil "...") mode-line))
         (setq mode-line (replace-regexp-in-string "%a" (second fields) mode-line))
+        (setq mode-line (replace-regexp-in-string "%tt" (truncate-string-to-width (third fields) spotify-mode-line-truncate-length 0 nil "...") mode-line))
         (setq mode-line (replace-regexp-in-string "%t" (third fields) mode-line))
         (setq mode-line (replace-regexp-in-string "%n" (fourth fields) mode-line))
         (setq mode-line (replace-regexp-in-string "%d" (fifth fields) mode-line))
