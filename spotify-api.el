@@ -209,8 +209,8 @@ depending on the `type' argument."
     (spotify-api-call
      "GET"
      (concat "/browse/featured-playlists?"
-             (url-build-query-string `((locale  ,spotify-browse-locale)
-                                       (country ,spotify-browse-country)
+             (url-build-query-string `((locale  ,spotify-api-locale)
+                                       (country ,spotify-api-country)
                                        (limit   ,spotify-api-search-limit)
                                        (offset  ,offset))
                                      nil t)))))
