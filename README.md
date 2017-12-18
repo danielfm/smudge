@@ -234,6 +234,12 @@ the `spotify-mode-line-truncate-length` variable.
 This mode can be enabled globally by running
 <kbd>M-x global-spotify-remote-mode</kbd>.
 
+## Donate
+
+If this project is useful for you, buy me a beer!
+
+Bitcoin: `1CLFiuB5oghPjnq8zXFkYgKyFnCTVWEV1r`
+
 ## License
 
 Copyright (C) Daniel Fernandes Martins
