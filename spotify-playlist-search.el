@@ -1,6 +1,6 @@
 ;; spotify-playlist-search.el --- Spotify.el playlist search major mode
 
-;; Copyright (C) 2014-2016 Daniel Fernandes Martins
+;; Copyright (C) 2014-2018 Daniel Fernandes Martins
 
 ;; Code:
 
@@ -9,12 +9,11 @@
 (defvar spotify-playlist-search-mode-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map tabulated-list-mode-map)
-    (define-key map (kbd "RET") 'spotify-playlist-select)
-    (define-key map (kbd "t")   'spotify-playlist-tracks)
-    (define-key map (kbd "l")   'spotify-playlist-load-more)
-    (define-key map (kbd "g")   'spotify-playlist-reload)
-    (define-key map (kbd "f")   'spotify-playlist-follow)
-    (define-key map (kbd "u")   'spotify-playlist-unfollow)
+    (define-key map (kbd "M-RET") 'spotify-playlist-select)
+    (define-key map (kbd "l")     'spotify-playlist-load-more)
+    (define-key map (kbd "g")     'spotify-playlist-reload)
+    (define-key map (kbd "f")     'spotify-playlist-follow)
+    (define-key map (kbd "u")     'spotify-playlist-unfollow)
     map)
   "Local keymap for `spotify-playlist-search-mode' buffers.")
 
@@ -126,7 +125,11 @@
       (let ((user-id (spotify-get-playlist-owner-id playlist))
             (playlist-name (spotify-get-item-name playlist)))
         (push (list playlist
-                    (vector playlist-name
+                    (vector (cons playlist-name
+                                  (list 'face 'link
+                                        'follow-link t
+                                        'action `(lambda (_) (spotify-playlist-tracks))
+                                        'help-echo (format "Show %s's tracks" playlist-name)))
                             (cons user-id
                                   (list 'face 'link
                                         'follow-link t

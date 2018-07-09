@@ -1,11 +1,11 @@
 ;; spotify-api.el --- Spotify.el API integration layer
 
-;; Copyright (C) 2014-2016 Daniel Fernandes Martins
+;; Copyright (C) 2014-2018 Daniel Fernandes Martins
 
 ;; Code:
 
-(defvar *spotify-oauth2-token*)
-(defvar *spotify-user*)
+(defvar *spotify-oauth2-token* nil "Cached OAuth2 token")
+(defvar *spotify-user* nil "Cached user object")
 
 (defconst spotify-api-endpoint     "https://api.spotify.com/v1")
 (defconst spotify-oauth2-auth-url  "https://accounts.spotify.com/authorize")
@@ -42,21 +42,37 @@ relevant to a particular country. If omitted, the returned items will be
 globally relevant."
   :type 'string)
 
-(defun spotify-api-auth ()
-  "Starts the Spotify Oauth2 authentication and authorization workflow."
-  (oauth2-auth-and-store spotify-oauth2-auth-url
-                         spotify-oauth2-token-url
-                         spotify-oauth2-scopes
-                         spotify-oauth2-client-id
-                         spotify-oauth2-client-secret
-                         spotify-oauth2-callback))
+(defun spotify-retrieve-oauth2-token ()
+  "Retrieves the Oauth2 access token that must be used to interact with the
+Spotify API."
+  (if *spotify-oauth2-token*
+      *spotify-oauth2-token*
+    (let ((token (oauth2-auth spotify-oauth2-auth-url
+                              spotify-oauth2-token-url
+                              spotify-oauth2-client-id
+                              spotify-oauth2-client-secret
+                              spotify-oauth2-scopes
+                              nil
+                              spotify-oauth2-callback)))
+      (setq *spotify-oauth2-token* token)
+      (when (null token)
+        (user-error "OAuth2 authentication failed"))
+      token)))
+
+(defun spotify-current-user ()
+  "Retrieves the object that represents the authenticated user."
+  (if *spotify-user*
+      *spotify-user*
+    (let ((user (spotify-api-call "GET" "/me")))
+      (setq *spotify-user* user)
+      user)))
 
 (defun spotify-api-call (method uri &optional data is-retry)
   "Makes a request to the given Spotify service endpoint and returns the parsed
 JSON response."
   (let ((url (concat spotify-api-endpoint uri))
         (headers '(("Content-Type" . "application/json"))))
-    (with-current-buffer (oauth2-url-retrieve-synchronously *spotify-oauth2-token*
+    (with-current-buffer (oauth2-url-retrieve-synchronously (spotify-retrieve-oauth2-token)
                                                             url method data headers)
       (toggle-enable-multibyte-characters t)
       (goto-char (point-min))
@@ -82,36 +98,13 @@ JSON response."
          (kill-buffer)
          (signal (car err) (cdr err)))))))
 
-(defun spotify-disconnect ()
-  "Clears the Spotify session currently in use."
-  (interactive)
-  (makunbound '*spotify-oauth2-token*)
-  (makunbound '*spotify-user*)
-  (stop-mode-line-timer)
-  (message "Spotify session closed"))
-
-;;;###autoload
-(defun spotify-connect ()
-  "Starts a new Spotify session."
-  (interactive)
-  (spotify-disconnect)
-  (defvar *spotify-oauth2-token* (spotify-api-auth))
-  (defvar *spotify-user* (spotify-api-call "GET" "/me"))
-  (when *spotify-user*
-    (message "Welcome, %s!" (spotify-current-user-name))
-    (start-mode-line-timer)))
-
-(defun spotify-connected-p ()
-  "Returns whether there's an established session with Spotify API."
-  (and (boundp '*spotify-user*) (not (null *spotify-user*))))
-
 (defun spotify-current-user-name ()
   "Returns the user's display name of the current Spotify session."
-  (gethash 'display_name *spotify-user*))
+  (gethash 'display_name (spotify-current-user)))
 
 (defun spotify-current-user-id ()
   "Returns the user's id of the current Spotify session."
-  (spotify-get-item-id *spotify-user*))
+  (spotify-get-item-id (spotify-current-user)))
 
 (defun spotify-get-items (json)
   "Returns the list of items from the given json object."
@@ -244,7 +237,8 @@ depending on the `type' argument."
          "PUT"
          (format "/users/%s/playlists/%s/followers"
                  (url-hexify-string owner)
-                 (url-hexify-string id))))
+                 (url-hexify-string id))
+         ""))
     (end-of-file t)))
 
 (defun spotify-api-playlist-unfollow (playlist)
@@ -256,7 +250,8 @@ depending on the `type' argument."
          "DELETE"
          (format "/users/%s/playlists/%s/followers"
                  (url-hexify-string owner)
-                 (url-hexify-string id))))
+                 (url-hexify-string id))
+         ""))
     (end-of-file t)))
 
 (defun spotify-api-playlist-tracks (playlist page)
@@ -278,7 +273,7 @@ depending on the `type' argument."
   "Returns the popularity indicator bar proportional to the given parameter,
 which must be a number between 0 and 100."
   (let ((num-bars (truncate (/ popularity 10))))
-    (concat (make-string num-bars ?\u25cf)
-            (make-string (- 10 num-bars) ?\u25cb))))
+    (concat (make-string num-bars ?X)
+            (make-string (- 10 num-bars) ?-))))
 
 (provide 'spotify-api)

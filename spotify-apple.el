@@ -8,27 +8,36 @@
   "Path to `osascript' binary."
   :type 'string)
 
-;; Do not change this unless you know what you're doing
-(defvar spotify-player-status-script "
+; Do not change this unless you know what you're doing
+(setq spotify-apple-player-status-script "
+# Source: https://github.com/andrehaveman/spotify-node-applescript
+on escape_quotes(string_to_escape)
+  set AppleScript's text item delimiters to the \"\\\"\"
+  set the item_list to every text item of string_to_escape
+  set AppleScript's text item delimiters to the \"\\\\\\\"\"
+  set string_to_escape to the item_list as string
+  set AppleScript's text item delimiters to \"\"
+  return string_to_escape
+end escape_quotes
+
 tell application \"Spotify\"
-  set playerState     to get player state as string
-
-  # Empty data in order to avoid returning an error
-  if (playerState = \"stopped\") then
-    return \"\n\n\n\n\n\nstopped\n\"
+  if it is running then
+    set ctrack to \"{\"
+    set ctrack to ctrack & \"\\\"artist\\\": \\\"\" & my escape_quotes(current track's artist) & \"\\\"\"
+    set ctrack to ctrack & \",\\\"duration\\\": \" & current track's duration
+    set ctrack to ctrack & \",\\\"track_number\\\": \" & current track's track number
+    set ctrack to ctrack & \",\\\"name\\\": \\\"\" & my escape_quotes(current track's name) & \"\\\"\"
+    set ctrack to ctrack & \",\\\"player_state\\\": \\\"\" & player state & \"\\\"\"
+    set ctrack to ctrack & \",\\\"player_shuffling\\\": \" & shuffling
+    set ctrack to ctrack & \",\\\"player_repeating\\\": \" & repeating
+    set ctrack to ctrack & \"}\"
   end if
+end tell
+")
 
-  set trackId         to id of current track as string
-  set trackArtist     to artist of current track as string
-  set trackName       to name of current track as string
-  set trackNumber     to track number of current track as string
-  set trackDiscNumber to disc number of current track as string
-  set trackDuration   to duration of current track as string
-
-  set playerPosition  to get player position as string
-
-  return trackId & \"\n\" & trackArtist & \"\n\" & trackName & \"\n\" & trackNumber & \"\n\" & trackDiscNumber & \"\n\" & trackDuration & \"\n\" & playerState & \"\n\" & playerPosition
-end tell")
+;; Write script to a temp file
+(setq spotify-apple-player-status-script-file
+      (make-temp-file "spotify.el" nil nil spotify-apple-player-status-script))
 
 (defun spotify-apple-command-line (cmd)
   "Returns a command line prefix for any Spotify command."
@@ -41,12 +50,6 @@ end tell")
    "\n$" ""
    (shell-command-to-string (spotify-apple-command-line cmd))))
 
-(defun spotify-apple-player-status-command-line ()
-  "Returns the current Spotify player status that is set to the mode line."
-  (format "echo %s | %s"
-          (shell-quote-argument spotify-player-status-script)
-          spotify-osascript-bin-path))
-
 (defun spotify-apple-set-mode-line-from-process-output (process output)
   "Sets the output of the player status process to the mode line."
   (spotify-replace-mode-line-flags output)
@@ -56,11 +59,12 @@ end tell")
 (defun spotify-apple-player-status ()
   "Updates the mode line to display the current Spotify player status."
   (let* ((process-name "spotify-player-status")
-         (process-status (process-status process-name)))
-    (if (and (spotify-connected-p) (not process-status))
-        (let ((process (start-process-shell-command process-name "*spotify-player-status*" (spotify-apple-player-status-command-line))))
-          (set-process-filter process 'spotify-apple-set-mode-line-from-process-output))
-      (spotify-update-mode-line ""))))
+         (process-status (process-status process-name))
+         (cmd (format "%s %s" spotify-osascript-bin-path spotify-apple-player-status-script-file)))
+    (when (not process-status)
+      (let* ((default-directory user-emacs-directory)
+             (process (start-process-shell-command process-name "*spotify-player-status*" cmd)))
+        (set-process-filter process 'spotify-apple-set-mode-line-from-process-output)))))
 
 (defun spotify-apple-player-state ()
   (spotify-apple-command "get player state"))
@@ -74,11 +78,23 @@ end tell")
 (defun spotify-apple-player-previous-track ()
   (spotify-apple-command "previous track"))
 
+(defun spotify-apple-is-shuffling-supported ()
+  t)
+
+(defun spotify-apple-is-repeating-supported ()
+  t)
+
 (defun spotify-apple-toggle-repeat ()
   (spotify-apple-command "set repeating to not repeating"))
 
 (defun spotify-apple-toggle-shuffle ()
   (spotify-apple-command "set shuffling to not shuffling"))
+
+(defun spotify-apple-is-repeating ()
+  (string= "true" (spotify-apple-command "repeating")))
+
+(defun spotify-apple-is-shuffling ()
+  (string= "true" (spotify-apple-command "shuffling")))
 
 (defun spotify-apple-player-play-track (track-id context-id)
   (spotify-apple-command (format "play track \"%s\" in context \"%s\"" track-id context-id)))

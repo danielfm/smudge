@@ -29,7 +29,7 @@ GNU/Linux, `apple' otherwise."
                  (symbol :tag "D-Bus" dbus)))
 
 ;; TODO: No modeline support for linux just yet
-(defcustom spotify-mode-line-refresh-interval (if-gnu-linux 0 1)
+(defcustom spotify-mode-line-refresh-interval 1
   "The interval, in seconds, that the mode line must be updated. Set to 0 to
    disable this feature."
   :type 'integer)
@@ -38,21 +38,38 @@ GNU/Linux, `apple' otherwise."
   "The maximum number of characters to truncated fields in
 `spotify-mode-line-format'.")
 
-(defcustom spotify-mode-line-format "%at - %t [%l]"
+(defcustom spotify-mode-line-playing-text "Playing"
+  "Text to be displayed when Spotify is playing")
+
+(defcustom spotify-mode-line-paused-text "Paused"
+  "Text to be displayed when Spotify is paused")
+
+(defcustom spotify-mode-line-stopped-text "Stopped"
+  "Text to be displayed when Spotify is stopped")
+
+(defcustom spotify-mode-line-repeating-text "R"
+  "Text to be displayed when repeat is enabled")
+
+(defcustom spotify-mode-line-not-repeating-text "-"
+  "Text to be displayed when repeat is disabled")
+
+(defcustom spotify-mode-line-shuffling-text "S"
+  "Text to be displayed when shuffling is enabled")
+
+(defcustom spotify-mode-line-not-shuffling-text "-"
+  "Text to be displayed when shuffling is disabled")
+
+(defcustom spotify-mode-line-format "[%p: %a - %t ◷ %l %r%s]"
   "Format used to display the current Spotify client player status. The
 following placeholders are supported:
 
-* %u  - Track URI (i.e. spotify:track:<ID>)
-* %a  - Artist name
-* %at - Artist name (truncated)
-* %t  - Track name
-* %tt - Track name (truncated)
-* %n  - Track #
-* %d  - Track disc #
-* %s  - Player state (i.e. playing, paused, stopped)
-* %l  - Track duration, in minutes (i.e. 01:35)
-* %p  - Player position in current track, in minutes (i.e. 01:35)
-")
+* %a - Artist name (truncated)
+* %t - Track name (truncated)
+* %n - Track #
+* %l - Track duration, in minutes (i.e. 01:35)
+* %p - Player status indicator for 'playing', 'paused', and 'stopped' states
+* %s - Player shuffling status indicator
+* %r - Player repeating status indicator")
 
 (defvar spotify-timer nil)
 
@@ -61,42 +78,63 @@ following placeholders are supported:
   (let ((func-name (format "spotify-%s-%s" spotify-transport suffix)))
     (apply (intern func-name) args)))
 
-(defun spotify-replace-mode-line-flags (metadata)
-  ""
-  (let ((mode-line spotify-mode-line-format)
-        (fields (split-string metadata "\n"))
-        (duration-format "%m:%02s"))
-    (if (or (< (length fields) 8)
-            (string= "stopped" (seventh fields)))
-        (setq mode-line "")
-      (progn
-        (setq mode-line (replace-regexp-in-string "%u" (first fields) mode-line))
-        (setq mode-line (replace-regexp-in-string "%at" (truncate-string-to-width (second fields) spotify-mode-line-truncate-length 0 nil "...") mode-line))
-        (setq mode-line (replace-regexp-in-string "%a" (second fields) mode-line))
-        (setq mode-line (replace-regexp-in-string "%tt" (truncate-string-to-width (third fields) spotify-mode-line-truncate-length 0 nil "...") mode-line))
-        (setq mode-line (replace-regexp-in-string "%t" (third fields) mode-line))
-        (setq mode-line (replace-regexp-in-string "%n" (fourth fields) mode-line))
-        (setq mode-line (replace-regexp-in-string "%d" (fifth fields) mode-line))
-        (setq mode-line (replace-regexp-in-string "%s" (seventh fields) mode-line))
-        (setq mode-line (replace-regexp-in-string "%l" (format-seconds duration-format (/ (string-to-number (sixth fields)) 1000)) mode-line))
-        (setq mode-line (replace-regexp-in-string "%p" (format-seconds duration-format (string-to-number (eighth fields))) mode-line))))
-    (spotify-update-mode-line mode-line)))
+(defun spotify-mode-line-playing-indicator (str)
+  "Returns the value of the player state variable corresponding to the player's
+current state (playing, stopped, paused)."
+  (cond ((string= "playing" str) spotify-mode-line-playing-text)
+        ((string= "stopped" str) spotify-mode-line-stopped-text)
+        ((string= "paused" str) spotify-mode-line-paused-text)))
 
-(defun start-mode-line-timer ()
+(defun spotify-mode-line-shuffling-indicator (shuffling)
+  "Returns the value of the shuffling state variable corresponding to the
+current shuffling state."
+  (if (eq shuffling t)
+      spotify-mode-line-shuffling-text
+    spotify-mode-line-not-shuffling-text))
+
+(defun spotify-mode-line-repeating-indicator (repeating)
+  "Returns the value of the repeating state variable corresponding to the
+current repeating state."
+  (if (eq repeating t)
+      spotify-mode-line-repeating-text
+    spotify-mode-line-not-repeating-text))
+
+(defun spotify-replace-mode-line-flags (metadata)
+  "Compose the playing status string to be displayed in the mode-line."
+  (let* ((mode-line spotify-mode-line-format)
+         (duration-format "%m:%02s")
+         (json-object-type 'hash-table)
+         (json-key-type 'symbol)
+         (json (condition-case nil
+                   (json-read-from-string metadata)
+                 (error (spotify-update-mode-line "")
+                        nil))))
+    (when json
+      (progn
+        (setq mode-line (replace-regexp-in-string "%a" (truncate-string-to-width (gethash 'artist json) spotify-mode-line-truncate-length 0 nil "...") mode-line))
+        (setq mode-line (replace-regexp-in-string "%t" (truncate-string-to-width (gethash 'name json) spotify-mode-line-truncate-length 0 nil "...") mode-line))
+        (setq mode-line (replace-regexp-in-string "%n" (number-to-string (gethash 'track_number json)) mode-line))
+        (setq mode-line (replace-regexp-in-string "%l" (format-seconds duration-format (/ (gethash 'duration json) 1000)) mode-line))
+        (setq mode-line (replace-regexp-in-string "%s" (spotify-mode-line-shuffling-indicator (gethash 'player_shuffling json)) mode-line))
+        (setq mode-line (replace-regexp-in-string "%r" (spotify-mode-line-repeating-indicator (gethash 'player_repeating json)) mode-line))
+        (setq mode-line (replace-regexp-in-string "%p" (spotify-mode-line-playing-indicator (gethash 'player_state json)) mode-line))
+        (spotify-update-mode-line mode-line)))))
+
+(defun spotify-start-mode-line-timer ()
   "Starts the timer that updates the mode line according to the Spotify
    player status."
-  (stop-mode-line-timer)
+  (spotify-stop-mode-line-timer)
   (when (> spotify-mode-line-refresh-interval 0)
     (let ((first-run (format "%d sec" spotify-mode-line-refresh-interval))
           (interval spotify-mode-line-refresh-interval))
       (setq spotify-timer
             (run-at-time first-run interval 'spotify-refresh-mode-line)))))
 
-(defun stop-mode-line-timer ()
+(defun spotify-stop-mode-line-timer ()
   "Stops the timer that updates the mode line."
   (when (and (boundp 'spotify-timer) (timerp spotify-timer))
-    (cancel-timer spotify-timer)
-    (spotify-player-status)))
+    (cancel-timer spotify-timer))
+  (spotify-player-status))
 
 (defun spotify-player-status ()
   "Updates the mode line to display the current Spotify player status."
@@ -105,7 +143,10 @@ following placeholders are supported:
 
 (defun spotify-refresh-mode-line (&rest args)
   "Starts the player status process in order to update the mode line."
-  (spotify-apply "player-status"))
+  (spotify-apply "player-status")
+  (when spotify-mode-line-stale
+    (setq spotify-mode-line-stale nil)
+    (force-mode-line-update t)))
 
 (defun spotify-play-uri (uri)
   "Sends a `play' command to Spotify process passing the given URI."
@@ -144,6 +185,16 @@ following placeholders are supported:
   (interactive)
   (spotify-apply "player-pause"))
 
+(defun spotify-is-repeating-supported()
+  "Returns whether toggling repeat is supported."
+  (interactive)
+  (spotify-apply "is-repeating-supported"))
+
+(defun spotify-is-shuffling-supported()
+  "Returns whether toggling shuffle is supported."
+  (interactive)
+  (spotify-apply "is-shuffling-supported"))
+
 (defun spotify-toggle-repeat ()
   "Sends a command to Spotify process to toggle the repeating flag."
   (interactive)
@@ -153,5 +204,13 @@ following placeholders are supported:
   "Sends a command to Spotify process to toggle the shuffling flag."
   (interactive)
   (spotify-apply "toggle-shuffle"))
+
+(defun spotify-is-repeating ()
+  "Sends a command to Spotify process to get the current repeating state."
+  (spotify-apply "is-repeating"))
+
+(defun spotify-is-shuffling ()
+  "Sends a command to the Spotify process to get the current shuffling state."
+  (spotify-apply "is-shuffling"))
 
 (provide 'spotify-controller)

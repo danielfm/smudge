@@ -1,6 +1,6 @@
 ;;; spotify.el --- control the Spotify app from Emacs
 
-;; Copyright (C) 2014-2016 Daniel Fernandes Martins
+;; Copyright (C) 2014-2018 Daniel Fernandes Martins
 
 ;; Keywords: multimedia, music, spotify
 ;; Package: spotify
@@ -18,22 +18,9 @@
 ;;
 ;; (custom-set-variables
 ;;  '(spotify-oauth2-client-id "client-id")
-;;  '(spotify-oauth2-client-secret "client-secret")
+;;  '(spotify-oauth2-client-secret "client-secret"))
 ;;
-;;  ; Only for Mac OS X, for now
-;;  '(spotify-transport 'apple) 
-;;  '(spotify-osascript-bin-path "/usr/bin/osascript"))
-;;
-;; To authenticate, invoke the `spotify-connect' function. This will start the
-;; Oauth2 authentication and authorization workflow. You may be asked to type
-;; a password since the tokens are stored as an encrypted file in the local
-;; filesystem. After you enter your credentials and authorizes the app, you
-;; should see a greeting message in the echo area.
-;;
-;; To search for tracks, invoke the `spotify-track-search' function and
-;; type your query. The results will be shown up in a new buffer. To play the
-;; track under the cursor, just type RET, or type M-RET to play the
-;; track's album from the start.
+;; See 'README.md' for usage information.
 
 ;; Code:
 

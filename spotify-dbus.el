@@ -1,6 +1,6 @@
 ;;; spotify-dbus --- Dbus-specific code for Spotify.el
 
-;; Copyright (C) 2014-2016 Daniel Fernandes Martins
+;; Copyright (C) 2014-2018 Daniel Fernandes Martins
 
 ;;; Commentary:
 
@@ -42,25 +42,25 @@
 
 (defun spotify-dbus-player-status ()
   "Updates the mode line to display the current Spotify player status."
-  (let ((metadata (spotify-dbus-get-property "Metadata")))
-    (if (and (spotify-connected-p) metadata)
-        (let ((track-id (car (car (cdr (assoc "mpris:trackid" metadata)))))
-              (artist   (car (car (car (cdr (assoc "xesam:artist" metadata))))))
-              (title    (car (car (cdr (assoc "xesam:title" metadata)))))
-              (track-n  (car (car (cdr (assoc "xesam:trackNumber" metadata)))))
-              (disc-n   (car (car (cdr (assoc "xesam:discNumber" metadata)))))
-              (length   (/ (car (car (cdr (assoc "mpris:length" metadata)))) 1000)))
-          (if (> track-n 0)
+  (let* ((metadata (spotify-dbus-get-property "Metadata"))
+         (playback-status (spotify-dbus-get-property "PlaybackStatus"))
+         (player-state (if playback-status (downcase playback-status) "stopped")))
+    (if metadata
+        (let ((artist        (car (car (car (cdr (assoc "xesam:artist" metadata))))))
+              (name          (car (car (cdr (assoc "xesam:title" metadata)))))
+              (track-number  (car (car (cdr (assoc "xesam:trackNumber" metadata)))))
+              (duration      (/ (car (car (cdr (assoc "mpris:length" metadata)))) 1000)))
+          (if (> track-number 0)
               (spotify-replace-mode-line-flags
-               (concat track-id "\n"
-                       artist   "\n"
-                       title    "\n"
-                       (number-to-string track-n) "\n"
-                       (number-to-string disc-n)  "\n"
-                       (number-to-string length)  "\n"
-                       "-\n" ;; TODO: unable to get the player state via D-Bus
-                       "-\n" ;; TODO: unable to get the player position via D-Bus
-                       ))
+               (concat "{"
+                       " \"artist\": \"" artist "\""
+                       ",\"duration\": " (number-to-string duration) ""
+                       ",\"track_number\": " (number-to-string track-number) ""
+                       ",\"name\": \"" name "\""
+                       ",\"player_state\": \"" player-state "\""
+                       ",\"player_shuffling\": \"-\""
+                       ",\"player_repeating\": \"-\""
+                       "}"))
             (spotify-update-mode-line "")))
       (spotify-update-mode-line ""))))
 
@@ -76,11 +76,16 @@
   "Play previous previous."
   (spotify-dbus-call "Previous"))
 
-;; TODO: Currently not supported by the Spotify client D-Bus interface
+;; Toggling shuffle and repeating via D-Bus is not supported
+(defun spotify-dbus-is-shuffling-supported ()
+  nil)
+
+(defun spotify-dbus-is-repeating-supported ()
+  nil)
+
 (defun spotify-dbus-toggle-repeat ()
   (message "Toggling repeat status not supported by the Spotify client"))
 
-;; TODO: Currently not supported by the Spotify client D-Bus interface
 (defun spotify-dbus-toggle-shuffle ()
   (message "Toggline shuffle status not supported by the Spotify client"))
 

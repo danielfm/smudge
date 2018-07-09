@@ -1,6 +1,6 @@
 ;; spotify-track-search.el --- Spotify.el track search major mode
 
-;; Copyright (C) 2014-2016 Daniel Fernandes Martins
+;; Copyright (C) 2014-2018 Daniel Fernandes Martins
 
 ;; Code:
 
@@ -112,14 +112,24 @@ be played in the context of its album."
   (let (entries)
     (dolist (song songs)
       (when (spotify-is-track-playable song)
-        (push (list song
-                    (vector (number-to-string (spotify-get-track-number song))
-                            (spotify-get-item-name song)
-                            (spotify-get-track-artist song)
-                            (spotify-get-track-album-name song)
-                            (spotify-get-track-duration-formatted song)
-                            (spotify-popularity-bar (spotify-get-track-popularity song))))
-              entries)))
+        (let ((artist-name (spotify-get-track-artist song))
+              (album-name (spotify-get-track-album-name song)))
+          (push (list song
+                      (vector (number-to-string (spotify-get-track-number song))
+                              (spotify-get-item-name song)
+                              (cons artist-name
+                                  (list 'face 'link
+                                        'follow-link t
+                                        'action `(lambda (_) (spotify-track-search ,(format "artist:\"%s\"" artist-name)))
+                                        'help-echo (format "Show %s's tracks" artist-name)))
+                              (cons album-name
+                                  (list 'face 'link
+                                        'follow-link t
+                                        'action `(lambda (_) (spotify-track-search ,(format "artist:\"%s\" album:\"%s\"" artist-name album-name)))
+                                        'help-echo (format "Show %s's tracks" album-name)))
+                              (spotify-get-track-duration-formatted song)
+                              (spotify-popularity-bar (spotify-get-track-popularity song))))
+                entries))))
     (when (eq 1 current-page)
       (setq-local tabulated-list-entries nil))
     (setq-local tabulated-list-entries (append tabulated-list-entries (nreverse entries)))
