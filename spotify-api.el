@@ -168,7 +168,7 @@ JSON response."
   (gethash 'name json))
 
 (defun spotify-get-item-id (json)
-  "Returns the id from the givem object."
+  "Returns the id from the given object."
   (gethash 'id json))
 
 (defun spotify-get-item-uri (json)
