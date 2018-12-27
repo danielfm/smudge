@@ -9,8 +9,7 @@
 (defvar spotify-track-search-mode-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map tabulated-list-mode-map)
-    (define-key map (kbd "RET")   'spotify-track-select)
-    (define-key map (kbd "M-RET") 'spotify-track-select-album)
+    (define-key map (kbd "M-RET") 'spotify-track-select)
     (define-key map (kbd "l")     'spotify-track-load-more)
     (define-key map (kbd "g")     'spotify-track-reload)
     (define-key map (kbd "f")     'spotify-track-playlist-follow)
@@ -35,7 +34,7 @@ be played in the context of its album."
       (spotify-play-track selected-track (spotify-get-track-album selected-track)))))
 
 (defun spotify-track-playlist-follow ()
-  "Adds the current user as the follower of the track's playlist under the cursor."
+  "Adds the current user as the follower of the selected playlist."
   (interactive)
   (if (bound-and-true-p spotify-selected-playlist)
       (when (and (y-or-n-p (format "Follow playlist '%s'?" (spotify-get-item-name spotify-selected-playlist)))
@@ -44,20 +43,13 @@ be played in the context of its album."
     (message "Cannot follow a playlist from here")))
 
 (defun spotify-track-playlist-unfollow ()
-  "Removes the current user as the follower of the track's playlist under the cursor."
+  "Removes the current user as the follower of the selected playlist."
   (interactive)
   (if (bound-and-true-p spotify-selected-playlist)
       (when (and (y-or-n-p (format "Unfollow playlist '%s'?" (spotify-get-item-name spotify-selected-playlist)))
                  (spotify-api-playlist-unfollow spotify-selected-playlist))
         (message (format "Unfollowed playlist '%s'" (spotify-get-item-name spotify-selected-playlist))))
     (message "Cannot unfollow a playlist from here")))
-
-(defun spotify-track-select-album ()
-  "Plays the album of the track under the cursor in the context of its album."
-  (interactive)
-  (let ((selected-track (tabulated-list-get-id)))
-    (spotify-play-track selected-track
-                        (spotify-get-track-album selected-track))))
 
 (defun spotify-track-reload ()
   "Reloads the first page of results for the current track view."

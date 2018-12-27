@@ -144,11 +144,11 @@ To search for tracks, run <kbd>M-x spotify-track-search</kbd> and type in your
 query. The results will be displayed in a separate buffer with the following
 key bindings:
 
-| Key            | Description                                                      |
-|:---------------|:-----------------------------------------------------------------|
-| <kbd>l</kbd>   | Loads the next page of results (pagination)                      |
-| <kbd>g</kbd>   | Clears the results and reloads the first page of results         |
-| <kbd>RET</kbd> | Plays the track under the cursor in the context of its album [1] |
+| Key              | Description                                                      |
+|:-----------------|:-----------------------------------------------------------------|
+| <kbd>l</kbd>     | Loads the next page of results (pagination)                      |
+| <kbd>g</kbd>     | Clears the results and reloads the first page of results         |
+| <kbd>M-RET</kbd> | Plays the track under the cursor in the context of its album [1] |
 
 [1] D-Bus implementation for GNU/Linux do not support passing the context, so
 only the track under the cursor will be played
@@ -205,7 +205,7 @@ key bindings:
 | <kbd>f</kbd>     | Follows the playlist under the cursor                    |
 | <kbd>u</kbd>     | Unfollows the playlist under the cursor                  |
 | <kbd>t</kbd>     | Lists the tracks of the playlist under the cursor        |
-| <kbd>M-RET</kbd> | Plays the playlist under the cursor from the beginning   |
+| <kbd>M-RET</kbd> | Plays the playlist under the cursor                      |
 
 Once you opened the list of tracks of a playlist, you get the following key
 bindings in the resulting buffer:
@@ -216,8 +216,7 @@ bindings in the resulting buffer:
 | <kbd>g</kbd>     | Clears the results and reloads the first page of results            |
 | <kbd>f</kbd>     | Follows the current playlist                                        |
 | <kbd>u</kbd>     | Unfollows the current playlist                                      |
-| <kbd>RET</kbd>   | Plays the track under the cursor in the context of the playlist [1] |
-| <kbd>M-RET</kbd> | Plays the track under the cursor in the context of its album [1]    |
+| <kbd>M-RET</kbd> | Plays the track under the cursor in the context of the playlist [1] |
 
 Both buffers load the `spotify-remote-mode` by default.
 
