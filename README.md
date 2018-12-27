@@ -2,7 +2,7 @@
 
 **Control Spotify app from within Emacs.**
 
-![track-search](./img/playlist-tracks.png)
+[![asciicast](https://asciinema.org/a/218654.svg)](https://asciinema.org/a/218654)
 
 Spotify.el is a collection of extensions that allows you to control the Spotify
 application from within your favorite text editor.
