@@ -41,7 +41,9 @@ end tell
 
 (defun spotify-apple-command-line (cmd)
   "Returns a command line prefix for any Spotify command."
-  (format "%s -e 'tell application \"Spotify\" to %s'" spotify-osascript-bin-path cmd))
+  (format "%s -e %s"
+          spotify-osascript-bin-path
+          (shell-quote-argument (format "tell application \"Spotify\" to %s" cmd))))
 
 (defun spotify-apple-command (cmd)
   "Sends the given command to the Spotify client and returns the resulting
