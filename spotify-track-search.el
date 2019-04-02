@@ -24,6 +24,20 @@
   "Major mode for displaying the track listing returned by a Spotify search.")
 
 (defun spotify-track-select ()
+  "Plays the track, album or artist under the cursor. If the cursor is on a
+button representing an artist or album, start playing that artist or album.
+Otherwise, play the track selected."
+  (interactive)
+  (let ((button-selected (spotify-track-selected-button-type)))
+    (cond ((string= "Artist" button-selected)
+	   (spotify-track-artist-select))
+	  ((string= "Album" button-selected)
+	   (spotify-track-album-select))
+	  (t (spotify-track-select-default)))
+    )
+  )
+
+(defun spotify-track-select-default ()
   "Plays the track under the cursor. If the track list represents a playlist,
 the given track is played in the context of that playlist; otherwise, it will
 be played in the context of its album."
@@ -32,6 +46,19 @@ be played in the context of its album."
     (if (bound-and-true-p spotify-selected-playlist)
         (spotify-play-track selected-track spotify-selected-playlist)
       (spotify-play-track selected-track (spotify-get-track-album selected-track)))))
+
+(defun spotify-track-selected-button-type ()
+  (when (button-at (point))
+    (let* ((pos (current-column))
+	   (idx (loop for i from 0 to (1- (length tabulated-list-format))
+		      for col-width = (cadr (aref tabulated-list-format i))
+		      while (> pos col-width)
+		      do (decf pos col-width)
+		      finally return i
+		      )))
+      (car (aref tabulated-list-format idx)))
+    )
+  )
 
 (defun spotify-track-artist-select ()
   "Plays the artist of the track under the cursor."
