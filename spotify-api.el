@@ -152,8 +152,12 @@ JSON response."
   (spotify-get-item-name (spotify-get-track-album json)))
 
 (defun spotify-get-track-artist (json)
-  "Returns the first artist from the given track object."
-  (spotify-get-item-name (first (gethash 'artists json))))
+  "Returns the first simplified artist object from the given track object."
+  (first (gethash 'artists json)))
+
+(defun spotify-get-track-artist-name (json)
+  "Returns the first artist name from the given track object."
+  (spotify-get-item-name (spotify-get-track-artist json)))
 
 (defun spotify-get-track-popularity (json)
   "Returns the popularity from the given track/album/artist object."

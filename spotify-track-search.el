@@ -104,7 +104,7 @@ be played in the context of its album."
   (let (entries)
     (dolist (song songs)
       (when (spotify-is-track-playable song)
-        (let ((artist-name (spotify-get-track-artist song))
+        (let ((artist-name (spotify-get-track-artist-name song))
               (album-name (spotify-get-track-album-name song)))
           (push (list song
                       (vector (number-to-string (spotify-get-track-number song))
