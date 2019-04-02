@@ -33,6 +33,24 @@ be played in the context of its album."
         (spotify-play-track selected-track spotify-selected-playlist)
       (spotify-play-track selected-track (spotify-get-track-album selected-track)))))
 
+(defun spotify-track-artist-select ()
+  "Plays the artist of the track under the cursor."
+  (interactive)
+  (let ((selected-track-artist
+	 (spotify-get-track-artist (tabulated-list-get-id))))
+    (spotify-play-track nil selected-track-artist)
+    )
+  )
+
+(defun spotify-track-album-select ()
+  "Plays the album of the track under the cursor."
+  (interactive)
+  (let ((selected-track-album
+	 (spotify-get-track-album (tabulated-list-get-id))))
+    (spotify-play-track nil selected-track-album)
+    )
+  )
+
 (defun spotify-track-playlist-follow ()
   "Adds the current user as the follower of the selected playlist."
   (interactive)
