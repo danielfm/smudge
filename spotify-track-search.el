@@ -136,15 +136,14 @@ be played in the context of its album."
   (interactive)
   (let ((choices (mapcar (lambda (a) (list (spotify-get-item-name a) (spotify-get-item-id a))) (spotify-get-items (spotify-api-user-playlists (spotify-current-user-id) 1)))))
     (cadr (assoc (completing-read "Select Playlist: " choices) choices))))
-  
-
 
 
 (defun spotify-track-add ()
   "Adds the track under the cursor on a playlist. Prompts for the playlist."
   (interactive)
-  (let ((selected-track (tabulated-list-get-id)))
-      (spotify-api-playlist-add-track (spotify-current-user-id) (spotify-select-playlist) (spotify-get-item-uri selected-track))))
+  (progn (let ((selected-track (tabulated-list-get-id)))
+	   (spotify-api-playlist-add-track (spotify-current-user-id) (spotify-select-playlist) (spotify-get-item-uri selected-track)))
+	 (message "Song added.")))
 
 
 (provide 'spotify-track-search)

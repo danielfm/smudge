@@ -242,29 +242,24 @@ depending on the `type' argument."
 
 (defun spotify-format-id (type id)
   "Wrap raw id to type if necessary"
-  (if (string-match-p "spotify" id)
-      (format "\"%s\"" id)
-    (format "\"spotify:%s:%s\"" type id)))
+   (if (string-match-p "spotify" id) (format "\"%s\"" id) (format "\"spotify:%s:%s\"" type id)))
 
 
 (defun spotify-api-playlist-add-tracks (user-id playlist-id track-ids)
   "Add tracks in list track-ids in playlist"
   (let ((tracks (format "%s" (mapconcat (lambda (x) (spotify-format-id "track" x)) track-ids ","))))
-      (progn
-    (message "Adding: %s" tracks)
-      (spotify-api-call
+    (spotify-api-call
      "POST"
      (format "/users/%s/playlists/%s/tracks"
              (url-hexify-string user-id) (url-hexify-string playlist-id))
      (format "{\"uris\": [ %s ]}" tracks)
      ))
-  ))
+  )
+
 
 (defun spotify-api-playlist-add-album (user-id playlist-id album-id)
   "Add all tracks with album id to playlist"
   (spotify-api-playlist-add-tracks user-id playlist-id (spotify-api-album-get-tracks album-id)))
-
-
 
 
 (defun spotify-api-playlist-follow (playlist)
