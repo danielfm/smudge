@@ -239,7 +239,6 @@ depending on the `type' argument."
   "Add single track to playlist"
   (spotify-api-playlist-add-tracks user-id playlist-id (list track-id)))
 
-
 (defun spotify-format-id (type id)
   "Wrap raw id to type if necessary"
    (if (string-match-p "spotify" id) (format "\"%s\"" id) (format "\"spotify:%s:%s\"" type id)))
@@ -256,11 +255,9 @@ depending on the `type' argument."
      ))
   )
 
-
 (defun spotify-api-playlist-add-album (user-id playlist-id album-id)
   "Add all tracks with album id to playlist"
   (spotify-api-playlist-add-tracks user-id playlist-id (spotify-api-album-get-tracks album-id)))
-
 
 (defun spotify-api-playlist-follow (playlist)
   "Adds the current user as a follower of a playlist."
