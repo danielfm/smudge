@@ -131,7 +131,6 @@ be played in the context of its album."
     (tabulated-list-init-header)
     (tabulated-list-print t)))
 
-
 (defun spotify-select-playlist ()
   (interactive)
   (let ((choices (mapcar (lambda (a) (list (spotify-get-item-name a) (spotify-get-item-id a))) (spotify-get-items (spotify-api-user-playlists (spotify-current-user-id) 1)))))
