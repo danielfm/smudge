@@ -47,13 +47,12 @@ be played in the context of its album."
 
 (defun spotify-track-selected-button-type ()
   (when (button-at (point))
-    (let* ((pos (current-column))
-	   (idx (loop for i from 0 to (1- (length tabulated-list-format))
-		      for col-width = (cadr (aref tabulated-list-format i))
-		      while (> pos col-width)
-		      do (decf pos col-width)
-		      finally return i)))
-      (car (aref tabulated-list-format idx)))))
+    (let* ((format-list (append tabulated-list-format nil)) ;; convert vector to list
+	   (column-widths (-map 'cadr format-list))
+	   (selected-column (--find-index (< it 0)
+					  (cdr (-reductions-from
+						'- (current-column) column-widths)))))
+      (car (aref tabulated-list-format selected-column)))))
 
 (defun spotify-track-artist-select ()
   "Plays the artist of the track under the cursor."

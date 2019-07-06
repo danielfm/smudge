@@ -29,6 +29,7 @@
 
 (require 'json)
 (require 'oauth2)
+(require 'dash)
 (require 'tabulated-list)
 
 (require 'spotify-api)
