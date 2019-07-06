@@ -25,6 +25,18 @@
   "Major mode for displaying the track listing returned by a Spotify search.")
 
 (defun spotify-track-select ()
+  "Plays the track, album or artist under the cursor. If the cursor is on a
+button representing an artist or album, start playing that artist or album.
+Otherwise, play the track selected."
+  (interactive)
+  (let ((button-type (spotify-track-selected-button-type)))
+    (cond ((eq 'artist button-type)
+	   (spotify-track-artist-select))
+	  ((eq 'album button-type)
+	   (spotify-track-album-select))
+	  (t (spotify-track-select-default)))))
+
+(defun spotify-track-select-default ()
   "Plays the track under the cursor. If the track list represents a playlist,
 the given track is played in the context of that playlist; otherwise, it will
 be played in the context of its album."
@@ -33,6 +45,25 @@ be played in the context of its album."
     (if (bound-and-true-p spotify-selected-playlist)
         (spotify-play-track selected-track spotify-selected-playlist)
       (spotify-play-track selected-track (spotify-get-track-album selected-track)))))
+
+(defun spotify-track-selected-button-type ()
+  (let ((selected-button (button-at (point))))
+    (when selected-button
+      (button-get selected-button 'artist-or-album))))
+
+(defun spotify-track-artist-select ()
+  "Plays the artist of the track under the cursor."
+  (interactive)
+  (let ((selected-track-artist
+	 (spotify-get-track-artist (tabulated-list-get-id))))
+    (spotify-play-track nil selected-track-artist)))
+
+(defun spotify-track-album-select ()
+  "Plays the album of the track under the cursor."
+  (interactive)
+  (let ((selected-track-album
+	 (spotify-get-track-album (tabulated-list-get-id))))
+    (spotify-play-track nil selected-track-album)))
 
 (defun spotify-track-playlist-follow ()
   "Adds the current user as the follower of the selected playlist."
@@ -105,7 +136,7 @@ be played in the context of its album."
   (let (entries)
     (dolist (song songs)
       (when (spotify-is-track-playable song)
-        (let ((artist-name (spotify-get-track-artist song))
+        (let ((artist-name (spotify-get-track-artist-name song))
               (album-name (spotify-get-track-album-name song)))
           (push (list song
                       (vector (number-to-string (spotify-get-track-number song))
@@ -114,12 +145,14 @@ be played in the context of its album."
                                   (list 'face 'link
                                         'follow-link t
                                         'action `(lambda (_) (spotify-track-search ,(format "artist:\"%s\"" artist-name)))
-                                        'help-echo (format "Show %s's tracks" artist-name)))
+                                        'help-echo (format "Show %s's tracks" artist-name)
+					'artist-or-album 'artist))
                               (cons album-name
                                   (list 'face 'link
                                         'follow-link t
                                         'action `(lambda (_) (spotify-track-search ,(format "artist:\"%s\" album:\"%s\"" artist-name album-name)))
-                                        'help-echo (format "Show %s's tracks" album-name)))
+                                        'help-echo (format "Show %s's tracks" album-name)
+					'artist-or-album 'album))
                               (spotify-get-track-duration-formatted song)
                               (spotify-popularity-bar (spotify-get-track-popularity song))))
                 entries))))
