@@ -28,10 +28,10 @@
 button representing an artist or album, start playing that artist or album.
 Otherwise, play the track selected."
   (interactive)
-  (let ((button-selected (spotify-track-selected-button-type)))
-    (cond ((string= "Artist" button-selected)
+  (let ((button-type (spotify-track-selected-button-type)))
+    (cond ((eq 'artist button-type)
 	   (spotify-track-artist-select))
-	  ((string= "Album" button-selected)
+	  ((eq 'album button-type)
 	   (spotify-track-album-select))
 	  (t (spotify-track-select-default)))))
 
@@ -46,13 +46,9 @@ be played in the context of its album."
       (spotify-play-track selected-track (spotify-get-track-album selected-track)))))
 
 (defun spotify-track-selected-button-type ()
-  (when (button-at (point))
-    (let* ((format-list (append tabulated-list-format nil)) ;; convert vector to list
-	   (column-widths (-map 'cadr format-list))
-	   (selected-column (--find-index (< it 0)
-					  (cdr (-reductions-from
-						'- (current-column) column-widths)))))
-      (car (aref tabulated-list-format selected-column)))))
+  (let ((selected-button (button-at (point))))
+    (when selected-button
+      (button-get selected-button 'artist-or-album))))
 
 (defun spotify-track-artist-select ()
   "Plays the artist of the track under the cursor."
@@ -148,12 +144,14 @@ be played in the context of its album."
                                   (list 'face 'link
                                         'follow-link t
                                         'action `(lambda (_) (spotify-track-search ,(format "artist:\"%s\"" artist-name)))
-                                        'help-echo (format "Show %s's tracks" artist-name)))
+                                        'help-echo (format "Show %s's tracks" artist-name)
+					'artist-or-album 'artist))
                               (cons album-name
                                   (list 'face 'link
                                         'follow-link t
                                         'action `(lambda (_) (spotify-track-search ,(format "artist:\"%s\" album:\"%s\"" artist-name album-name)))
-                                        'help-echo (format "Show %s's tracks" album-name)))
+                                        'help-echo (format "Show %s's tracks" album-name)
+					'artist-or-album 'album))
                               (spotify-get-track-duration-formatted song)
                               (spotify-popularity-bar (spotify-get-track-popularity song))))
                 entries))))
