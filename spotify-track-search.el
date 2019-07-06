@@ -33,9 +33,7 @@ Otherwise, play the track selected."
 	   (spotify-track-artist-select))
 	  ((string= "Album" button-selected)
 	   (spotify-track-album-select))
-	  (t (spotify-track-select-default)))
-    )
-  )
+	  (t (spotify-track-select-default)))))
 
 (defun spotify-track-select-default ()
   "Plays the track under the cursor. If the track list represents a playlist,
@@ -54,29 +52,22 @@ be played in the context of its album."
 		      for col-width = (cadr (aref tabulated-list-format i))
 		      while (> pos col-width)
 		      do (decf pos col-width)
-		      finally return i
-		      )))
-      (car (aref tabulated-list-format idx)))
-    )
-  )
+		      finally return i)))
+      (car (aref tabulated-list-format idx)))))
 
 (defun spotify-track-artist-select ()
   "Plays the artist of the track under the cursor."
   (interactive)
   (let ((selected-track-artist
 	 (spotify-get-track-artist (tabulated-list-get-id))))
-    (spotify-play-track nil selected-track-artist)
-    )
-  )
+    (spotify-play-track nil selected-track-artist)))
 
 (defun spotify-track-album-select ()
   "Plays the album of the track under the cursor."
   (interactive)
   (let ((selected-track-album
 	 (spotify-get-track-album (tabulated-list-get-id))))
-    (spotify-play-track nil selected-track-album)
-    )
-  )
+    (spotify-play-track nil selected-track-album)))
 
 (defun spotify-track-playlist-follow ()
   "Adds the current user as the follower of the selected playlist."
