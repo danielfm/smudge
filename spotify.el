@@ -39,6 +39,7 @@
 
 (when-darwin    (require 'spotify-apple))
 (when-gnu-linux (require 'spotify-dbus))
+(when-windows (require 'spotify-windows))
 
 (defgroup spotify nil
   "Spotify client."

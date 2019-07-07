@@ -22,11 +22,21 @@
   "Evaluates `then' form if Emacs is running in OS X."
   `(if-darwin ,then nil))
 
-(defcustom spotify-transport (if-gnu-linux 'dbus 'apple)
+(defmacro if-windows (then else)
+  "Evaluates `then' form if Emacs is running in Windows, otherwise evaluates
+`else' form."
+  `(if (eq system-type 'windows-nt) ,then ,else))
+
+(defmacro when-windows (then)
+  "Evaluates `then' form if Emacs is running in Windows"
+  `(if-windows ,then nil))
+
+(defcustom spotify-transport (if-gnu-linux 'dbus (if-darwin 'apple 'windows))
   "How the commands should be sent to Spotify process. Defaults for `dbus' for
 GNU/Linux, `apple' otherwise."
   :type '(choice (symbol :tag "AppleScript" apple)
-                 (symbol :tag "D-Bus" dbus)))
+                 (symbol :tag "D-Bus" dbus)
+		 (symbol :tag "Windows" windows)))
 
 ;; TODO: No modeline support for linux just yet
 (defcustom spotify-mode-line-refresh-interval 1
