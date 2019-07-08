@@ -10,7 +10,7 @@
 (defconst spotify-api-endpoint     "https://api.spotify.com/v1")
 (defconst spotify-oauth2-auth-url  "https://accounts.spotify.com/authorize")
 (defconst spotify-oauth2-token-url "https://accounts.spotify.com/api/token")
-(defconst spotify-oauth2-scopes    "playlist-read-private playlist-modify-public playlist-modify-private user-read-private")
+(defconst spotify-oauth2-scopes    "user-modify-playback-state playlist-read-private playlist-modify-public playlist-modify-private user-read-private")
 (defconst spotify-oauth2-callback  "http://localhost:8591/")
 
 (defcustom spotify-oauth2-client-id ""
@@ -301,6 +301,14 @@ depending on the `type' argument."
                                        (offset ,offset)
                                        (market from_token))
                                      nil t)))))
+
+(defun spotify-api-pause ()
+  "Play pause current user"
+  (condition-case err
+      (spotify-api-call "PUT" "")
+    (end-of-file t)))
+
+;; (spotify-api-play-pause)
 
 (defun spotify-popularity-bar (popularity)
   "Returns the popularity indicator bar proportional to the given parameter,
