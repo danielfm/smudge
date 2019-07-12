@@ -29,19 +29,21 @@
 
 (defun spotify-web-player-status ()
   "Updates the mode line to display the current Spotify player status."
+  (message "modeline status called")
   )
 
 (defun spotify-web-player-state ()
 )
 
 (defun spotify-web-player-toggle-play ()
+  (spotify-api-play)
 )
 
 (defun spotify-web-player-next-track ()
-)
+  (spotify-api-next))
 
 (defun spotify-web-player-previous-track ()
-)
+    (spotify-api-previous))
 
 (defun spotify-web-is-shuffling-supported ()
   t)
@@ -64,7 +66,11 @@
 (defun spotify-web-player-play-track (track-id context-id)
 )
 
+(defun spotify-web-player-play ()
+    (spotify-api-play))
+  
+
 (defun spotify-web-player-pause ()
-  (spotify-api-play-pause))
+    (spotify-api-pause))
 
 (provide 'spotify-web)

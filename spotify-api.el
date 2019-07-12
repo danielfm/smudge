@@ -75,6 +75,7 @@ JSON response."
     (with-current-buffer (oauth2-url-retrieve-synchronously (spotify-retrieve-oauth2-token)
                                                             url method data headers)
       (toggle-enable-multibyte-characters t)
+      (message (buffer-string))
       (goto-char (point-min))
 
       ;; If (json-read) signals 'end-of-file, we still kill the temp buffer
@@ -302,13 +303,37 @@ depending on the `type' argument."
                                        (market from_token))
                                      nil t)))))
 
-(defun spotify-api-pause ()
-  "Play pause current user"
+(defun spotify-api-player-pause ()
+  "Pause current track"
   (condition-case err
-      (spotify-api-call "PUT" "")
+      (spotify-api-call "PUT" "/me/player/pause?" "")
     (end-of-file t)))
 
-;; (spotify-api-play-pause)
+(defun spotify-api-player-play ()
+  "Play current track"
+  (condition-case err
+      (spotify-api-call "PUT" "/me/player/play?" "")
+    (end-of-file t)))
+
+(defun spotify-api-player-shuffle (state)
+  "Toggle shuffle"
+  (condition-case err
+      (spotify-api-call "PUT"
+			(format "/me/player/shuffle?state=%s" (if state "true" "false")  "")
+    (end-of-file t))))
+
+
+(defun spotify-api-player-next ()
+  "Play next track"
+  (condition-case err
+      (spotify-api-call "POST" "/me/player/next?" "")
+    (end-of-file t)))
+
+(defun spotify-api-player-previous ()
+  "Play previous track"
+  (condition-case err
+      (spotify-api-call "POST" "/me/player/previous?" "")
+    (end-of-file t)))
 
 (defun spotify-popularity-bar (popularity)
   "Returns the popularity indicator bar proportional to the given parameter,
