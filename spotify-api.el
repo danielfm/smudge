@@ -10,7 +10,7 @@
 (defconst spotify-api-endpoint     "https://api.spotify.com/v1")
 (defconst spotify-oauth2-auth-url  "https://accounts.spotify.com/authorize")
 (defconst spotify-oauth2-token-url "https://accounts.spotify.com/api/token")
-(defconst spotify-oauth2-scopes    "user-modify-playback-state playlist-read-private playlist-modify-public playlist-modify-private user-read-private")
+(defconst spotify-oauth2-scopes    "user-read-playback-state user-modify-playback-state playlist-read-private playlist-modify-public playlist-modify-private user-read-private")
 (defconst spotify-oauth2-callback  "http://localhost:8591/")
 
 (defcustom spotify-oauth2-client-id ""
@@ -75,9 +75,7 @@ JSON response."
     (with-current-buffer (oauth2-url-retrieve-synchronously (spotify-retrieve-oauth2-token)
                                                             url method data headers)
       (toggle-enable-multibyte-characters t)
-      (message (buffer-string))
       (goto-char (point-min))
-
       ;; If (json-read) signals 'end-of-file, we still kill the temp buffer
       ;; and re-signal the error
       (condition-case err
@@ -322,7 +320,6 @@ depending on the `type' argument."
 			(format "/me/player/shuffle?state=%s" (if state "true" "false")  "")
     (end-of-file t))))
 
-
 (defun spotify-api-player-next ()
   "Play next track"
   (condition-case err
@@ -334,6 +331,21 @@ depending on the `type' argument."
   (condition-case err
       (spotify-api-call "POST" "/me/player/previous?" "")
     (end-of-file t)))
+
+(defun spotify-api-player-status ()
+  "Status of current playback"
+  (condition-case err
+      ;; Sometimes this returns nothing even if playback is on
+      (spotify-api-call "GET" "/me/player?" "")
+    (end-of-file nil)))
+
+(defun spotify-api-player-play-track (track-id context-id)
+  "Play track track-id in context-context"
+  (condition-case err
+      ;; Sometimes this returns nothing even if playback is on
+      (spotify-api-call "PUT" "/me/player/play?"
+			(format "{\"context_uri\": \"%s\",\"offset\": {\"uri\": \"%s\"}}" context-id track-id))
+  (end-of-file t)))
 
 (defun spotify-popularity-bar (popularity)
   "Returns the popularity indicator bar proportional to the given parameter,

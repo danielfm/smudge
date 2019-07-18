@@ -39,7 +39,7 @@ GNU/Linux, `apple' otherwise."
 		 (symbol :tag "Web" web)))
 
 ;; TODO: No modeline support for linux just yet
-(defcustom spotify-mode-line-refresh-interval 1
+(defcustom spotify-mode-line-refresh-interval 15
   "The interval, in seconds, that the mode line must be updated. Set to 0 to
    disable this feature."
   :type 'integer)
