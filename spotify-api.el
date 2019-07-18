@@ -176,7 +176,9 @@ JSON response."
 
 (defun spotify-get-item-uri (json)
   "Returns the uri from the given track/album/artist object."
-  (gethash 'uri json))
+  (if (gethash 'linked_from json)
+      (gethash 'uri (gethash 'linked_from json))
+    (gethash 'uri json)))
 
 (defun spotify-get-playlist-track-count (json)
   "Returns the number of tracks of the given playlist object."
@@ -345,8 +347,8 @@ depending on the `type' argument."
       ;; Sometimes this returns nothing even if playback is on
       (spotify-api-call "PUT" "/me/player/play?"
 			(format "{\"context_uri\": \"%s\",\"offset\": {\"uri\": \"%s\"}}" context-id track-id))
-  (end-of-file t)))
-
+    (end-of-file t)))
+b
 (defun spotify-popularity-bar (popularity)
   "Returns the popularity indicator bar proportional to the given parameter,
 which must be a number between 0 and 100."
