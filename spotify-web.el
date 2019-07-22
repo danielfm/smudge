@@ -4,10 +4,6 @@
 
 ;; Code:
 
-;; Write script to a temp file
-(setq spotify-web-player-status-script-file
-      (make-temp-file "spotify.el" nil nil spotify-web-player-status-script))
-
 (set (make-local-variable 'spotify-web-player-status-json) nil)
 
 (defun spotify-web-player-status ()

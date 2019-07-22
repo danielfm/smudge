@@ -348,7 +348,7 @@ depending on the `type' argument."
       (spotify-api-call "PUT" "/me/player/play?"
 			(format "{\"context_uri\": \"%s\",\"offset\": {\"uri\": \"%s\"}}" context-id track-id))
     (end-of-file t)))
-b
+
 (defun spotify-popularity-bar (popularity)
   "Returns the popularity indicator bar proportional to the given parameter,
 which must be a number between 0 and 100."
