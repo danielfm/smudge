@@ -309,4 +309,10 @@ which must be a number between 0 and 100."
     (concat (make-string num-bars ?X)
             (make-string (- 10 num-bars) ?-))))
 
+(defun spotify-api-device-list ()
+	"Retrieve the list of devices available for use with Spotify Connect."
+	(spotify-api-call
+	 "GET"
+	 "/me/player/devices"))
+
 (provide 'spotify-api)

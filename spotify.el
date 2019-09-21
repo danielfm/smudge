@@ -116,4 +116,17 @@
   (let ((new-playlist (spotify-api-playlist-create (spotify-current-user-id) name is-public)))
     (message (format "Playlist '%s' created" (spotify-get-item-name new-playlist)))))
 
+;;;###autoload
+(defun spotify-select-device ()
+  "Allows for the selection of a device via Spotify Connect for transport functions."
+  (interactive)
+  (let ((buffer (get-buffer-create "*Devices*")))
+    (with-current-buffer buffer
+      (spotify-select-device-mode)
+      (setq-local spotify-current-page 1)
+      (setq tabulated-list-entries nil)
+      (pop-to-buffer buffer)
+      (spotify-device-list-update 1)
+      buffer)))
+
 (provide 'spotify)
