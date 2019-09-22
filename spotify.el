@@ -122,11 +122,11 @@
   (interactive)
   (let ((buffer (get-buffer-create "*Devices*")))
     (with-current-buffer buffer
-      (spotify-select-device-mode)
+      (spotify-device-select-mode)
       (setq-local spotify-current-page 1)
       (setq tabulated-list-entries nil)
       (pop-to-buffer buffer)
-      (spotify-device-list-update 1)
+      (spotify-device-select-update 1)
       buffer)))
 
 (provide 'spotify)
