@@ -235,9 +235,9 @@ depending on the `type' argument."
 (defun spotify-api-album-get-tracks (album-id)
   "Get list of track ids for given album."
   (mapcar 'spotify-get-item-id (spotify-get-items (spotify-api-call
-						   "GET"
-						   (format "/albums/%s/tracks"
-							   (url-hexify-string album-id))))))
+               "GET"
+               (format "/albums/%s/tracks"
+                 (url-hexify-string album-id))))))
 
 (defun spotify-api-playlist-add-track (user-id playlist-id track-id)
   "Add single track to playlist"
@@ -310,9 +310,18 @@ which must be a number between 0 and 100."
             (make-string (- 10 num-bars) ?-))))
 
 (defun spotify-api-device-list ()
-	"Retrieve the list of devices available for use with Spotify Connect."
-	(spotify-api-call
-	 "GET"
-	 "/me/player/devices"))
+  "Retrieve the list of devices available for use with Spotify Connect."
+  (spotify-api-call
+   "GET"
+   "/me/player/devices"))
+
+(defun spotify-api-transfer-player (device-id)
+  "Transfer playback to DEVICE-ID and determine if it should start playing."
+  (condition-case err
+      (spotify-api-call
+       "PUT"
+       "/me/player"
+       (format "{\"device_ids\":[\"%s\"]}" device-id))
+    (end-of-file t)))
 
 (provide 'spotify-api)

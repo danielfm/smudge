@@ -34,6 +34,7 @@
 (require 'spotify-api)
 (require 'spotify-track-search)
 (require 'spotify-playlist-search)
+(require 'spotify-device-select)
 (require 'spotify-controller)
 (require 'spotify-remote)
 
@@ -126,7 +127,7 @@
       (setq-local spotify-current-page 1)
       (setq tabulated-list-entries nil)
       (pop-to-buffer buffer)
-      (spotify-device-select-update 1)
+      (spotify-device-select-update)
       buffer)))
 
 (provide 'spotify)
