@@ -81,6 +81,15 @@ key bindings:
 | <kbd>M-p p u</kbd> | `spotify-user-playlists`     | Show playlists for the given user |
 | <kbd>M-p p c</kbd> | `spotify-create-playlist`    | Create a new playlist             |
 | <kbd>M-p t s</kbd> | `spotify-track-search`       | Search for tracks                 |
+| <kbd>M-p v u</kbd> | `spotify-volume-up`          | Increase the volume               |
+| <kbd>M-p v d</kbd> | `spotify-volume-down`        | Decrease the volume               |
+
+The volume controls only work with the Spotify Connect transport. In order to use them, set the transport in your init file as follows:
+
+````el
+(setq spotify-transport 'connect)
+````
+
 
 The current song being played by the Spotify client is displayed in the mode
 line along with the player status (playing, paused). The interval in which the

@@ -34,6 +34,8 @@ See commands \\[spotify-toggle-repeating] and
             (define-key map (kbd "M-p p s") 'spotify-playlist-search)
             (define-key map (kbd "M-p p c") 'spotify-create-playlist)
             (define-key map (kbd "M-p t s") 'spotify-track-search)
+            (define-key map (kbd "M-p v u") 'spotify-volume-up)
+            (define-key map (kbd "M-p v d") 'spotify-volume-down)
             map)
   (let ((s '(:eval (spotify-mode-line-text))))
     (if spotify-remote-mode
@@ -100,6 +102,7 @@ See commands \\[spotify-toggle-repeating] and
 (defun turn-on-spotify-remote-mode ()
   "Turns the `spotify-remote-mode' on in the current buffer."
   (spotify-remote-mode 1))
+
 
 (define-globalized-minor-mode global-spotify-remote-mode
   spotify-remote-mode turn-on-spotify-remote-mode

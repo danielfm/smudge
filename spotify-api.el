@@ -324,4 +324,24 @@ which must be a number between 0 and 100."
        (format "{\"device_ids\":[\"%s\"]}" device-id))
     (end-of-file t)))
 
+(defun spotify-api-set-volume (device-id percentage)
+  "Set the volume level to PERCENTAGE of max for DEVICE-ID."
+  (condition-case err
+      (spotify-api-call
+       "PUT"
+       (concat "/me/player/volume?"
+               (url-build-query-string `((volume_percent     ,percentage)
+                                         (device_id          ,device-id))
+                                       nil t))
+       "")
+    (end-of-file t)))
+
+(defun spotify-api-get-player-status ()
+  "Get the Spotify Connect status of the currently active player."
+  (condition-case err
+      (spotify-api-call
+       "GET"
+       "/me/player")
+    (end-of-file nil)))
+
 (provide 'spotify-api)

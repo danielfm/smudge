@@ -94,7 +94,7 @@
   (eq (gethash 'is_restricted device) t))
 
 (defun spotify-get-device-id (device)
-  "Return the unique id of DEVICE."  
+  "Return the unique id of DEVICE."
   (gethash 'id device))
 
 (provide 'spotify-device-select)

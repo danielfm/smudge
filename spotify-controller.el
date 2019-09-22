@@ -208,10 +208,15 @@ This corresponds to the current REPEATING state."
   (interactive)
   (spotify-apply "player-pause"))
 
-(defun spotify-device-volume-up ()
-  "Increase the volume by 10 percent for the active device."
+(defun spotify-volume-up ()
+  "Increase the volume for the active device."
   (interactive)
-  (spotify-apply "set-volume"))
+  (spotify-apply "volume-up"))
+
+(defun spotify-volume-down ()
+  "Increase the volume for the active device."
+  (interactive)
+  (spotify-apply "volume-down"))
 
 (defun spotify-is-repeating-supported()
   "Return whether toggling repeat is supported."
