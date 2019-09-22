@@ -207,7 +207,7 @@ key bindings:
 | <kbd>t</kbd>     | Lists the tracks of the playlist under the cursor        |
 | <kbd>M-RET</kbd> | Plays the playlist under the cursor                      |
 
-Once you opened the list of tracks of a playlist, you get the following key
+Once you open the list of tracks of a playlist, you get the following key
 bindings in the resulting buffer:
 
 | Key              | Description                                                         |
@@ -222,6 +222,19 @@ Both buffers load the `spotify-remote-mode` by default.
 
 [1] D-Bus implementation for GNU/Linux do not support passing the context, so
 only the track under the cursor will be played
+
+## Selecting a Device for Playback
+
+<kbd>M-x spotify-select-device</kbd> will display a list of devices available for playback in a separate buffer.
+
+Note: use of this feature requires a Spotify premium subscription.
+
+Once you open the list of devices, you get the following key bindings in the resulting buffer:
+
+| Key              | Description                                                         |
+|:-----------------|:--------------------------------------------------------------------|
+| <kbd>RET</kbd>   | Transfer playback to the device under the cursor.                   |
+| <kbd>g</kbd>     | Reloads the list of devices                                         |
 
 ## Donate
 
