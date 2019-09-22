@@ -37,11 +37,14 @@ disk, add that directory in the `load-path`, and require the `spotify` module:
 ;; Settings
 (setq spotify-oauth2-client-secret "<spotify-app-client-secret>")
 (setq spotify-oauth2-client-id "<spotify-app-client-id>")
+(setq spotify-transport 'connect)
 ````
 
 In order to get the the client ID and client secret, you need to create
 [a Spotify app](https://developer.spotify.com/my-applications), specifying
 <http://localhost:8591/> as the redirect URI.
+
+To use the "Spotify Connect" transport (in order to control players across the network and have the ability to control volume), set `spotify-transport` to `'connect`. This feature requires a Spotify premium subscription. Otherwise set it to `'apple` (Mac OS) or `'dbus` (GNU Linux).
 
 ### Creating The Spotify App
 
@@ -68,27 +71,21 @@ Finally, scroll to the end of the page and hit **Save**.
 Whenever you enable the `spotify-remote-mode` minor mode you get the following
 key bindings:
 
-| Key                | Function                     | Description                       |
-|:-------------------|:-----------------------------|:----------------------------------|
-| <kbd>M-p M-s</kbd> | `spotify-toggle-shuffle`     | Turn shuffle on/off [1]           |
-| <kbd>M-p M-r</kbd> | `spotify-toggle-repeat`      | Turn repeat on/off [1]            |
-| <kbd>M-p M-p</kbd> | `spotify-toggle-play`        | Play/pause                        |
-| <kbd>M-p M-f</kbd> | `spotify-next-track`         | Next track                        |
-| <kbd>M-p M-b</kbd> | `spotify-previous-track`     | Previous track                    |
-| <kbd>M-p p m</kbd> | `spotify-my-playlists`       | Show your playlists               |
-| <kbd>M-p p f</kbd> | `spotify-featured-playlists` | Show the featured playlists       |
-| <kbd>M-p p s</kbd> | `spotify-playlist-search`    | Search for playlists              |
-| <kbd>M-p p u</kbd> | `spotify-user-playlists`     | Show playlists for the given user |
-| <kbd>M-p p c</kbd> | `spotify-create-playlist`    | Create a new playlist             |
-| <kbd>M-p t s</kbd> | `spotify-track-search`       | Search for tracks                 |
-| <kbd>M-p v u</kbd> | `spotify-volume-up`          | Increase the volume               |
-| <kbd>M-p v d</kbd> | `spotify-volume-down`        | Decrease the volume               |
-
-The volume controls only work with the Spotify Connect transport. In order to use them, set the transport in your init file as follows:
-
-````el
-(setq spotify-transport 'connect)
-````
+| Key                | Function                     | Description                                |
+|:-------------------|:-----------------------------|:-------------------------------------------|
+| <kbd>M-p M-s</kbd> | `spotify-toggle-shuffle`     | Turn shuffle on/off [1]                    |
+| <kbd>M-p M-r</kbd> | `spotify-toggle-repeat`      | Turn repeat on/off [1]                     |
+| <kbd>M-p M-p</kbd> | `spotify-toggle-play`        | Play/pause                                 |
+| <kbd>M-p M-f</kbd> | `spotify-next-track`         | Next track                                 |
+| <kbd>M-p M-b</kbd> | `spotify-previous-track`     | Previous track                             |
+| <kbd>M-p p m</kbd> | `spotify-my-playlists`       | Show your playlists                        |
+| <kbd>M-p p f</kbd> | `spotify-featured-playlists` | Show the featured playlists                |
+| <kbd>M-p p s</kbd> | `spotify-playlist-search`    | Search for playlists                       |
+| <kbd>M-p p u</kbd> | `spotify-user-playlists`     | Show playlists for the given user          |
+| <kbd>M-p p c</kbd> | `spotify-create-playlist`    | Create a new playlist                      |
+| <kbd>M-p t s</kbd> | `spotify-track-search`       | Search for tracks                          |
+| <kbd>M-p v u</kbd> | `spotify-volume-up`          | Increase the volume (Spotify connect only) |
+| <kbd>M-p v d</kbd> | `spotify-volume-down`        | Decrease the volume (Spotify connect only) |
 
 
 The current song being played by the Spotify client is displayed in the mode

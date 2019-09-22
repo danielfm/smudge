@@ -11,8 +11,30 @@
 (require 'spotify-api)
 
 (defun spotify-connect-player-status ()
-  "Get the player status of the currently playing device, if any."
-  (spotify-api-get-player-status))
+  "Get the player status of the currently playing device, if any.
+Returns a JSON string in the format:
+{
+  \"artist\": \"Aesop Rock\",
+  \"duration\": 265333,
+  \"track_number\": 9,
+  \"name\":  \"Shrunk\",
+  \"player_state\": \"playing\",
+  \"player_shuffling\": \"t\",
+  \"player_repeating\": \"context\"
+}"
+  (let* ((status (spotify-api-get-player-status))
+         (track (gethash 'item status)))
+    (spotify-replace-mode-line-flags
+		 (concat "{"
+             (format "\"artist\":\"%s\"," (gethash 'name (car (gethash 'artists track))))
+             (format "\"duration\": %d," (gethash 'duration_ms track))
+             (format "\"track_number\":%d," (gethash 'track_number track))
+             (format "\"name\":\"%s\"," (gethash 'name track))
+             (format "\"player_state\":\"%s\","
+                     (if (gethash 'is_playing status) "playing", "paused"))
+             (format "\"player_shuffling\":\"%s\"," (gethash 'shuffle_state status))
+             (format "\"player_repeating\":\"%s\"" (gethash 'repeat_state status))
+             "}"))))
 
 (defun spotify-connect-get-device-id (player-status)
   "Get the id if from PLAYER-STATUS of the currently playing device, if any."
