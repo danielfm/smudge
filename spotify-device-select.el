@@ -14,8 +14,7 @@
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map tabulated-list-mode-map)
     (define-key map (kbd "M-RET") 'spotify-device-select)
-    (define-key map (kbd "l")     'spotify-playlist-load-more)
-    (define-key map (kbd "g")     'spotify-playlist-reload)
+    (define-key map (kbd "g")     'spotify-device-list-reload)
     map)
   "Local keymap for `spotify-device-select-mode' buffers.")
 
@@ -31,6 +30,11 @@
           (spotify-devices-print devices current-page)
           (message "device list updated"))
       (message "No more devices"))))
+
+(defun spotify-device-list-reload ()
+  "Reloads the devices for the current device list view."
+  (interactive)
+	(spotify-device-select-update 1))
 
 (defun spotify-devices-print (devices current-page)
   "Append the given DEVICES the CURRENT-PAGE devices view."
