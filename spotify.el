@@ -119,15 +119,17 @@
 
 ;;;###autoload
 (defun spotify-select-device ()
-  "Allows for the selection of a device via Spotify Connect for transport functions."
+  "Allow for the selection of a device via Spotify Connect for transport functions."
   (interactive)
-  (let ((buffer (get-buffer-create "*Devices*")))
-    (with-current-buffer buffer
-      (spotify-device-select-mode)
-      (setq-local spotify-current-page 1)
-      (setq tabulated-list-entries nil)
-      (pop-to-buffer buffer)
-      (spotify-device-select-update)
-      buffer)))
+  (if (not (string= (gethash 'product (spotify-current-user)) "premium"))
+      (message "This feature requires a Spotify premium subscription.")
+    (let ((buffer (get-buffer-create "*Devices*")))
+      (with-current-buffer buffer
+        (spotify-device-select-mode)
+        (setq-local spotify-current-page 1)
+        (setq tabulated-list-entries nil)
+        (pop-to-buffer buffer)
+        (spotify-device-select-update)
+        buffer))))
 
 (provide 'spotify)

@@ -30,13 +30,12 @@
   (let* ((json (spotify-api-device-list))
          (devices (gethash 'devices json))
          (line (string-to-number (format-mode-line "%l"))))
-    (if devices
+    (when devices
         (progn
           (spotify-devices-print devices)
           (goto-char (point-min))
           (forward-line (1- line))
-          (message "device list updated"))
-      (message "No more devices"))))
+          (message "Device list updated.")))))
 
 (defun spotify-devices-print (devices)
   "Append the given DEVICES to the devices view."
@@ -57,9 +56,10 @@
                               'action `(lambda (_)
                                          (progn
                                            (setq spotify-selected-device-id ,device-id)
-                                           (spotify-api-transfer-player ,device-id)
-                                           ;; FIXME: figure out how to do this synchronously
-                                           (run-at-time 1 nil #'spotify-device-select-update)))
+                                           (spotify-api-transfer-player
+                                            ,device-id
+                                            ,(lambda () (progn (message "switching devices") (spotify-device-select-update)
+                                                          (message "wtf"))))))
                               'help-echo (format "Select %s for transport" name)))
                   (if is-active "X" "")
                   (if is-active (number-to-string volume) "")))
