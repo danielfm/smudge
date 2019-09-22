@@ -56,10 +56,8 @@
                               'action `(lambda (_)
                                          (progn
                                            (setq spotify-selected-device-id ,device-id)
-                                           (spotify-api-transfer-player
-                                            ,device-id
-                                            ,(lambda () (progn (message "switching devices") (spotify-device-select-update)
-                                                          (message "wtf"))))))
+                                           (spotify-api-transfer-player ,device-id)
+                                           (run-at-time 1 nil #'spotify-device-select-update)))
                               'help-echo (format "Select %s for transport" name)))
                   (if is-active "X" "")
                   (if is-active (number-to-string volume) "")))
