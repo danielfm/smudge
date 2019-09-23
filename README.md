@@ -74,21 +74,22 @@ Finally, scroll to the end of the page and hit **Save**.
 Whenever you enable the `spotify-remote-mode` minor mode you get the following
 key bindings:
 
-| Key                | Function                     | Description                                |
-|:-------------------|:-----------------------------|:-------------------------------------------|
-| <kbd>M-p M-s</kbd> | `spotify-toggle-shuffle`     | Turn shuffle on/off [1]                    |
-| <kbd>M-p M-r</kbd> | `spotify-toggle-repeat`      | Turn repeat on/off [1]                     |
-| <kbd>M-p M-p</kbd> | `spotify-toggle-play`        | Play/pause                                 |
-| <kbd>M-p M-f</kbd> | `spotify-next-track`         | Next track                                 |
-| <kbd>M-p M-b</kbd> | `spotify-previous-track`     | Previous track                             |
-| <kbd>M-p p m</kbd> | `spotify-my-playlists`       | Show your playlists                        |
-| <kbd>M-p p f</kbd> | `spotify-featured-playlists` | Show the featured playlists                |
-| <kbd>M-p p s</kbd> | `spotify-playlist-search`    | Search for playlists                       |
-| <kbd>M-p p u</kbd> | `spotify-user-playlists`     | Show playlists for the given user          |
-| <kbd>M-p p c</kbd> | `spotify-create-playlist`    | Create a new playlist                      |
-| <kbd>M-p t s</kbd> | `spotify-track-search`       | Search for tracks                          |
-| <kbd>M-p v u</kbd> | `spotify-volume-up`          | Increase the volume (Spotify connect only) |
-| <kbd>M-p v d</kbd> | `spotify-volume-down`        | Decrease the volume (Spotify connect only) |
+| Key                | Function                     | Description                                     |
+|:-------------------|:-----------------------------|:------------------------------------------------|
+| <kbd>M-p M-s</kbd> | `spotify-toggle-shuffle`     | Turn shuffle on/off [1]                         |
+| <kbd>M-p M-r</kbd> | `spotify-toggle-repeat`      | Turn repeat on/off [1]                          |
+| <kbd>M-p M-p</kbd> | `spotify-toggle-play`        | Play/pause                                      |
+| <kbd>M-p M-f</kbd> | `spotify-next-track`         | Next track                                      |
+| <kbd>M-p M-b</kbd> | `spotify-previous-track`     | Previous track                                  |
+| <kbd>M-p p m</kbd> | `spotify-my-playlists`       | Show your playlists                             |
+| <kbd>M-p p f</kbd> | `spotify-featured-playlists` | Show the featured playlists                     |
+| <kbd>M-p p s</kbd> | `spotify-playlist-search`    | Search for playlists                            |
+| <kbd>M-p p u</kbd> | `spotify-user-playlists`     | Show playlists for the given user               |
+| <kbd>M-p p c</kbd> | `spotify-create-playlist`    | Create a new playlist                           |
+| <kbd>M-p t s</kbd> | `spotify-track-search`       | Search for tracks                               |
+| <kbd>M-p v u</kbd> | `spotify-volume-up`          | Increase the volume [2]                         |
+| <kbd>M-p v d</kbd> | `spotify-volume-down`        | Decrease the volume [2]                         |
+| <kbd>M-p M-d</kbd> | `spotify-select-device`      | Select a playback device [2]                    |
 
 
 The current song being played by the Spotify client is displayed in the mode
@@ -101,7 +102,8 @@ mode line is updated can be configured via the
 (setq spotify-mode-line-refresh-interval 1)
 ````
 
-[1] No proper support for this in D-Bus implementation for GNU/Linux
+[1] No proper support for this in D-Bus implementation for GNU/Linux  
+[2] This feature uses Spotify Connect and requires a premium subscription
 
 #### Customizing The Mode Line
 

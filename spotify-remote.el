@@ -36,6 +36,7 @@ See commands \\[spotify-toggle-repeating] and
             (define-key map (kbd "M-p t s") 'spotify-track-search)
             (define-key map (kbd "M-p v u") 'spotify-volume-up)
             (define-key map (kbd "M-p v d") 'spotify-volume-down)
+						(define-key map (kbd "M-p M-d") 'spotify-select-device)
             map)
   (let ((s '(:eval (spotify-mode-line-text))))
     (if spotify-remote-mode
