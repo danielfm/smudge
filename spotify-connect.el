@@ -79,18 +79,63 @@ Returns a JSON string in the format:
 (defun spotify-connect-volume-up ()
   "Turn up the volume on the actively playing device."
   (let ((player-status (spotify-api-get-player-status)))
-    (spotify-api-set-volume
-     (spotify-connect-get-device-id player-status)
-     (min (+ (spotify-connect-get-volume player-status) 10) 100)))
+    (if player-status
+        (spotify-api-set-volume
+         (spotify-connect-get-device-id player-status)
+         (min (+ (spotify-connect-get-volume player-status) 10) 100))))
   (message "volume increased"))
 
 (defun spotify-connect-volume-down ()
   "Turn down the volume (for what?) on the actively playing device."
   (let ((player-status (spotify-api-get-player-status)))
-    (spotify-api-set-volume
-     (spotify-connect-get-device-id player-status)
-     (max (- (spotify-connect-get-volume player-status) 10) 0)))
+    (if player-status
+        (spotify-api-set-volume
+         (spotify-connect-get-device-id player-status)
+         (max (- (spotify-connect-get-volume player-status) 10) 0))))
   (message "volume decreased"))
+
+(defun spotify-connect-is-shuffling-supported ()
+  "Shuffling is supported on Spotify Connect."
+  t)
+
+(defun spotify-connect-is-repeating-supported ()
+  "Repeating is supported Spotify Connect."
+  t)
+
+(defun spotify-connect-toggle-repeat ()
+  "Toggle repeat for the current track."
+  (let ((player-status (spotify-api-get-player-status)))
+    (if player-status
+        (spotify-api-repeat
+         (if (spotify--is-repeating player-status) "off" "context")))))
+
+(defun spotify-connect-toggle-shuffle ()
+  "Toggle shuffle for the current track."
+  (let ((player-status (spotify-api-get-player-status)))
+    (if player-status
+        (spotify-api-shuffle
+         (if (spotify--is-shuffling player-status) "false" "true")))))
+
+(defun spotify-connect-is-repeating ()
+  "Answer whether the current device is set to repeat."
+  (let ((player-status (spotify-api-get-player-status)))
+    (and player-status
+         (spotify--is-repeating player-status))))
+
+(defun spotify-connect-is-shuffling ()
+  "Answer whether the current device is set to shuffle."
+  (let ((player-status (spotify-api-get-player-status)))
+    (spotify--is-shuffling player-status)))
+
+(defun spotify--is-shuffling (player-status)
+  "Business logic for shuffling state of PLAYER-STATUS."
+  (and player-status
+         (not (eq (gethash 'shuffle_state player-status) :json-false))))
+
+(defun spotify--is-repeating (player-status)
+  "Business logic for repeat state of PLAYER-STATUS."
+  (string= (gethash 'repeat_state player-status) "context"))
+
 
 (provide 'spotify-connect)
 

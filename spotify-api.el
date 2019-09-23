@@ -385,6 +385,27 @@ If no args, resume playing current track.  Otherwise, play URI in CONTEXT, if sp
        "")
     (end-of-file t)))
 
+(defun spotify-api-repeat (state)
+  "Set repeat of current track to STATE."
+  (condition-case err
+      (spotify-api-call
+       "PUT"
+       (concat "/me/player/repeat?"
+               (url-build-query-string `((state ,state))
+                                       nil t))
+       "")
+    (end-of-file t)))
 
+
+(defun spotify-api-shuffle (state)
+  "Set repeat of current track to STATE."
+  (condition-case err
+      (spotify-api-call
+       "PUT"
+       (concat "/me/player/shuffle?"
+               (url-build-query-string `((state ,state))
+                                       nil t))
+       "")
+    (end-of-file t)))
 
 (provide 'spotify-api)
