@@ -32,15 +32,14 @@ Returns a JSON string in the format:
                   (format "\"track_number\":%d," (gethash 'track_number track))
                   (format "\"name\":\"%s\"," (gethash 'name track))
                   (format "\"player_state\":\"%s\","
-                          (if (gethash 'is_playing status) "playing", "paused"))
+                          (if (eq (gethash 'is_playing status) :json-false) "paused" "playing"))
                   (format "\"player_shuffling\":%s,"
                           (if (not (eq (gethash 'shuffle_state status) :json-false))
                               "true" "false"))
                   (format "\"player_repeating\":%s"
                           (if (string= (gethash 'repeat_state status) "off") "false" "true"))
                   "}"))))
-    (when status
-      (spotify-replace-mode-line-flags json))))
+    (spotify-replace-mode-line-flags json)))
 
 (defun spotify-connect-get-device-id (player-status)
   "Get the id if from PLAYER-STATUS of the currently playing device, if any."
