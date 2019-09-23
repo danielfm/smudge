@@ -26,7 +26,7 @@
   "Evaluate THEN form if Emacs is running in OS X."
   `(if-darwin ,then nil))
 
-(defcustom spotify-transport nil
+(defcustom spotify-transport (if-gnu-linux 'dbus 'apple)
   "How the commands should be sent to Spotify process.  Defaults for `dbus' for GNU/Linux, `apple' otherwise."
   :type '(choice (symbol :tag "AppleScript" apple)
                  (symbol :tag "D-Bus" dbus)

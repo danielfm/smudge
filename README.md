@@ -37,14 +37,17 @@ disk, add that directory in the `load-path`, and require the `spotify` module:
 ;; Settings
 (setq spotify-oauth2-client-secret "<spotify-app-client-secret>")
 (setq spotify-oauth2-client-id "<spotify-app-client-id>")
-(setq spotify-transport 'connect)
 ````
 
 In order to get the the client ID and client secret, you need to create
 [a Spotify app](https://developer.spotify.com/my-applications), specifying
 <http://localhost:8591/> as the redirect URI.
 
-To use the "Spotify Connect" transport (in order to control players across the network and have the ability to control volume), set `spotify-transport` to `'connect`. This feature requires a Spotify premium subscription. Otherwise set it to `'apple` (Mac OS) or `'dbus` (GNU Linux).
+To use the "Spotify Connect" transport (in order to control players across the network and have the ability to control volume), set `spotify-transport` to `'connect` as follows. This feature requires a Spotify premium subscription.
+
+````el
+(setq spotify-transport 'connect)
+````
 
 ### Creating The Spotify App
 
