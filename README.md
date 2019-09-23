@@ -4,14 +4,16 @@
 
 [![asciicast](https://asciinema.org/a/218654.svg)](https://asciinema.org/a/218654)
 
-Spotify.el is a collection of extensions that allows you to control the Spotify
-application from within your favorite text editor.
-
-**Note:** This is _very_ alpha software, and it works only in Mac OS X and Linux.
+Spotify.el is a collection of extensions that allows you to control the Spotify application from
+within your favorite text editor. If you are running on Mac OS X or Linux, you can control the
+locally running instance. If you are running on any platform with a network connection (including
+Windows - and even headless!) and have a Spotify premium subscription, you can control an instance
+of Spotify via the Spotify Connect feature.
 
 ## Features
 
 * Spotify client integration for GNU/Linux (via D-Bus) and OS X (via AppleScript)
+* Device playback display & selection using the Spotify Connect API (requires premium)
 * Communicates with the Spotify API via Oauth2
 * Displays the current track in mode line
 * Create playlists (public or private)
@@ -43,7 +45,9 @@ In order to get the the client ID and client secret, you need to create
 [a Spotify app](https://developer.spotify.com/my-applications), specifying
 <http://localhost:8591/> as the redirect URI.
 
-To use the "Spotify Connect" transport (in order to control players across the network and have the ability to control volume), set `spotify-transport` to `'connect` as follows. This feature requires a Spotify premium subscription.
+To use the "Spotify Connect" transport (vs. controlling only your local instance - though you can
+also control your local instance as well), set `spotify-transport` to `'connect` as follows. This
+feature requires a Spotify premium subscription.
 
 ````el
 (setq spotify-transport 'connect)
@@ -56,9 +60,8 @@ and give your application a name and a description:
 
 ![Creating a Spotify App 1/2](./img/spotify-app-01.png)
 
-At this point, the client ID and the client secret is already available, so set
-those values to `spotify-oauth2-client-id` and `spotify-oauth2-client-secret`,
-respectively.
+At this point, the client ID and the client secret are available, so set those values to
+`spotify-oauth2-client-id` and `spotify-oauth2-client-secret`, respectively.
 
 Then, scroll down a little bit, type <http://localhost:8591/> as the Redirect
 URI for the application, and click **Add**:
