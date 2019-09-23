@@ -71,8 +71,8 @@
 (defun spotify-device-set-list-format ()
   "Configures the column data for the device view."
   (setq tabulated-list-format
-        (vector `("Device" ,(- (window-width) 18) t)
-                '("Active" 8 t)
+        (vector `("Device" ,(- (window-width) 22) t)
+                '("Active" 12 t)
                 '("Volume" 8 nil :right-align t))))
 
 (defun spotify-get-device-name (device)
