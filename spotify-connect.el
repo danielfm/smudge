@@ -47,6 +47,30 @@ Returns a JSON string in the format:
   (if player-status
       (gethash 'id (gethash 'device player-status))))
 
+(defun spotify-connect-player-play-track (uri &optional context)
+  "Play a track URI via Spotify Connect in an optional CONTEXT."
+  (spotify-api-play uri context))
+
+(defun spotify-connect-player-pause ()
+  "Pause the currently playing track."
+  (spotify-api-pause))
+
+(defun spotify-connect-player-toggle-play ()
+  "Toggle playing status of current track."
+  (let ((player-status (spotify-api-get-player-status)))
+    (if player-status
+        (if (not (eq (gethash 'is_playing player-status) :json-false))
+            (spotify-api-pause)
+          (spotify-api-play)))))
+
+(defun spotify-connect-player-next-track ()
+  "Skip to the next track."
+  (spotify-api-next))
+
+(defun spotify-connect-player-previous-track ()
+  "Skip to the previous track."
+  (spotify-api-previous))
+
 (defun spotify-connect-get-volume (player-status)
   "Get the volume from PLAYER-STATUS of the currently playing device, if any."
   (if player-status

@@ -344,4 +344,47 @@ which must be a number between 0 and 100."
        "/me/player")
     (end-of-file nil)))
 
+(defun spotify-api-play (&optional uri context)
+  "Play a track.
+If no args, resume playing current track.  Otherwise, play URI in CONTEXT, if specified."
+  (condition-case err
+      (spotify-api-call
+       "PUT"
+       "/me/player/play"
+       (concat
+        "{"
+        (when uri (format "\"uris\":[\"%s\"]," uri))
+        (when context (format "\"context_uri\":\"%s\"" context))
+        "}"))
+    (end-of-file t)))
+
+(defun spotify-api-pause ()
+  "Pause the currently playing track."
+  (condition-case err
+      (spotify-api-call
+       "PUT"
+       "/me/player/pause"
+       "")
+    (end-of-file t)))
+
+(defun spotify-api-next ()
+  "Skip to the next track."
+  (condition-case err
+      (spotify-api-call
+       "POST"
+       "/me/player/next"
+       "")
+    (end-of-file t)))
+
+(defun spotify-api-previous ()
+  "Skip to the previous track."
+  (condition-case err
+      (spotify-api-call
+       "POST"
+       "/me/player/previous"
+       "")
+    (end-of-file t)))
+
+
+
 (provide 'spotify-api)
