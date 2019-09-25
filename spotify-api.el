@@ -235,9 +235,9 @@ depending on the `type' argument."
 (defun spotify-api-album-get-tracks (album-id)
   "Get list of track ids for given album."
   (mapcar 'spotify-get-item-id (spotify-get-items (spotify-api-call
-						   "GET"
-						   (format "/albums/%s/tracks"
-							   (url-hexify-string album-id))))))
+               "GET"
+               (format "/albums/%s/tracks"
+                 (url-hexify-string album-id))))))
 
 (defun spotify-api-playlist-add-track (user-id playlist-id track-id)
   "Add single track to playlist"
@@ -308,5 +308,104 @@ which must be a number between 0 and 100."
   (let ((num-bars (truncate (/ popularity 10))))
     (concat (make-string num-bars ?X)
             (make-string (- 10 num-bars) ?-))))
+
+(defun spotify-api-device-list ()
+  "Retrieve the list of devices available for use with Spotify Connect."
+  (spotify-api-call
+   "GET"
+   "/me/player/devices"))
+
+(defun spotify-api-transfer-player (device-id)
+  "Transfer playback to DEVICE-ID and determine if it should start playing."
+  (condition-case err
+      (spotify-api-call
+       "PUT"
+       "/me/player"
+       (format "{\"device_ids\":[\"%s\"]}" device-id))
+    (end-of-file t)))
+
+(defun spotify-api-set-volume (device-id percentage)
+  "Set the volume level to PERCENTAGE of max for DEVICE-ID."
+  (condition-case err
+      (spotify-api-call
+       "PUT"
+       (concat "/me/player/volume?"
+               (url-build-query-string `((volume_percent     ,percentage)
+                                         (device_id          ,device-id))
+                                       nil t))
+       "")
+    (end-of-file t)))
+
+(defun spotify-api-get-player-status ()
+  "Get the Spotify Connect status of the currently active player."
+  (condition-case err
+      (spotify-api-call
+       "GET"
+       "/me/player")
+    (end-of-file nil)))
+
+(defun spotify-api-play (&optional uri context)
+  "Play a track.
+If no args, resume playing current track.  Otherwise, play URI in CONTEXT, if specified."
+  (condition-case err
+      (spotify-api-call
+       "PUT"
+       "/me/player/play"
+       (concat
+        "{"
+        (when uri (format "\"uris\":[\"%s\"]," uri))
+        (when context (format "\"context_uri\":\"%s\"" context))
+        "}"))
+    (end-of-file t)))
+
+(defun spotify-api-pause ()
+  "Pause the currently playing track."
+  (condition-case err
+      (spotify-api-call
+       "PUT"
+       "/me/player/pause"
+       "")
+    (end-of-file t)))
+
+(defun spotify-api-next ()
+  "Skip to the next track."
+  (condition-case err
+      (spotify-api-call
+       "POST"
+       "/me/player/next"
+       "")
+    (end-of-file t)))
+
+(defun spotify-api-previous ()
+  "Skip to the previous track."
+  (condition-case err
+      (spotify-api-call
+       "POST"
+       "/me/player/previous"
+       "")
+    (end-of-file t)))
+
+(defun spotify-api-repeat (state)
+  "Set repeat of current track to STATE."
+  (condition-case err
+      (spotify-api-call
+       "PUT"
+       (concat "/me/player/repeat?"
+               (url-build-query-string `((state ,state))
+                                       nil t))
+       "")
+    (end-of-file t)))
+
+
+(defun spotify-api-shuffle (state)
+  "Set repeat of current track to STATE."
+  (condition-case err
+      (spotify-api-call
+       "PUT"
+       (concat "/me/player/shuffle?"
+               (url-build-query-string `((state ,state))
+                                       nil t))
+       "")
+    (end-of-file t)))
 
 (provide 'spotify-api)

@@ -228,7 +228,8 @@ TOKEN can be obtained with `oauth2-auth'."
           (url-request-data request-data)
           (url-request-extra-headers request-extra-headers))
       (url-retrieve-synchronously
-       (oauth2-url-append-access-token token url)))))
+       (oauth2-url-append-access-token token url)
+			 t))))
 
 ;;;###autoload
 (defun oauth2-url-retrieve (token url callback &optional

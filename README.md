@@ -4,14 +4,16 @@
 
 [![asciicast](https://asciinema.org/a/218654.svg)](https://asciinema.org/a/218654)
 
-Spotify.el is a collection of extensions that allows you to control the Spotify
-application from within your favorite text editor.
-
-**Note:** This is _very_ alpha software, and it works only in Mac OS X and Linux.
+Spotify.el is a collection of extensions that allows you to control the Spotify application from
+within your favorite text editor. If you are running on Mac OS X or Linux, you can control the
+locally running instance. If you are running on any platform with a network connection (including
+Windows - and even headless!) and have a Spotify premium subscription, you can control an instance
+of Spotify via the Spotify Connect feature.
 
 ## Features
 
 * Spotify client integration for GNU/Linux (via D-Bus) and OS X (via AppleScript)
+* Device playback display & selection using the Spotify Connect API (requires premium)
 * Communicates with the Spotify API via Oauth2
 * Displays the current track in mode line
 * Create playlists (public or private)
@@ -43,6 +45,14 @@ In order to get the the client ID and client secret, you need to create
 [a Spotify app](https://developer.spotify.com/my-applications), specifying
 <http://localhost:8591/> as the redirect URI.
 
+To use the "Spotify Connect" transport (vs. controlling only your local instance - though you can
+also control your local instance as well), set `spotify-transport` to `'connect` as follows. This
+feature requires a Spotify premium subscription.
+
+````el
+(setq spotify-transport 'connect)
+````
+
 ### Creating The Spotify App
 
 Go to [Create an Application](https://developer.spotify.com/my-applications/#!/applications/create)
@@ -50,9 +60,8 @@ and give your application a name and a description:
 
 ![Creating a Spotify App 1/2](./img/spotify-app-01.png)
 
-At this point, the client ID and the client secret is already available, so set
-those values to `spotify-oauth2-client-id` and `spotify-oauth2-client-secret`,
-respectively.
+At this point, the client ID and the client secret are available, so set those values to
+`spotify-oauth2-client-id` and `spotify-oauth2-client-secret`, respectively.
 
 Then, scroll down a little bit, type <http://localhost:8591/> as the Redirect
 URI for the application, and click **Add**:
@@ -68,19 +77,23 @@ Finally, scroll to the end of the page and hit **Save**.
 Whenever you enable the `spotify-remote-mode` minor mode you get the following
 key bindings:
 
-| Key                | Function                     | Description                       |
-|:-------------------|:-----------------------------|:----------------------------------|
-| <kbd>M-p M-s</kbd> | `spotify-toggle-shuffle`     | Turn shuffle on/off [1]           |
-| <kbd>M-p M-r</kbd> | `spotify-toggle-repeat`      | Turn repeat on/off [1]            |
-| <kbd>M-p M-p</kbd> | `spotify-toggle-play`        | Play/pause                        |
-| <kbd>M-p M-f</kbd> | `spotify-next-track`         | Next track                        |
-| <kbd>M-p M-b</kbd> | `spotify-previous-track`     | Previous track                    |
-| <kbd>M-p p m</kbd> | `spotify-my-playlists`       | Show your playlists               |
-| <kbd>M-p p f</kbd> | `spotify-featured-playlists` | Show the featured playlists       |
-| <kbd>M-p p s</kbd> | `spotify-playlist-search`    | Search for playlists              |
-| <kbd>M-p p u</kbd> | `spotify-user-playlists`     | Show playlists for the given user |
-| <kbd>M-p p c</kbd> | `spotify-create-playlist`    | Create a new playlist             |
-| <kbd>M-p t s</kbd> | `spotify-track-search`       | Search for tracks                 |
+| Key                | Function                     | Description                                     |
+|:-------------------|:-----------------------------|:------------------------------------------------|
+| <kbd>M-p M-s</kbd> | `spotify-toggle-shuffle`     | Turn shuffle on/off [1]                         |
+| <kbd>M-p M-r</kbd> | `spotify-toggle-repeat`      | Turn repeat on/off [1]                          |
+| <kbd>M-p M-p</kbd> | `spotify-toggle-play`        | Play/pause                                      |
+| <kbd>M-p M-f</kbd> | `spotify-next-track`         | Next track                                      |
+| <kbd>M-p M-b</kbd> | `spotify-previous-track`     | Previous track                                  |
+| <kbd>M-p p m</kbd> | `spotify-my-playlists`       | Show your playlists                             |
+| <kbd>M-p p f</kbd> | `spotify-featured-playlists` | Show the featured playlists                     |
+| <kbd>M-p p s</kbd> | `spotify-playlist-search`    | Search for playlists                            |
+| <kbd>M-p p u</kbd> | `spotify-user-playlists`     | Show playlists for the given user               |
+| <kbd>M-p p c</kbd> | `spotify-create-playlist`    | Create a new playlist                           |
+| <kbd>M-p t s</kbd> | `spotify-track-search`       | Search for tracks                               |
+| <kbd>M-p v u</kbd> | `spotify-volume-up`          | Increase the volume [2]                         |
+| <kbd>M-p v d</kbd> | `spotify-volume-down`        | Decrease the volume [2]                         |
+| <kbd>M-p M-d</kbd> | `spotify-select-device`      | Select a playback device [2]                    |
+
 
 The current song being played by the Spotify client is displayed in the mode
 line along with the player status (playing, paused). The interval in which the
@@ -92,7 +105,8 @@ mode line is updated can be configured via the
 (setq spotify-mode-line-refresh-interval 1)
 ````
 
-[1] No proper support for this in D-Bus implementation for GNU/Linux
+[1] No proper support for this in D-Bus implementation for GNU/Linux  
+[2] This feature uses Spotify Connect and requires a premium subscription
 
 #### Customizing The Mode Line
 
@@ -207,7 +221,7 @@ key bindings:
 | <kbd>t</kbd>     | Lists the tracks of the playlist under the cursor        |
 | <kbd>M-RET</kbd> | Plays the playlist under the cursor                      |
 
-Once you opened the list of tracks of a playlist, you get the following key
+Once you open the list of tracks of a playlist, you get the following key
 bindings in the resulting buffer:
 
 | Key              | Description                                                         |
@@ -222,6 +236,19 @@ Both buffers load the `spotify-remote-mode` by default.
 
 [1] D-Bus implementation for GNU/Linux do not support passing the context, so
 only the track under the cursor will be played
+
+## Selecting a Device for Playback
+
+<kbd>M-x spotify-select-device</kbd> will display a list of devices available for playback in a separate buffer.
+
+Note: use of this feature requires a Spotify premium subscription.
+
+Once you open the list of devices, you get the following key bindings in the resulting buffer:
+
+| Key              | Description                                                         |
+|:-----------------|:--------------------------------------------------------------------|
+| <kbd>RET</kbd>   | Transfer playback to the device under the cursor.                   |
+| <kbd>g</kbd>     | Reloads the list of devices                                         |
 
 ## Donate
 
