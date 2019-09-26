@@ -34,11 +34,13 @@
 (require 'spotify-api)
 (require 'spotify-track-search)
 (require 'spotify-playlist-search)
+(require 'spotify-device-select)
 (require 'spotify-controller)
 (require 'spotify-remote)
 
 (when-darwin    (require 'spotify-apple))
 (when-gnu-linux (require 'spotify-dbus))
+(require 'spotify-connect)
 
 (defgroup spotify nil
   "Spotify client."
@@ -115,5 +117,20 @@
          (y-or-n-p "Make the playlist public? ")))
   (let ((new-playlist (spotify-api-playlist-create (spotify-current-user-id) name is-public)))
     (message (format "Playlist '%s' created" (spotify-get-item-name new-playlist)))))
+
+;;;###autoload
+(defun spotify-select-device ()
+  "Allow for the selection of a device via Spotify Connect for transport functions."
+  (interactive)
+  (if (not (string= (gethash 'product (spotify-current-user)) "premium"))
+      (message "This feature requires a Spotify premium subscription.")
+    (let ((buffer (get-buffer-create "*Devices*")))
+      (with-current-buffer buffer
+        (spotify-device-select-mode)
+        (setq-local spotify-current-page 1)
+        (setq tabulated-list-entries nil)
+        (pop-to-buffer buffer)
+        (spotify-device-select-update)
+        buffer))))
 
 (provide 'spotify)
