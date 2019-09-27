@@ -33,7 +33,7 @@
   "Reloads the first page of results for the current playlist view."
   (interactive)
   (let ((page 1))
-    (cond ((bound-and-true-p spotify-query)          (spotify-playlist-search-update page))
+    (cond ((bound-and-true-p spotify-query)          (spotify-playlist-search-update spotify-query page))
           ((bound-and-true-p spotify-browse-message) (spotify-featured-playlists-update page))
           (t                                         (spotify-user-playlists-update spotify-user-id page)))))
 
@@ -41,73 +41,96 @@
   "Loads the next page of results for the current playlist view."
   (interactive)
   (let ((next-page (1+ spotify-current-page)))
-    (cond ((bound-and-true-p spotify-query)          (spotify-playlist-search-update next-page))
+    (cond ((bound-and-true-p spotify-query)          (spotify-playlist-search-update spotify-query next-page))
           ((bound-and-true-p spotify-browse-message) (spotify-featured-playlists-update next-page))
           (t                                         (spotify-user-playlists-update spotify-user-id next-page)))))
 
 (defun spotify-playlist-follow ()
   "Adds the current user as the follower of the playlist under the cursor."
   (interactive)
-  (let* ((selected-playlist (tabulated-list-get-id))
-         (name (spotify-get-item-name selected-playlist)))
-    (when (and (y-or-n-p (format "Follow playlist '%s'?" name))
-               (spotify-api-playlist-follow selected-playlist))
-      (message (format "Followed playlist '%s'" name)))))
+  (lexical-let* ((selected-playlist (tabulated-list-get-id))
+                 (name (spotify-get-item-name selected-playlist)))
+    (when (y-or-n-p (format "Follow playlist '%s'?" name))
+      (spotify-api-playlist-follow
+       selected-playlist
+       (lambda (_)
+         (message (format "Followed playlist '%s'" name)))))))
 
 (defun spotify-playlist-unfollow ()
   "Removes the current user as the follower of the playlist under the cursor."
   (interactive)
-  (let* ((selected-playlist (tabulated-list-get-id))
-         (name (spotify-get-item-name selected-playlist)))
-    (when (and (y-or-n-p (format "Unfollow playlist '%s'?" name))
-               (spotify-api-playlist-unfollow selected-playlist))
-      (message (format "Unfollow playlist '%s'" name)))))
+  (lexical-let* ((selected-playlist (tabulated-list-get-id))
+                 (name (spotify-get-item-name selected-playlist)))
+    (when (y-or-n-p (format "Unfollow playlist '%s'?" name))
+      (spotify-api-playlist-unfollow
+       selected-playlist
+       (lambda (_)
+         (message (format "Unfollowed playlist '%s'" name)))))))
 
-(defun spotify-playlist-search-update (current-page)
+(defun spotify-playlist-search-update (query current-page)
   "Fetches the given page of results using the search endpoint."
-  (let* ((json (spotify-api-search 'playlist spotify-query current-page))
-         (items (spotify-get-search-playlist-items json)))
-    (if items
-        (progn
-          (spotify-playlist-search-print items current-page)
-          (message "playlist view updated"))
-      (message "No more playlists"))))
+  (lexical-let ((current-page current-page)
+                (query query)
+                (buffer (current-buffer)))
+    (spotify-api-search
+     'playlist
+     query
+     current-page
+     (lambda (playlists)
+       (if-let ((items (spotify-get-search-playlist-items playlists)))
+           (with-current-buffer buffer
+             (setq-local spotify-current-page current-page)
+             (setq-local spotify-query query)
+             (pop-to-buffer buffer)
+             (spotify-playlist-search-print items current-page)
+             (message "Playlist view updated"))
+         (message "No more playlists"))))))
 
 (defun spotify-user-playlists-update (user-id current-page)
   "Fetches the given page of results using the user's playlist endpoint."
-  (let* ((json (spotify-api-user-playlists user-id current-page))
-         (items (spotify-get-items json)))
-    (if items
-        (progn
-          (spotify-playlist-search-print items current-page)
-          (message "Playlist view updated"))
-      (message "No more playlists"))))
+  (lexical-let ((user-id user-id)
+                (current-page current-page)
+                (buffer (current-buffer)))
+    (spotify-api-user-playlists
+     user-id
+     current-page
+     (lambda (playlists)
+       (if-let ((items (spotify-get-items playlists)))
+         (with-current-buffer buffer
+           (setq-local spotify-user-id user-id)
+           (setq-local spotify-current-page current-page)
+           (pop-to-buffer buffer)
+           (spotify-playlist-search-print items current-page)
+           (message "Playlist view updated"))
+         (message "No more playlists"))))))
 
 (defun spotify-featured-playlists-update (current-page)
-  "Fetches the given page of results of Spotify's featured playlists."
-  (let* ((json (spotify-api-featured-playlists current-page))
-         (msg (spotify-get-message json))
-         (items (spotify-get-search-playlist-items json)))
-    (if items
-        (progn
-          (spotify-playlist-search-print items current-page)
-          (setq-local spotify-browse-message msg)
-          (message msg))
-      (message "No more playlists"))))
+  "Fetches the given page of results using of Spotify's featured playlists"
+  (lexical-let ((current-page current-page)
+                (buffer (current-buffer)))
+    (spotify-api-featured-playlists
+     current-page
+     (lambda (json)
+       (if-let ((items (spotify-get-search-playlist-items json))
+                (msg (spotify-get-message json)))
+         (with-current-buffer buffer
+           (setq-local spotify-current-page current-page)
+           (setq-local spotify-browse-message msg)
+           (pop-to-buffer buffer)
+           (spotify-playlist-search-print items current-page)
+           (message "Playlist view updated"))
+         (message "No more playlists"))))))
 
 (defun spotify-playlist-tracks ()
   "Displays the tracks that belongs to the playlist under the cursor."
   (interactive)
   (let* ((selected-playlist (tabulated-list-get-id))
-         (name (spotify-get-item-name selected-playlist)))
-    (let ((buffer (get-buffer-create (format "*Playlist Tracks: %s*" name))))
-      (with-current-buffer buffer
-        (spotify-track-search-mode)
-        (spotify-track-search-set-list-format)
-        (setq-local spotify-selected-playlist selected-playlist)
-        (spotify-playlist-tracks-update 1)
-        (pop-to-buffer buffer)
-        buffer))))
+         (name (spotify-get-item-name selected-playlist))
+         (buffer (get-buffer-create (format "*Playlist Tracks: %s*" name))))
+    (with-current-buffer buffer
+      (spotify-track-search-mode)
+      (setq-local spotify-selected-playlist selected-playlist)
+      (spotify-playlist-tracks-update 1))))
 
 (defun spotify-playlist-set-list-format ()
   "Configures the column data for the typical playlist view."
@@ -137,12 +160,11 @@
                                         'help-echo (format "Show %s's public playlists" user-id)))
                             (number-to-string (spotify-get-playlist-track-count playlist))))
               entries)))
-    (when (eq 1 current-page)
-      (setq-local tabulated-list-entries nil))
-    (setq-local tabulated-list-entries (append tabulated-list-entries (nreverse entries)))
-    (setq-local spotify-current-page current-page)
+    (when (eq 1 current-page) (setq-local tabulated-list-entries nil))
     (spotify-playlist-set-list-format)
+    (setq-local tabulated-list-entries (append tabulated-list-entries (nreverse entries)))
     (tabulated-list-init-header)
     (tabulated-list-print t)))
+
 
 (provide 'spotify-playlist-search)
