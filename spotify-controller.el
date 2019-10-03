@@ -27,7 +27,7 @@
   `(if-darwin ,then nil))
 
 (defcustom spotify-transport 'connect
-  "How the commands should be sent to Spotify process. Defaults for 'connect, as it provides a consistent UX across all OSes."
+  "How the commands should be sent to Spotify process. Defaults to 'connect, as it provides a consistent UX across all OSes."
   :type '(choice (symbol :tag "AppleScript" apple)
                  (symbol :tag "D-Bus" dbus)
                  (symbol :tag "Connect" connect))

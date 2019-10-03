@@ -6,7 +6,7 @@
 
 (defvar *spotify-user*         nil "Cached user object")
 (defvar *spotify-oauth2-token* nil "Cached OAuth2 token")
-(defvar *spotify-oauth2-ts*    nil "Unix timestamp in which the OAuth2 token was retrieved, used to trigger the token renewal process shortly after the token expiration")
+(defvar *spotify-oauth2-ts*    nil "Unix timestamp in which the OAuth2 token was retrieved. This is used to manually refresh the token when it's about to expire.")
 
 (defconst spotify-api-endpoint     "https://api.spotify.com/v1")
 (defconst spotify-oauth2-auth-url  "https://accounts.spotify.com/authorize")
