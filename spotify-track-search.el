@@ -70,15 +70,6 @@ be played in the context of its album."
   "Adds the current user as the follower of the selected playlist."
   (interactive)
   (if (bound-and-true-p spotify-selected-playlist)
-      (when (and (y-or-n-p (format "Follow playlist '%s'?" (spotify-get-item-name spotify-selected-playlist)))
-                 (spotify-api-playlist-follow spotify-selected-playlist))
-        (message (format "Followed playlist '%s'" (spotify-get-item-name spotify-selected-playlist))))
-    (message "Cannot follow a playlist from here")))
-
-(defun spotify-track-playlist-follow ()
-  "Adds the current user as the follower of the selected playlist."
-  (interactive)
-  (if (bound-and-true-p spotify-selected-playlist)
       (lexical-let ((playlist spotify-selected-playlist))
         (when (y-or-n-p (format "Follow playlist '%s'?" (spotify-get-item-name playlist)))
           (spotify-api-playlist-follow

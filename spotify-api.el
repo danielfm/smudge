@@ -279,10 +279,6 @@ depending on the `type' argument."
      (format "{\"uris\": [ %s ]}" tracks)
      callback)))
 
-(defun spotify-api-playlist-add-album (user-id playlist-id album-id)
-  "Add all tracks with album id to playlist."
-  (spotify-api-playlist-add-tracks user-id playlist-id (spotify-api-album-get-tracks album-id)))
-
 (defun spotify-api-playlist-follow (playlist callback)
   "Add the current user as a follower of a playlist."
   (let ((owner (spotify-get-playlist-owner-id playlist))
