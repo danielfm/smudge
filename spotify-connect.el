@@ -24,26 +24,27 @@ Returns a JSON string in the format:
 }"
   (spotify-api-get-player-status
    (lambda (status)
-     (when-let* ((status status)
-                 (track (gethash 'item status))
-                 (json (concat
-                        "{"
-                        (format "\"artist\":\"%s\","
-                                (gethash 'name (car (gethash 'artists track))))
-                        (format "\"duration\": %d,"
-                                (gethash 'duration_ms track))
-                        (format "\"track_number\":%d,"
-                                (gethash 'track_number track))
-                        (format "\"name\":\"%s\","
-                                (gethash 'name track))
-                        (format "\"player_state\":\"%s\","
-                                (if (eq (gethash 'is_playing status) :json-false) "paused" "playing"))
-                        (format "\"player_shuffling\":%s,"
-                                (if (not (eq (gethash 'shuffle_state status) :json-false))"true" "false"))
-                        (format "\"player_repeating\":%s"
-                                (if (string= (gethash 'repeat_state status) "off") "false" "true"))
-                        "}")))
-       (spotify-replace-mode-line-flags json)))))
+     (if-let* ((status status)
+               (track (gethash 'item status))
+               (json (concat
+                      "{"
+                      (format "\"artist\":\"%s\","
+                              (gethash 'name (car (gethash 'artists track))))
+                      (format "\"duration\": %d,"
+                              (gethash 'duration_ms track))
+                      (format "\"track_number\":%d,"
+                              (gethash 'track_number track))
+                      (format "\"name\":\"%s\","
+                              (gethash 'name track))
+                      (format "\"player_state\":\"%s\","
+                              (if (eq (gethash 'is_playing status) :json-false) "paused" "playing"))
+                      (format "\"player_shuffling\":%s,"
+                              (if (not (eq (gethash 'shuffle_state status) :json-false))"true" "false"))
+                      (format "\"player_repeating\":%s"
+                              (if (string= (gethash 'repeat_state status) "off") "false" "true"))
+                      "}")))
+         (spotify-replace-mode-line-flags json)
+       (spotify-replace-mode-line-flags nil)))))
 
 (defmacro spotify-when-device-active (body)
   "Evaluate BODY when there is an active device, otherwise shows an error message."
