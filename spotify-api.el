@@ -156,6 +156,10 @@ the parsed JSON response."
   "Return the track number from the given track JSON object."
   (gethash 'track_number json))
 
+(defun spotify-get-disc-number (json)
+  "Return the disc number from the given track JSON object."
+  (gethash 'disc_number json))
+
 (defun spotify-get-track-duration (json)
   "Return the track duration, in milliseconds, from the given track JSON object."
   (gethash 'duration_ms json))

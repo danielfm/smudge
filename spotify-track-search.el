@@ -167,8 +167,10 @@ be played in the context of its album."
   (let ((default-width (truncate (/ (- (window-width) 30) 3))))
     (setq tabulated-list-format
           (vector '("#" 3 (lambda (row-1 row-2)
-                            (< (spotify-get-track-number (first row-1))
-                               (spotify-get-track-number (first row-2)))):right-align t)
+                            (< (+ (* 100 (spotify-get-disc-number (first row-1)))
+                                  (spotify-get-track-number (first row-1)))
+                               (+ (* 100 (spotify-get-disc-number (first row-2)))
+                                  (spotify-get-track-number (first row-2))))) :right-align t)
                   `("Track Name" ,default-width t)
                   `("Artist" ,default-width t)
                   `("Album" ,default-width t)
