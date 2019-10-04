@@ -166,7 +166,9 @@ be played in the context of its album."
   "Configures the column data for the typical track view."
   (let ((default-width (truncate (/ (- (window-width) 30) 3))))
     (setq tabulated-list-format
-          (vector '("#" 3 t :right-align t)
+          (vector '("#" 3 (lambda (row-1 row-2)
+                            (< (spotify-get-track-number (first row-1))
+                               (spotify-get-track-number (first row-2)))):right-align t)
                   `("Track Name" ,default-width t)
                   `("Artist" ,default-width t)
                   `("Album" ,default-width t)
