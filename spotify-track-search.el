@@ -256,10 +256,12 @@ be played in the context of its album."
         (spotify-get-item-id user)
         1
         (lambda (json)
-          (let ((choices (mapcar (lambda (a)
-                                   (list (spotify-get-item-name a) (spotify-get-item-id a)))
-                                 (spotify-get-items json))))
-            (funcall callback (cadr (assoc (completing-read "Select Playlist: " choices) choices))))))))))
+          (if-let* ((choices (mapcar (lambda (a)
+                                       (list (spotify-get-item-name a) (spotify-get-item-id a)))
+                                     (spotify-get-items json)))
+                    (selected (completing-read "Select Playlist: " choices)))
+              (when (not (string= "" selected))
+                (funcall callback (cadr (assoc selected choices)))))))))))
 
 (defun spotify-track-add ()
   "Adds the track under the cursor on a playlist. Prompts for the playlist."
