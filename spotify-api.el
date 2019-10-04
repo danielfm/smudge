@@ -259,12 +259,6 @@ depending on the `type' argument."
    (format "{\"name\":\"%s\",\"public\":\"%s\"}" name (if is-public "true" "false"))
    callback))
 
-(defun spotify-api-album-get-tracks (album-id)
-  "Get list of track ids for the given album ID."
-  (mapcar 'spotify-get-item-id (spotify-get-items (spotify-api-call
-               "GET"
-               (format "/albums/%s/tracks" (url-hexify-string album-id))))))
-
 (defun spotify-api-playlist-add-track (user-id playlist-id track-id callback)
   "Add single track to playlist."
   (spotify-api-playlist-add-tracks user-id playlist-id (list track-id) callback))
@@ -316,8 +310,23 @@ depending on the `type' argument."
      "GET"
      (concat (format "/users/%s/playlists/%s/tracks?"
                      (url-hexify-string owner)
-                     (url-hexify-string id)  offset)
+                     (url-hexify-string id))
              (url-build-query-string `((limit  ,spotify-api-search-limit)
+                                       (offset ,offset)
+                                       (market from_token))
+                                     nil t))
+     nil
+     callback)))
+
+(defun spotify-api-album-tracks (album page callback)
+  "Return the tracks for the given album."
+  (let ((album-id (spotify-get-item-id album))
+        (offset (* spotify-api-search-limit (1- page))))
+    (spotify-api-call-async
+     "GET"
+     (concat (format "/albums/%s/tracks?"
+                     (url-hexify-string album-id))
+             (url-build-query-string `((limit ,spotify-api-search-limit)
                                        (offset ,offset)
                                        (market from_token))
                                      nil t))

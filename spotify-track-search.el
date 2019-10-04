@@ -98,7 +98,9 @@ be played in the context of its album."
         ((bound-and-true-p spotify-selected-playlist)
          (spotify-playlist-tracks-update 1))
         ((bound-and-true-p spotify-query)
-         (spotify-track-search-update spotify-query 1))))
+         (spotify-track-search-update spotify-query 1))
+        ((bound-and-true-p spotify-selected-album)
+         (spotify-album-tracks-update spotify-selected-album 1))))
 
 (defun spotify-track-load-more ()
   "Loads the next page of results for the current track view."
@@ -107,6 +109,8 @@ be played in the context of its album."
          (spotify-recently-played-tracks-update (1+ spotify-current-page)))
         ((bound-and-true-p spotify-selected-playlist)
          (spotify-playlist-tracks-update (1+ spotify-current-page)))
+        ((bound-and-true-p spotify-selected-album)
+         (spotify-album-tracks-update spotify-selected-album (1+ spotify-current-page)))
         ((bound-and-true-p spotify-query)
          (spotify-track-search-update spotify-query (1+ spotify-current-page)))))
 
@@ -146,6 +150,24 @@ be played in the context of its album."
                (message "Track view updated"))
            (message "No more tracks")))))))
 
+(defun spotify-album-tracks-update (album current-page)
+  "Fetches the list of tracks for the given album."
+  (lexical-let ((album album)
+                (current-page current-page)
+                (buffer (current-buffer)))
+    (spotify-api-album-tracks
+     album
+     current-page
+     (lambda (json)
+       (if-let ((items (spotify-get-items json)))
+           (with-current-buffer buffer
+             (setq-local spotify-current-page current-page)
+             (setq-local spotify-selected-album album)
+             (pop-to-buffer buffer)
+             (spotify-track-search-print items current-page)
+             (message "Track view updated"))
+         (message "No more tracks"))))))
+
 (defun spotify-recently-played-tracks-update (current-page)
   "Fetches the given page of results for the recently played tracks."
   (lexical-let ((current-page current-page)
@@ -163,29 +185,35 @@ be played in the context of its album."
          (message "No more tracks"))))))
 
 (defun spotify-track-search-set-list-format ()
-  "Configures the column data for the typical track view."
-  (let ((default-width (truncate (/ (- (window-width) 30) 3))))
+  "Configures the column data for the typical track view. The tracks are sorted by number by default when listing the tracks from an album."
+  (let* ((base-width (truncate (/ (- (window-width) 30) 3)))
+         (default-width (if (bound-and-true-p spotify-selected-album) (+ base-width 4) base-width )))
+    (when (not (bound-and-true-p spotify-selected-playlist))
+        (setq tabulated-list-sort-key `("#" . nil)))
     (setq tabulated-list-format
-          (vector '("#" 3 (lambda (row-1 row-2)
+          (vconcat (vector `("#" 3 ,(lambda (row-1 row-2)
                             (< (+ (* 100 (spotify-get-disc-number (first row-1)))
                                   (spotify-get-track-number (first row-1)))
                                (+ (* 100 (spotify-get-disc-number (first row-2)))
                                   (spotify-get-track-number (first row-2))))) :right-align t)
-                  `("Track Name" ,default-width t)
-                  `("Artist" ,default-width t)
-                  `("Album" ,default-width t)
-                  `("Time" 8 (lambda (row-1 row-2)
-                                (< (spotify-get-track-duration (first row-1))
-                                   (spotify-get-track-duration (first row-2)))))
-                  '("Popularity" 14 t)))))
+                           `("Track Name" ,default-width t)
+                           `("Artist" ,default-width t)
+                           `("Album" ,default-width t)
+                           `("Time" 8 (lambda (row-1 row-2)
+                                        (< (spotify-get-track-duration (first row-1))
+                                           (spotify-get-track-duration (first row-2))))))
+                   (when (not (bound-and-true-p spotify-selected-album))
+                     (vector '("Popularity" 14 t)))))))
 
 (defun spotify-track-search-print (songs current-page)
   "Appends the given songs to the current track view."
   (let (entries)
     (dolist (song songs)
       (when (spotify-is-track-playable song)
-        (let ((artist-name (spotify-get-track-artist-name song))
-              (album-name (spotify-get-track-album-name song)))
+        (let* ((artist-name (spotify-get-track-artist-name song))
+               (album (or (spotify-get-track-album song) spotify-selected-album))
+               (album-name (spotify-get-item-name album))
+               (album (spotify-get-track-album song)))
           (push (list song
                       (vector (number-to-string (spotify-get-track-number song))
                               (spotify-get-item-name song)
@@ -198,11 +226,12 @@ be played in the context of its album."
                               (cons album-name
                                   (list 'face 'link
                                         'follow-link t
-                                        'action `(lambda (_) (spotify-track-search ,(format "artist:\"%s\" album:\"%s\"" artist-name album-name)))
+                                        'action `(lambda (_) (spotify-album-tracks ,album))
                                         'help-echo (format "Show %s's tracks" album-name)
 					'artist-or-album 'album))
                               (spotify-get-track-duration-formatted song)
-                              (spotify-popularity-bar (spotify-get-track-popularity song))))
+                              (when (not (bound-and-true-p spotify-selected-album))
+                                (spotify-popularity-bar (spotify-get-track-popularity song)))))
                 entries))))
     (spotify-track-search-set-list-format)
     (when (eq 1 current-page) (setq-local tabulated-list-entries nil))
@@ -210,7 +239,15 @@ be played in the context of its album."
     (tabulated-list-init-header)
     (tabulated-list-print t)))
 
+(defun spotify-album-tracks (album)
+  "Open a new buffer that lists the tracks from the given album."
+  (let ((buffer (get-buffer-create (format "*Album: %s*" (spotify-get-item-name album)))))
+    (with-current-buffer buffer
+      (spotify-track-search-mode)
+      (spotify-album-tracks-update album 1))))
+
 (defun spotify-select-playlist (callback)
+  "Ask the user to select a playlist and calls CALLBACK with the selected option."
   (interactive)
   (lexical-let ((callback callback))
     (spotify-current-user
