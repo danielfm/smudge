@@ -50,7 +50,7 @@ See commands \\[spotify-toggle-repeating] and
     (if spotify-remote-mode
         (progn
           (spotify-start-player-status-timer)
-          (cond ((eq spotify-status-location 'modeline)
+          (cond ((or (eq spotify-status-location 'modeline) (not (display-graphic-p)))
                  (unless (member s global-mode-string)
                    (push s global-mode-string)))
                 ((eq spotify-status-location 'title-bar)
@@ -62,7 +62,7 @@ See commands \\[spotify-toggle-repeating] and
                    (nconc frame-title-format `("    " ,s))))))
       (progn
         (spotify-stop-player-status-timer)
-        (cond ((eq spotify-status-location 'modeline)
+        (cond ((or (eq spotify-status-location 'modeline) (not (display-graphic-p)))
                (when (member s global-mode-string)
                  (setq global-mode-string (remove s global-mode-string))))
               ((eq spotify-status-location 'title-bar)

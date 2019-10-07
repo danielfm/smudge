@@ -253,6 +253,21 @@ Once you open the list of devices, you get the following key bindings in the res
 | <kbd>RET</kbd>   | Transfer playback to the device under the cursor.                   |
 | <kbd>g</kbd>     | Reloads the list of devices                                         |
 
+## Specifying the Player Status Location
+
+By default, the player status (playing, paused, track name, time, shuffle, repeat, etc.) are shown
+in the modeline. If you want to display the status in the title bar when using a graphical display,
+you can set the following:
+
+````el
+(setq spotify-status-location 'title-bar)
+
+````
+
+Valid values include `'title-bar`, `'modeline` and `nil`, where nil turns off the display of the
+player status completely. If the value is set to `title-bar` but you are not using a graphical
+display, the player status will be displayed in the mode line instead.
+
 ## Donate
 
 If this project is useful for you, buy me a beer!
