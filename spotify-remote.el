@@ -6,6 +6,10 @@
 
 (require 'easymenu)
 
+(defcustom spotify-keymap-prefix nil
+  "Spotify remote keymap prefix."
+  :group 'spotify
+  :type 'string)
 
 (defvar spotify-player-status ""
   "The text to be displayed in the global mode line or title bar.")
@@ -15,6 +19,32 @@
                 (const :tag "Title Bar" title-bar)
                 (const :tag "Do not show" nil))
   :group 'spotify)
+(defvar spotify-command-map
+  (let ((map (make-sparse-keymap)))
+            (define-key map (kbd "M-r") #'spotify-toggle-repeat)
+            (define-key map (kbd "M-s") #'spotify-toggle-shuffle)
+            (define-key map (kbd "M-p") #'spotify-toggle-play)
+            (define-key map (kbd "M-b") #'spotify-previous-track)
+            (define-key map (kbd "M-u") #'spotify-volume-up)
+            (define-key map (kbd "M-d") #'spotify-volume-down)
+            (define-key map (kbd "M-f") #'spotify-next-track)
+            (define-key map (kbd "p m") #'spotify-my-playlists)
+            (define-key map (kbd "p f") #'spotify-featured-playlists)
+            (define-key map (kbd "p u") #'spotify-user-playlists)
+            (define-key map (kbd "p s") #'spotify-playlist-search)
+            (define-key map (kbd "p c") #'spotify-create-playlist)
+            (define-key map (kbd "t s") #'spotify-track-search)
+            (define-key map (kbd "d") #'spotify-select-device)
+            map)
+  "Keymap for Spotify commands after 'spotify-keymap-prefix'.")
+(fset 'spotify-command-map spotify-command-map)
+
+(defvar spotify-mode-map
+  (let ((map (make-sparse-keymap)))
+    (when spotify-keymap-prefix
+      (define-key map spotify-keymap-prefix 'spotify-command-map))
+    map)
+  "Keymap for Spotify remote mode.")
 
 (define-minor-mode spotify-remote-mode
   "Toggles Spotify Remote mode.
@@ -28,24 +58,7 @@ See commands \\[spotify-toggle-repeating] and
 \\[spotify-toggle-shuffling]."
   :group 'spotify
   :init-value nil
-  :keymap (let ((map (make-sparse-keymap)))
-            (define-key map (kbd "M-p M-r") 'spotify-toggle-repeat)
-            (define-key map (kbd "M-p M-s") 'spotify-toggle-shuffle)
-            (define-key map (kbd "M-p M-p") 'spotify-toggle-play)
-            (define-key map (kbd "M-p M-b") 'spotify-previous-track)
-            (define-key map (kbd "M-p M-f") 'spotify-next-track)
-            (define-key map (kbd "M-p p m") 'spotify-my-playlists)
-            (define-key map (kbd "M-p p f") 'spotify-featured-playlists)
-            (define-key map (kbd "M-p p u") 'spotify-user-playlists)
-            (define-key map (kbd "M-p p s") 'spotify-playlist-search)
-            (define-key map (kbd "M-p p c") 'spotify-create-playlist)
-            (define-key map (kbd "M-p t s") 'spotify-track-search)
-            (define-key map (kbd "M-p t r") 'spotify-recently-played)
-            (define-key map (kbd "M-p v u") 'spotify-volume-up)
-            (define-key map (kbd "M-p v d") 'spotify-volume-down)
-            (define-key map (kbd "M-p v m") 'spotify-volume-mute-unmute)
-            (define-key map (kbd "M-p d") 'spotify-select-device)
-            map)
+  :keymap spotify-mode-map
   (let ((s '(:eval (spotify-player-status-text))))
     (if spotify-remote-mode
         (progn
