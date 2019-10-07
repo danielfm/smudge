@@ -22,109 +22,131 @@ Returns a JSON string in the format:
   \"player_shuffling\": \"t\",
   \"player_repeating\": \"context\"
 }"
-  (let* ((status (spotify-api-get-player-status))
-         (track (when status (gethash 'item status)))
-         (json (when status
-                 (concat
-                  "{"
-                  (format "\"artist\":\"%s\"," (gethash 'name (car (gethash 'artists track))))
-                  (format "\"duration\": %d," (gethash 'duration_ms track))
-                  (format "\"track_number\":%d," (gethash 'track_number track))
-                  (format "\"name\":\"%s\"," (gethash 'name track))
-                  (format "\"player_state\":\"%s\","
-                          (if (eq (gethash 'is_playing status) :json-false) "paused" "playing"))
-                  (format "\"player_shuffling\":%s,"
-                          (if (not (eq (gethash 'shuffle_state status) :json-false))
-                              "true" "false"))
-                  (format "\"player_repeating\":%s"
-                          (if (string= (gethash 'repeat_state status) "off") "false" "true"))
-                  "}"))))
-    (spotify-replace-mode-line-flags json)))
+  (spotify-api-get-player-status
+   (lambda (status)
+     (if-let* ((status status)
+               (track (gethash 'item status))
+               (json (concat
+                      "{"
+                      (format "\"artist\":\"%s\","
+                              (gethash 'name (car (gethash 'artists track))))
+                      (format "\"duration\": %d,"
+                              (gethash 'duration_ms track))
+                      (format "\"track_number\":%d,"
+                              (gethash 'track_number track))
+                      (format "\"name\":\"%s\","
+                              (gethash 'name track))
+                      (format "\"player_state\":\"%s\","
+                              (if (eq (gethash 'is_playing status) :json-false) "paused" "playing"))
+                      (format "\"player_shuffling\":%s,"
+                              (if (not (eq (gethash 'shuffle_state status) :json-false))"true" "false"))
+                      (format "\"player_repeating\":%s"
+                              (if (string= (gethash 'repeat_state status) "off") "false" "true"))
+                      "}")))
+         (spotify-replace-mode-line-flags json)
+       (spotify-replace-mode-line-flags nil)))))
 
-(defun spotify-connect-get-device-id (player-status)
-  "Get the id if from PLAYER-STATUS of the currently playing device, if any."
-  (if player-status
-      (gethash 'id (gethash 'device player-status))))
+(defmacro spotify-when-device-active (body)
+  "Evaluate BODY when there is an active device, otherwise shows an error message."
+  `(spotify-api-device-list
+    (lambda (json)
+      (if-let ((json json)
+               (devices (gethash 'devices json))
+               (active (> (length (seq-filter (lambda (dev) (eq (gethash 'is_active dev) t)) devices)) 0)))
+          (progn ,body)
+        (message "No active device")))))
 
 (defun spotify-connect-player-play-track (uri &optional context)
   "Play a track URI via Spotify Connect in an optional CONTEXT."
-  (spotify-api-play uri context))
+  (lexical-let ((uri uri)
+                (context context))
+    (spotify-when-device-active
+     (spotify-api-play nil uri context))))
 
 (defun spotify-connect-player-pause ()
   "Pause the currently playing track."
-  (spotify-api-pause))
+  (spotify-when-device-active
+   (spotify-api-pause)))
 
 (defun spotify-connect-player-toggle-play ()
   "Toggle playing status of current track."
-  (let ((player-status (spotify-api-get-player-status)))
-    (if player-status
-        (if (not (eq (gethash 'is_playing player-status) :json-false))
-            (spotify-api-pause)
-          (spotify-api-play)))))
+  (spotify-when-device-active
+   (spotify-api-get-player-status
+    (lambda (status)
+      (if status
+          (if (not (eq (gethash 'is_playing status) :json-false))
+              (spotify-api-pause)
+            (spotify-api-play)))))))
 
 (defun spotify-connect-player-next-track ()
   "Skip to the next track."
-  (spotify-api-next))
+  (spotify-when-device-active
+   (spotify-api-next)))
 
 (defun spotify-connect-player-previous-track ()
   "Skip to the previous track."
-  (spotify-api-previous))
-
-(defun spotify-connect-get-volume (player-status)
-  "Get the volume from PLAYER-STATUS of the currently playing device, if any."
-  (if player-status
-      (gethash 'volume_percent (gethash 'device player-status))))
+  (spotify-when-device-active
+   (spotify-api-previous)))
 
 (defun spotify-connect-volume-up ()
   "Turn up the volume on the actively playing device."
-  (let ((player-status (spotify-api-get-player-status)))
-    (if player-status
+  (spotify-when-device-active
+   (spotify-api-get-player-status
+    (lambda (status)
+      (lexical-let ((new-volume (min (+ (spotify-connect-get-volume status) 10) 100)))
         (spotify-api-set-volume
-         (spotify-connect-get-device-id player-status)
-         (min (+ (spotify-connect-get-volume player-status) 10) 100))))
-  (message "volume increased"))
+         (spotify-connect-get-device-id status)
+         new-volume
+         (lambda (_)
+           (message "Volume increased to %d%%" new-volume))))))))
 
 (defun spotify-connect-volume-down ()
   "Turn down the volume (for what?) on the actively playing device."
-  (let ((player-status (spotify-api-get-player-status)))
-    (if player-status
+  (spotify-when-device-active
+   (spotify-api-get-player-status
+    (lambda (status)
+      (lexical-let ((new-volume (max (- (spotify-connect-get-volume status) 10) 0)))
         (spotify-api-set-volume
-         (spotify-connect-get-device-id player-status)
-         (max (- (spotify-connect-get-volume player-status) 10) 0))))
-  (message "volume decreased"))
+         (spotify-connect-get-device-id status)
+         new-volume
+         (lambda (_)
+           (message "Volume decreased to %d%%" new-volume))))))))
 
-(defun spotify-connect-is-shuffling-supported ()
-  "Shuffling is supported on Spotify Connect."
-  t)
-
-(defun spotify-connect-is-repeating-supported ()
-  "Repeating is supported Spotify Connect."
-  t)
+(defun spotify-connect-volume-mute-unmute ()
+  "Mute/unmute the volume on the actively playing device by setting the volume to 0."
+  (spotify-when-device-active
+   (spotify-api-get-player-status
+    (lambda (status)
+      (let ((volume (spotify-connect-get-volume status)))
+        (if (eq volume 0)
+            (spotify-api-set-volume (spotify-connect-get-device-id status) 100
+                                    (lambda (_) (message "Volume unmuted")))
+          (spotify-api-set-volume (spotify-connect-get-device-id status) 0
+                                  (lambda (_) (message "Volume muted")))))))))
 
 (defun spotify-connect-toggle-repeat ()
   "Toggle repeat for the current track."
-  (let ((player-status (spotify-api-get-player-status)))
-    (if player-status
-        (spotify-api-repeat
-         (if (spotify--is-repeating player-status) "off" "context")))))
+  (spotify-when-device-active
+   (spotify-api-get-player-status
+    (lambda (status)
+      (spotify-api-repeat (if (spotify--is-repeating status) "off" "context"))))))
 
 (defun spotify-connect-toggle-shuffle ()
   "Toggle shuffle for the current track."
-  (let ((player-status (spotify-api-get-player-status)))
-    (if player-status
-        (spotify-api-shuffle
-         (if (spotify--is-shuffling player-status) "false" "true")))))
+  (spotify-when-device-active
+   (spotify-api-get-player-status
+    (lambda (status)
+      (spotify-api-shuffle (if (spotify--is-shuffling status) "false" "true"))))))
 
-(defun spotify-connect-is-repeating ()
-  "Answer whether the current device is set to repeat."
-  (let ((player-status (spotify-api-get-player-status)))
-    (and player-status
-         (spotify--is-repeating player-status))))
+(defun spotify-connect-get-device-id (player-status)
+  "Get the id if from PLAYER-STATUS of the currently playing device, if any."
+  (when player-status
+    (gethash 'id (gethash 'device player-status))))
 
-(defun spotify-connect-is-shuffling ()
-  "Answer whether the current device is set to shuffle."
-  (let ((player-status (spotify-api-get-player-status)))
-    (spotify--is-shuffling player-status)))
+(defun spotify-connect-get-volume (player-status)
+  "Get the volume from PLAYER-STATUS of the currently playing device, if any."
+  (when player-status
+    (gethash 'volume_percent (gethash 'device player-status))))
 
 (defun spotify--is-shuffling (player-status)
   "Business logic for shuffling state of PLAYER-STATUS."

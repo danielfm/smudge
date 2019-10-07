@@ -40,6 +40,7 @@
 
 (when-darwin    (require 'spotify-apple))
 (when-gnu-linux (require 'spotify-dbus))
+
 (require 'spotify-connect)
 
 (defgroup spotify nil
@@ -49,88 +50,87 @@
 
 ;;;###autoload
 (defun spotify-track-search (query)
-  "Searches for tracks that match the given query string."
+  "Search for tracks that match the given query string."
   (interactive "sSpotify Search (Tracks): ")
   (let ((buffer (get-buffer-create (format "*Track Search: %s*" query))))
     (with-current-buffer buffer
       (spotify-track-search-mode)
-      (spotify-track-search-set-list-format)
-      (setq-local spotify-query query)
-      (setq-local spotify-current-page 1)
-      (setq tabulated-list-entries nil)
-      (pop-to-buffer buffer)
-      (spotify-track-search-update 1)
-      buffer)))
+      (spotify-track-search-update query 1))))
 
 ;;;###autoload
 (defun spotify-playlist-search (query)
-  "Searches for playlists that match the given query string."
+  "Search for playlists that match the given query string."
   (interactive "sSpotify Search (Playlists): ")
   (let ((buffer (get-buffer-create (format "*Playlist Search: %s*" query))))
     (with-current-buffer buffer
       (spotify-playlist-search-mode)
-      (setq-local spotify-query query)
-      (setq-local spotify-current-page 1)
-      (setq tabulated-list-entries nil)
-      (pop-to-buffer buffer)
-      (spotify-playlist-search-update 1)
-      buffer)))
+      (spotify-playlist-search-update query 1))))
+
+;;;###autoload
+(defun spotify-recently-played ()
+  "Display recently played tracks."
+  (interactive)
+  (let ((buffer (get-buffer-create "*Recently Played*")))
+    (with-current-buffer buffer
+      (spotify-track-search-mode)
+      (spotify-recently-played-tracks-update 1))))
 
 ;;;###autoload
 (defun spotify-my-playlists ()
-  "Displays the current user's playlists."
+  "Display the current user's playlists."
   (interactive)
-  (spotify-user-playlists (spotify-current-user-id)))
+  (spotify-current-user
+   (lambda (user)
+     (spotify-user-playlists (spotify-get-item-id user)))))
 
 ;;;###autoload
 (defun spotify-user-playlists (user-id)
-  "Displays the public playlists of the given user."
+  "Display the public playlists of the given user."
   (interactive "sSpotify User ID: ")
   (let ((buffer (get-buffer-create (format "*Playlists: %s*" user-id))))
     (with-current-buffer buffer
       (spotify-playlist-search-mode)
-      (setq-local spotify-user-id user-id)
-      (setq-local spotify-current-page 1)
-      (setq tabulated-list-entries nil)
-      (pop-to-buffer buffer)
-      (spotify-user-playlists-update user-id 1)
-      buffer)))
+      (spotify-user-playlists-update user-id 1))))
 
 ;;;###autoload
 (defun spotify-featured-playlists ()
-  "Displays Spotify's featured playlists."
+  "Display Spotify's featured playlists."
   (interactive)
   (let ((buffer (get-buffer-create "*Featured Playlists*")))
     (with-current-buffer buffer
       (spotify-playlist-search-mode)
-      (setq-local spotify-current-page 1)
-      (setq tabulated-list-entries nil)
-      (pop-to-buffer buffer)
-      (spotify-featured-playlists-update 1)
-      buffer)))
+      (spotify-featured-playlists-update 1))))
 
 ;;;###autoload
 (defun spotify-create-playlist (name is-public)
-  "Creates an empty playlist owned by the current user."
+  "Create an empty playlist owned by the current user."
   (interactive
    (list (read-string "Playlist name: ")
          (y-or-n-p "Make the playlist public? ")))
-  (let ((new-playlist (spotify-api-playlist-create (spotify-current-user-id) name is-public)))
-    (message (format "Playlist '%s' created" (spotify-get-item-name new-playlist)))))
+  (lexical-let ((name name)
+                (is-public is-public))
+    (spotify-current-user
+     (lambda (user)
+       (spotify-api-playlist-create
+        (spotify-get-item-id user)
+        name
+        is-public
+        (lambda (new-playlist)
+          (if new-playlist
+              (message (format "Playlist '%s' created" (spotify-get-item-name new-playlist)))
+            (message "Error creating the playlist"))))))))
 
 ;;;###autoload
 (defun spotify-select-device ()
   "Allow for the selection of a device via Spotify Connect for transport functions."
   (interactive)
-  (if (not (string= (gethash 'product (spotify-current-user)) "premium"))
-      (message "This feature requires a Spotify premium subscription.")
-    (let ((buffer (get-buffer-create "*Devices*")))
-      (with-current-buffer buffer
-        (spotify-device-select-mode)
-        (setq-local spotify-current-page 1)
-        (setq tabulated-list-entries nil)
-        (pop-to-buffer buffer)
-        (spotify-device-select-update)
-        buffer))))
+  (spotify-current-user
+   (lambda (user)
+     (if (not (string= (gethash 'product user) "premium"))
+         (message "This feature requires a Spotify premium subscription.")
+       (let ((buffer (get-buffer-create "*Devices*")))
+         (with-current-buffer buffer
+           (spotify-device-select-mode)
+           (spotify-device-select-update)))))))
 
 (provide 'spotify)
