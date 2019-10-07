@@ -27,15 +27,18 @@
 (defun spotify-device-select-update ()
   "Fetches the list of devices using the device list endpoint."
   (interactive)
-  (let* ((json (spotify-api-device-list))
-         (devices (gethash 'devices json))
-         (line (string-to-number (format-mode-line "%l"))))
-    (when devices
-        (progn
-          (spotify-devices-print devices)
-          (goto-char (point-min))
-          (forward-line (1- line))
-          (message "Device list updated.")))))
+  (lexical-let ((buffer (current-buffer)))
+    (spotify-api-device-list
+     (lambda (json)
+       (if-let ((devices (gethash 'devices json))
+                (line (string-to-number (format-mode-line "%l"))))
+           (progn
+             (pop-to-buffer buffer)
+             (spotify-devices-print devices)
+             (goto-char (point-min))
+             (forward-line (1- line))
+             (message "Device list updated."))
+         (message "No devices are available."))))))
 
 (defun spotify-devices-print (devices)
   "Append the given DEVICES to the devices view."
@@ -54,11 +57,12 @@
                         (list 'face 'link
                               'follow-link t
                               'action `(lambda (_)
-                                         (progn
-                                           (setq spotify-selected-device-id ,device-id)
-                                           (spotify-api-transfer-player ,device-id)
-                                           (run-at-time 1 nil #'spotify-device-select-update)))
-                              'help-echo (format "Select %s for transport" name)))
+                                         (spotify-api-transfer-player
+                                          ,device-id
+                                          (lambda (json)
+                                            (setq spotify-selected-device-id ,device-id)
+                                            (message "Device '%s' selected" ,name))))
+                              'help-echo (format "Select '%s' for transport" name)))
                   (if is-active "X" "")
                   (if is-active (number-to-string volume) "")))
            entries))))

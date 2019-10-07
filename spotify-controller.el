@@ -4,7 +4,7 @@
 
 ;;; spotify-controller.el --- Generic player controller interface for Spotify.el
 
-;; Copyright (C) 2014-2016 Daniel Fernandes Martins
+;; Copyright (C) 2014-2019 Daniel Fernandes Martins
 
 ;;; Code:
 
@@ -26,16 +26,17 @@
   "Evaluate THEN form if Emacs is running in OS X."
   `(if-darwin ,then nil))
 
-(defcustom spotify-transport (if-gnu-linux 'dbus 'apple)
-  "How the commands should be sent to Spotify process.  Defaults for `dbus' for GNU/Linux, `apple' otherwise."
+(defcustom spotify-transport 'connect
+  "How the commands should be sent to Spotify process. Defaults to 'connect, as it provides a consistent UX across all OSes."
   :type '(choice (symbol :tag "AppleScript" apple)
                  (symbol :tag "D-Bus" dbus)
                  (symbol :tag "Connect" connect))
   :group 'spotify)
 
-;; TODO: No modeline support for linux just yet
-(defcustom spotify-player-status-refresh-interval 1
-  "The interval, in seconds, that the player status will be updated.  Set to 0 to disable this feature."
+(defcustom spotify-player-status-refresh-interval 5
+  "The interval, in seconds, that the mode line must be updated. When using the
+'connect transport, avoid using values smaller than 5 to avoid being rate
+limited. Set to 0 to disable this feature."
   :type 'integer
   :group 'spotify)
 
@@ -144,27 +145,23 @@ This corresponds to the current REPEATING state."
         (spotify-update-player-status player-status)))))
 
 (defun spotify-start-player-status-timer ()
-  "Start the timer that will update the player status according to the Spotify player status."
+  "Start the timer that will update the mode line according to the Spotify player status."
   (spotify-stop-player-status-timer)
   (when (> spotify-player-status-refresh-interval 0)
     (let ((first-run (format "%d sec" spotify-player-status-refresh-interval))
           (interval spotify-player-status-refresh-interval))
       (setq spotify-timer
-            (run-at-time first-run interval 'spotify-refresh-player-status)))))
+            (run-at-time first-run interval 'spotify-player-status)))))
 
 (defun spotify-stop-player-status-timer ()
-  "Stop the timer that is updating the player status."
+  "Stop the timer that is updating the mode line."
   (when (and (boundp 'spotify-timer) (timerp spotify-timer))
     (cancel-timer spotify-timer))
   (spotify-player-status))
 
 (defun spotify-player-status ()
-  "Update the player status to display the current Spotify player status."
+  "Update the mode line to display the current Spotify player status."
   (interactive)
-  (spotify-apply "player-status"))
-
-(defun spotify-refresh-player-status ()
-  "Start the player status process in order to update the player status."
   (spotify-apply "player-status")
   (force-mode-line-update t))
 
@@ -176,9 +173,10 @@ This corresponds to the current REPEATING state."
 (defun spotify-play-track (track &optional context)
   "Sends a `play' command to Spotify process with TRACK passing a CONTEXT id."
   (interactive)
-  (spotify-apply "player-play-track"
-                 (when track (spotify-get-item-uri track))
-                 (when context (spotify-get-item-uri context))))
+  (spotify-apply
+   "player-play-track"
+   (when track (spotify-get-item-uri track))
+   (when context (spotify-get-item-uri context))))
 
 (defun spotify-toggle-play ()
   "Sends a `playpause' command to Spotify process."
@@ -215,15 +213,10 @@ This corresponds to the current REPEATING state."
   (interactive)
   (spotify-apply "volume-down"))
 
-(defun spotify-is-repeating-supported()
-  "Return whether toggling repeat is supported."
+(defun spotify-volume-mute-unmute ()
+  "Mute/unmute the volume for the active device."
   (interactive)
-  (spotify-apply "is-repeating-supported"))
-
-(defun spotify-is-shuffling-supported()
-  "Return whether toggling shuffle is supported."
-  (interactive)
-  (spotify-apply "is-shuffling-supported"))
+  (spotify-apply "volume-mute-unmute"))
 
 (defun spotify-toggle-repeat ()
   "Sends a command to Spotify process to toggle the repeating flag."

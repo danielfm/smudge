@@ -1,9 +1,9 @@
 ;;; oauth2.el --- OAuth 2.0 Authorization Protocol
 
-;; Copyright (C) 2011-2013 Free Software Foundation, Inc
+;; Copyright (C) 2011-2016 Free Software Foundation, Inc
 
 ;; Author: Julien Danjou <julien@danjou.info>
-;; Version: 0.10
+;; Version: 0.11
 ;; Keywords: comm
 
 ;; Modified by Daniel Martins <daniel.tritone@gmail.com>
@@ -202,18 +202,30 @@ This allows to store the token in an unique way."
 (defvar oauth--url-advice nil)
 (defvar oauth--token-data nil)
 
+
+(defun oauth2-authz-bearer-header (token)
+  "Return 'Authoriztions: Bearer' header with TOKEN."
+  (cons "Authorization" (format "Bearer %s" token)))
+
+(defun oauth2-extra-headers (extra-headers)
+  "Return EXTRA-HEADERS with 'Authorization: Bearer' added."
+  (cons (oauth2-authz-bearer-header (oauth2-token-access-token (car oauth--token-data)))
+        extra-headers))
+
+
 ;; FIXME: We should change URL so that this can be done without an advice.
 (defadvice url-http-handle-authentication (around oauth-hack activate)
   (if (not oauth--url-advice)
       ad-do-it
     (let ((url-request-method url-http-method)
           (url-request-data url-http-data)
-          (url-request-extra-headers url-http-extra-headers)))
-    (url-retrieve-internal (oauth2-url-append-access-token
-                            (oauth2-refresh-access (car oauth--token-data))
-                            (cdr oauth--token-data))
-                           url-callback-function
-                           url-callback-arguments)
+          (url-request-extra-headers
+           (oauth2-extra-headers url-http-extra-headers))))
+    (oauth2-refresh-access (car oauth--token-data))
+    (url-retrieve-internal (cdr oauth--token-data)
+               url-callback-function
+               url-callback-arguments
+               t)
     ;; This is to make `url' think it's done.
     (when (boundp 'success) (setq success t)) ;For URL library in Emacs<24.4.
     (setq ad-return-value t)))                ;For URL library in Emacs≥24.4.
@@ -226,10 +238,9 @@ TOKEN can be obtained with `oauth2-auth'."
     (let ((oauth--url-advice t)         ;Activate our advice.
           (url-request-method request-method)
           (url-request-data request-data)
-          (url-request-extra-headers request-extra-headers))
-      (url-retrieve-synchronously
-       (oauth2-url-append-access-token token url)
-			 t))))
+          (url-request-extra-headers
+           (oauth2-extra-headers request-extra-headers)))
+      (url-retrieve-synchronously url))))
 
 ;;;###autoload
 (defun oauth2-url-retrieve (token url callback &optional
@@ -243,13 +254,16 @@ when finished.  See `url-retrieve'."
     (let ((oauth--url-advice t)         ;Activate our advice.
           (url-request-method request-method)
           (url-request-data request-data)
-          (url-request-extra-headers request-extra-headers))
-      (url-retrieve
-       (oauth2-url-append-access-token token url)
-       callback cbargs))))
+          (url-request-extra-headers
+           (oauth2-extra-headers request-extra-headers)))
+      (url-retrieve url callback cbargs t))))
 
 ;;;; ChangeLog:
 
+;; 2016-07-09  Julien Danjou  <julien@danjou.info>
+;; 
+;; 	oauth2: send authentication token via Authorization header
+;; 
 ;; 2014-01-28  Rüdiger Sonderfeld  <ruediger@c-plusplus.de>
 ;; 
 ;; 	oauth2.el: Add support for async retrieve.

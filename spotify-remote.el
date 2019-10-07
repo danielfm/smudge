@@ -1,6 +1,6 @@
 ;; spotify-remote.el --- Spotify.el remote minor mode
 
-;; Copyright (C) 2014-2018 Daniel Fernandes Martins
+;; Copyright (C) 2014-2019 Daniel Fernandes Martins
 
 ;;; Code:
 
@@ -40,9 +40,11 @@ See commands \\[spotify-toggle-repeating] and
             (define-key map (kbd "M-p p s") 'spotify-playlist-search)
             (define-key map (kbd "M-p p c") 'spotify-create-playlist)
             (define-key map (kbd "M-p t s") 'spotify-track-search)
+            (define-key map (kbd "M-p t r") 'spotify-recently-played)
             (define-key map (kbd "M-p v u") 'spotify-volume-up)
             (define-key map (kbd "M-p v d") 'spotify-volume-down)
-						(define-key map (kbd "M-p M-d") 'spotify-select-device)
+            (define-key map (kbd "M-p v m") 'spotify-volume-mute-unmute)
+            (define-key map (kbd "M-p d") 'spotify-select-device)
             map)
   (let ((s '(:eval (spotify-player-status-text))))
     (if spotify-remote-mode
@@ -74,15 +76,15 @@ See commands \\[spotify-toggle-repeating] and
     ["Previous Track" spotify-previous-track :active spotify-remote-mode]
     ["Next Track"     spotify-next-track     :active spotify-remote-mode]
     "--"
-    ["Shuffle" spotify-toggle-shuffle :style toggle :active (and spotify-remote-mode (spotify-is-shuffling-supported)) :selected (spotify-is-shuffling)]
-    ["Repeat"  spotify-toggle-repeat  :style toggle :active (and spotify-remote-mode (spotify-is-repeating-supported)) :selected (spotify-is-repeating)]
+    ["Shuffle" spotify-toggle-shuffle :active spotify-remote-mode]
+    ["Repeat"  spotify-toggle-repeat  :active spotify-remote-mode]
     "--"
-    ["Search Tracks..."    spotify-track-search       :active (spotify-remote-mode)]
-    ["Featured Playlists"  spotify-featured-playlists :active (spotify-remote-mode)]
-    ["My Playlists"        spotify-my-playlists       :active (spotify-remote-mode)]
-    ["User Playlists..."   spotify-user-playlists     :active (spotify-remote-mode)]
-    ["Search Playlists..." spotify-playlist-search    :active (spotify-remote-mode)]
-    ["Create Playlist..."  spotify-create-playlist    :active (spotify-remote-mode)]
+    ["Search Tracks..."    spotify-track-search       :active spotify-remote-mode]
+    ["Featured Playlists"  spotify-featured-playlists :active spotify-remote-mode]
+    ["My Playlists"        spotify-my-playlists       :active spotify-remote-mode]
+    ["User Playlists..."   spotify-user-playlists     :active spotify-remote-mode]
+    ["Search Playlists..." spotify-playlist-search    :active spotify-remote-mode]
+    ["Create Playlist..."  spotify-create-playlist    :active spotify-remote-mode]
     "--"
     ["Spotify Remote Mode" spotify-remote-mode :style toggle :selected spotify-remote-mode]))
 
@@ -90,19 +92,23 @@ See commands \\[spotify-toggle-repeating] and
   (interactive)
   (popup-menu
    '("Spotify"
-     ["Play/Pause" spotify-toggle-play :active t]
-     ["Previous Track" spotify-previous-track :active t]
-     ["Next Track" spotify-next-track :active t]
+     ["Play/Pause" spotify-toggle-play]
+     ["Previous Track" spotify-previous-track]
+     ["Next Track" spotify-next-track]
      "--"
-     ["Shuffle" spotify-toggle-shuffle :style toggle :active (spotify-is-shuffling-supported) :selected (spotify-is-shuffling)]
-     ["Repeat"  spotify-toggle-repeat  :style toggle :active (spotify-is-repeating-supported) :selected (spotify-is-repeating)]
+     ["Volume Up" spotify-volume-up]
+     ["Volume Down" spotify-volume-down]
+     ["Mute/Unmute" spotify-volume-mute-unmute]
      "--"
-     ["Search Tracks..."    spotify-track-search       :active t]
-     ["Featured Playlists"  spotify-featured-playlists :active t]
-     ["My Playlists"        spotify-my-playlists       :active t]
-     ["User Playlists..."   spotify-user-playlists     :active t]
-     ["Search Playlists..." spotify-playlist-search    :active t]
-     ["Create Playlist..."  spotify-create-playlist    :active t])))
+     ["Shuffle" spotify-toggle-shuffle]
+     ["Repeat"  spotify-toggle-repeat]
+     "--"
+     ["Search Tracks..."    spotify-track-search]
+     ["Featured Playlists"  spotify-featured-playlists]
+     ["My Playlists"        spotify-my-playlists]
+     ["User Playlists..."   spotify-user-playlists]
+     ["Search Playlists..." spotify-playlist-search]
+     ["Create Playlist..."  spotify-create-playlist])))
 
 (defvar spotify-remote-player-status-map (make-sparse-keymap))
 (define-key spotify-remote-player-status-map [player-status mouse-1] 'spotify-remote-popup-menu)
