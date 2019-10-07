@@ -9,12 +9,12 @@
 ;; This variable keeps the text to be displayed in the global mode line
 (defvar spotify-mode-line "")
 (defcustom spotify-keymap-prefix nil
-	"Spotify remote keymap prefix."
-	:group 'spotify
-	:type 'string)
+  "Spotify remote keymap prefix."
+  :group 'spotify
+  :type 'string)
 
 (defvar spotify-command-map
-	(let ((map (make-sparse-keymap)))
+  (let ((map (make-sparse-keymap)))
             (define-key map (kbd "M-r") #'spotify-toggle-repeat)
             (define-key map (kbd "M-s") #'spotify-toggle-shuffle)
             (define-key map (kbd "M-p") #'spotify-toggle-play)
@@ -28,17 +28,17 @@
             (define-key map (kbd "p s") #'spotify-playlist-search)
             (define-key map (kbd "p c") #'spotify-create-playlist)
             (define-key map (kbd "t s") #'spotify-track-search)
-						(define-key map (kbd "d") #'spotify-select-device)
-						map)
-	"Keymap for Spotify commands after 'spotify-keymap-prefix'.")
+            (define-key map (kbd "d") #'spotify-select-device)
+            map)
+  "Keymap for Spotify commands after 'spotify-keymap-prefix'.")
 (fset 'spotify-command-map spotify-command-map)
 
 (defvar spotify-mode-map
-	(let ((map (make-sparse-keymap)))
-		(when spotify-keymap-prefix
-			(define-key map spotify-keymap-prefix 'spotify-command-map))
-		map)
-	"Keymap for Spotify remote mode.")
+  (let ((map (make-sparse-keymap)))
+    (when spotify-keymap-prefix
+      (define-key map spotify-keymap-prefix 'spotify-command-map))
+    map)
+  "Keymap for Spotify remote mode.")
 
 (define-minor-mode spotify-remote-mode
   "Toggles Spotify Remote mode.

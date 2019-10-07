@@ -100,7 +100,7 @@ key bindings:
 | <kbd>C-c . v u</kbd> | `spotify-volume-up`          | Increase the volume [2]                    |
 | <kbd>C-c . v d</kbd> | `spotify-volume-down`        | Decrease the volume [2]                    |
 | <kbd>C-c . v m</kbd> | `spotify-volume-mute-unmute` | Alternate the volume between 0 and 100 [2] |
-| <kbd>C-c . M-d</kbd> | `spotify-select-device`      | Select a playback device [2]               |
+| <kbd>C-c . d</kbd>   | `spotify-select-device`      | Select a playback device [2]               |
 
 The current song being played by the Spotify client is displayed in the mode
 line along with the player status (playing, paused). The interval in which the
