@@ -39,7 +39,7 @@ Returns a JSON string in the format:
                   (format "\"player_repeating\":%s"
                           (if (string= (gethash 'repeat_state status) "off") "false" "true"))
                   "}"))))
-    (spotify-replace-mode-line-flags json)))
+    (spotify-replace-player-status-flags json)))
 
 (defun spotify-connect-get-device-id (player-status)
   "Get the id if from PLAYER-STATUS of the currently playing device, if any."

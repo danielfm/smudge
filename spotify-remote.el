@@ -2,13 +2,19 @@
 
 ;; Copyright (C) 2014-2018 Daniel Fernandes Martins
 
-;; Code:
+;;; Code:
 
 (require 'easymenu)
 
-;; This variable keeps the text to be displayed in the global mode line or title bar
-(defvar spotify-mode-line "")
-(defvar spotify-mode-line-stale nil)
+
+(defvar spotify-player-status ""
+  "The text to be displayed in the global mode line or title bar.")
+(defcustom spotify-status-location 'modeline
+  "Specify where to show the player status: one of '(modeline title-bar nil)."
+  :type '(choice (const :tag "Modeline" modeline)
+                (const :tag "Title Bar" title-bar)
+                (const :tag "Do not show" nil))
+  :group 'spotify)
 
 (define-minor-mode spotify-remote-mode
   "Toggles Spotify Remote mode.
@@ -38,10 +44,10 @@ See commands \\[spotify-toggle-repeating] and
             (define-key map (kbd "M-p v d") 'spotify-volume-down)
 						(define-key map (kbd "M-p M-d") 'spotify-select-device)
             map)
-  (let ((s '(:eval (spotify-mode-line-text))))
+  (let ((s '(:eval (spotify-player-status-text))))
     (if spotify-remote-mode
         (progn
-          (spotify-start-mode-line-timer)
+          (spotify-start-player-status-timer)
           (cond ((eq spotify-status-location 'modeline)
                  (unless (member s global-mode-string)
                    (push s global-mode-string)))
@@ -53,7 +59,7 @@ See commands \\[spotify-toggle-repeating] and
                  (unless (member s frame-title-format)
                    (nconc frame-title-format `("    " ,s))))))
       (progn
-        (spotify-stop-mode-line-timer)
+        (spotify-stop-player-status-timer)
         (cond ((eq spotify-status-location 'modeline)
                (when (member s global-mode-string)
                  (setq global-mode-string (remove s global-mode-string))))
@@ -98,23 +104,22 @@ See commands \\[spotify-toggle-repeating] and
      ["Search Playlists..." spotify-playlist-search    :active t]
      ["Create Playlist..."  spotify-create-playlist    :active t])))
 
-(defvar spotify-remote-mode-line-map (make-sparse-keymap))
-(define-key spotify-remote-mode-line-map [mode-line mouse-1] 'spotify-remote-popup-menu)
+(defvar spotify-remote-player-status-map (make-sparse-keymap))
+(define-key spotify-remote-player-status-map [player-status mouse-1] 'spotify-remote-popup-menu)
 
-(defun spotify-update-mode-line (str)
-  "Sets the given str to the mode line, prefixed with the mode identifier."
-  (when (not (string= str spotify-mode-line))
-    (setq spotify-mode-line str)
-    (setq spotify-mode-line-stale t)))
+(defun spotify-update-player-status (str)
+  "Set the given STR to the player status, prefixed with the mode identifier."
+  (when (not (string= str spotify-player-status))
+    (setq spotify-player-status str)))
 
-(defun spotify-mode-line-text ()
-  "Returns the propertized text to be displayed as the lighter."
-  (propertize spotify-mode-line
-              'local-map spotify-remote-mode-line-map
-              'mouse-face 'mode-line-highlight))
+(defun spotify-player-status-text ()
+  "Return the propertized text to be displayed as the lighter."
+  (propertize spotify-player-status
+              'local-map spotify-remote-player-status-map
+              'mouse-face 'player-status-highlight))
 
 (defun turn-on-spotify-remote-mode ()
-  "Turns the `spotify-remote-mode' on in the current buffer."
+  "Turn the `spotify-remote-mode' on in the current buffer."
   (spotify-remote-mode 1))
 
 
