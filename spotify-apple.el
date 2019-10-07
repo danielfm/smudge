@@ -1,6 +1,6 @@
 ;; spotify-apple.el --- Apple-specific code for Spotify.el
 
-;; Copyright (C) 2014-2016 Daniel Fernandes Martins
+;; Copyright (C) 2014-2019 Daniel Fernandes Martins
 
 ;; Code:
 
@@ -80,23 +80,20 @@ end tell
 (defun spotify-apple-player-previous-track ()
   (spotify-apple-command "previous track"))
 
-(defun spotify-apple-is-shuffling-supported ()
-  t)
+(defun spotify-apple-volume-up ()
+  (message "Changing the volume not supported by the Spotify AppleScript client"))
 
-(defun spotify-apple-is-repeating-supported ()
-  t)
+(defun spotify-apple-volume-down ()
+  (message "Changing the volume not supported by the Spotify AppleScript client"))
+
+(defun spotify-apple-volume-mute-unmute ()
+  (message "Changing the volume not supported by the Spotify AppleScript client"))
 
 (defun spotify-apple-toggle-repeat ()
   (spotify-apple-command "set repeating to not repeating"))
 
 (defun spotify-apple-toggle-shuffle ()
   (spotify-apple-command "set shuffling to not shuffling"))
-
-(defun spotify-apple-is-repeating ()
-  (string= "true" (spotify-apple-command "repeating")))
-
-(defun spotify-apple-is-shuffling ()
-  (string= "true" (spotify-apple-command "shuffling")))
 
 (defun spotify-apple-player-play-track (track-id context-id)
   (spotify-apple-command (format "play track \"%s\" in context \"%s\"" track-id context-id)))

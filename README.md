@@ -89,11 +89,12 @@ key bindings:
 | <kbd>M-p p s</kbd> | `spotify-playlist-search`    | Search for playlists                            |
 | <kbd>M-p p u</kbd> | `spotify-user-playlists`     | Show playlists for the given user               |
 | <kbd>M-p p c</kbd> | `spotify-create-playlist`    | Create a new playlist                           |
+| <kbd>M-p t r</kbd> | `spotify-recently-played`    | List of recently played tracks                  |
 | <kbd>M-p t s</kbd> | `spotify-track-search`       | Search for tracks                               |
 | <kbd>M-p v u</kbd> | `spotify-volume-up`          | Increase the volume [2]                         |
 | <kbd>M-p v d</kbd> | `spotify-volume-down`        | Decrease the volume [2]                         |
+| <kbd>M-p v m</kbd> | `spotify-volume-mute-unmute` | Alternate volume between 0 and 100 [2]          |
 | <kbd>M-p M-d</kbd> | `spotify-select-device`      | Select a playback device [2]                    |
-
 
 The current song being played by the Spotify client is displayed in the mode
 line along with the player status (playing, paused). The interval in which the
@@ -101,8 +102,10 @@ mode line is updated can be configured via the
 `spotify-mode-line-refresh-interval` variable:
 
 ````el
-;; Updates the mode line every second (set to 0 to disable this feature)
-(setq spotify-mode-line-refresh-interval 1)
+;; Updates the mode line every 10 seconds (default is 5)
+;; Note: Set 0 to disable this feature, and avoid values between 1 and 4 when
+;; using the 'connect transport.
+(setq spotify-mode-line-refresh-interval 10)
 ````
 
 [1] No proper support for this in D-Bus implementation for GNU/Linux  

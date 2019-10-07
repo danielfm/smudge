@@ -1,6 +1,6 @@
 ;;; spotify-dbus --- Dbus-specific code for Spotify.el
 
-;; Copyright (C) 2014-2018 Daniel Fernandes Martins
+;; Copyright (C) 2014-2019 Daniel Fernandes Martins
 
 ;;; Commentary:
 
@@ -76,12 +76,14 @@
   "Play previous previous."
   (spotify-dbus-call "Previous"))
 
-;; Toggling shuffle and repeating via D-Bus is not supported
-(defun spotify-dbus-is-shuffling-supported ()
-  nil)
+(defun spotify-dbus-volume-up ()
+  (message "Changing the volume not supported by the Spotify DBus client"))
 
-(defun spotify-dbus-is-repeating-supported ()
-  nil)
+(defun spotify-dbus-volume-down ()
+  (message "Changing the volume not supported by the Spotify DBus client"))
+
+(defun spotify-dbus-volume-mute-unmute ()
+  (message "Changing the volume not supported by the Spotify DBus client"))
 
 (defun spotify-dbus-toggle-repeat ()
   (message "Toggling repeat status not supported by the Spotify client"))
