@@ -6,7 +6,7 @@
 
 (require 'easymenu)
 
-;; This variable keeps the text to be displayed in the global mode line
+;; This variable keeps the text to be displayed in the global mode line or title bar
 (defvar spotify-mode-line "")
 (defvar spotify-mode-line-stale nil)
 
@@ -42,12 +42,25 @@ See commands \\[spotify-toggle-repeating] and
     (if spotify-remote-mode
         (progn
           (spotify-start-mode-line-timer)
-          (unless (member s global-mode-string)
-            (push s global-mode-string)))
+          (cond ((eq spotify-status-location 'modeline)
+                 (unless (member s global-mode-string)
+                   (push s global-mode-string)))
+                ((eq spotify-status-location 'title-bar)
+                 ;; title-bar-format may be just a string.
+                 ;; make it a list so we can push player status on to it
+                 (if (stringp frame-title-format)
+                     (setq frame-title-format (list frame-title-format)))
+                 (unless (member s frame-title-format)
+                   (nconc frame-title-format `("    " ,s))))))
       (progn
         (spotify-stop-mode-line-timer)
-        (when (member s global-mode-string)
-          (setq global-mode-string (remq s global-mode-string)))))))
+        (cond ((eq spotify-status-location 'modeline)
+               (when (member s global-mode-string)
+                 (setq global-mode-string (remove s global-mode-string))))
+              ((eq spotify-status-location 'title-bar)
+               (when (member s frame-title-format)
+                 (setq frame-title-format
+                       (remove "    " (remove s frame-title-format))))))))))
 
 (easy-menu-add-item nil '("Tools")
   '("Spotify"
