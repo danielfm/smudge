@@ -150,7 +150,11 @@
                                       (switch-to-buffer buffer)
                                       (erase-buffer)
                                       (shr-insert-document result)
-                                      (goto-char (point-min)))))))))
+                                      (goto-char (point-min))
+                                      (dotimes (_ 2) (forward-line))
+                                      (let ((beg (point)))
+                                        (forward-line 10)
+                                        (delete-region beg (point))))))))))
 
 
 (provide 'spotify)
