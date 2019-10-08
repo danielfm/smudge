@@ -71,16 +71,23 @@ Spotify API."
         *spotify-oauth2-token*))))
 
 (defun spotify-api-call-async (method uri &optional data callback is-retry)
-  "Make a request to the given Spotify service endpoint and calls CALLBACK with
-the parsed JSON response."
+  "Make a request via METHOD to the given Spotify service URI and call CALLBACK with the parsed JSON response.  Pass DATA if provided."
+  (spotify-api-call-endpoint-async
+   method uri (spotify-oauth2-token) spotify-api-endpoint data callback is-retry))
+
+(defun spotify-api-call-endpoint-async
+    (method uri token endpoint &optional data callback is-retry)
+  "Make a request via METHOD to a URI at ENDPOINT with TOKEN and call CALLBACK with the parsed JSON response."
   (lexical-let ((method method)
                 (uri uri)
+                (token token)
+                (endpoint endpoint)
                 (data data)
                 (callback callback)
                 (is-retry is-retry))
     (oauth2-url-retrieve
-     (spotify-oauth2-token)
-     (concat spotify-api-endpoint uri)
+     token
+     (concat endpoint uri)
      (lambda (_)
        (toggle-enable-multibyte-characters t)
        (goto-char (point-min))
@@ -97,7 +104,7 @@ the parsed JSON response."
                (if (and (hash-table-p error-json)
                         (eq 401 (gethash 'status error-json))
                         (not is-retry))
-                   (spotify-api-call-async method uri data callback t)
+                   (spotify-api-call-endpointasync method uri token endpoint data callback t)
                  (when callback (funcall callback json)))))
 
          ;; Handle empty responses

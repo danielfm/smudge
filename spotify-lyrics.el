@@ -18,54 +18,18 @@
 (defconst spotify-genius-endpoint "https://api.genius.com")
 (defconst spotify-genius-website-url "https://genius.com")
 
-(defun genius-api-call-async (method uri &optional data callback is-retry)
-  "Make a request to the genius API endpoint via METHOD with provided URI and optional DATA.  Call CALLBACK with the parsed JSON response.  Only retry if not IS-RETRY."
-  (lexical-let ((method method)
-                (uri uri)
-                (data data)
-                (callback callback)
-                (is-retry is-retry))
-    (oauth2-url-retrieve
-     (make-oauth2-token :access-token spotify-genius-token)
-     (concat spotify-genius-endpoint uri)
-     (lambda (_)
-       (toggle-enable-multibyte-characters t)
-       (goto-char (point-min))
-       (condition-case err
-           (when (search-forward-regexp "^$" nil t)
-             (let* ((json-object-type 'hash-table)
-                    (json-array-type 'list)
-                    (json-key-type 'symbol)
-                    (json (json-read))
-                    (error-json (gethash 'error json)))
-               (kill-buffer)
-
-               ;; Retries the request when the token expires and gets refreshed
-               (if (and (hash-table-p error-json)
-                        (eq 401 (gethash 'status error-json))
-                        (not is-retry))
-                   (genius-api-call-async method uri data callback t)
-                 (when callback (funcall callback json)))))
-
-         ;; Handle empty responses
-         (end-of-file
-          (kill-buffer)
-          (when callback (funcall callback nil)))))
-     nil
-     method
-     (or data "")
-     '(("Content-Type" . "application/json")))))
-
 (defun spotify-genius-search (metadata callback)
-  "Search the genius API by ARTIST and TITLE.  Call CALLBACK with the URL of the lyrics."
+  "Search the genius API using METADATA.  Call CALLBACK with the URL of the lyrics."
   (lexical-let ((metadata metadata)
                 (callback callback))
-    (genius-api-call-async
+    (spotify-api-call-endpoint-async
      "GET"
      (concat "/search?"
              (url-build-query-string
               `((q      ,(concat (gethash 'artist metadata) (gethash 'name metadata))))
               nil t))
+     (make-oauth2-token :access-token spotify-genius-token)
+     spotify-genius-endpoint
      nil
      (lambda (json)
        (let* ((hits (gethash 'hits (gethash 'response json)))

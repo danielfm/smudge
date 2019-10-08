@@ -145,7 +145,7 @@ This corresponds to the current REPEATING state."
         (setq player-status (replace-regexp-in-string "%s" (spotify-player-status-shuffling-indicator (gethash 'player_shuffling json)) player-status))
         (setq player-status (replace-regexp-in-string "%r" (spotify-player-status-repeating-indicator (gethash 'player_repeating json)) player-status))
         (setq player-status (replace-regexp-in-string "%p" (spotify-player-status-playing-indicator (gethash 'player_state json)) player-status))
-        (spotify-update-player-status player-status)))))
+        (spotify-update-player-status player-status)
         (setq spotify-player-metadata json)))))
 
 (defun spotify-start-player-status-timer ()
