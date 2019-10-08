@@ -101,4 +101,7 @@ end tell
 (defun spotify-apple-player-pause ()
   (spotify-apple-command "pause"))
 
+(defun spotify-apple-player-play ()
+  (spotify-apple-command "play"))
+
 (provide 'spotify-apple)

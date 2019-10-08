@@ -68,6 +68,11 @@ Returns a JSON string in the format:
   (spotify-when-device-active
    (spotify-api-pause)))
 
+(defun spotify-connect-player-play ()
+  "Play something probably."
+  (spotify-when-device-active
+   (spotify-api-play)))
+
 (defun spotify-connect-player-toggle-play ()
   "Toggle playing status of current track."
   (spotify-when-device-active
