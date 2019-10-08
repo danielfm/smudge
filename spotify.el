@@ -37,6 +37,7 @@
 (require 'spotify-device-select)
 (require 'spotify-controller)
 (require 'spotify-remote)
+(require 'spotify-lyrics)
 
 (when-darwin    (require 'spotify-apple))
 (when-gnu-linux (require 'spotify-dbus))
@@ -132,5 +133,24 @@
          (with-current-buffer buffer
            (spotify-device-select-mode)
            (spotify-device-select-update)))))))
+
+;;;###autoload
+(defun spotify-get-lyrics ()
+  "Fetch lyrics for the currently playing track."
+  (interactive)
+  (pp spotify-player-metadata)
+  (lexical-let ((buffer (get-buffer-create "*Lyrics*")))
+    (with-current-buffer buffer
+      (spotify-genius-search
+       spotify-player-metadata
+       (lambda (lyrics-url)
+         (message lyrics-url)
+         (spotify-genius-get-lyrics lyrics-url
+                                    (lambda (result)
+                                      (switch-to-buffer buffer)
+                                      (erase-buffer)
+                                      (shr-insert-document result)
+                                      (goto-char (point-min)))))))))
+
 
 (provide 'spotify)

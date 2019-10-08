@@ -2,7 +2,7 @@
 
 ;;; Commentary:
 
-;; spotify-genius.el --- Spotify.el interface for Genius lyrics
+;; spotify-lyrics.el --- Spotify.el interface for Genius lyrics
 
 ;; Copyright (C) 2019 Jason Dufair
 
@@ -56,16 +56,15 @@
      (or data "")
      '(("Content-Type" . "application/json")))))
 
-(defun spotify-genius-search (artist title callback)
+(defun spotify-genius-search (metadata callback)
   "Search the genius API by ARTIST and TITLE.  Call CALLBACK with the URL of the lyrics."
-  (lexical-let ((artist artist)
-                (title title)
+  (lexical-let ((metadata metadata)
                 (callback callback))
     (genius-api-call-async
      "GET"
      (concat "/search?"
              (url-build-query-string
-              `((q      ,(concat artist title)))
+              `((q      ,(concat (gethash 'artist metadata) (gethash 'name metadata))))
               nil t))
      nil
      (lambda (json)
@@ -91,17 +90,5 @@
          (kill-buffer)
          (funcall callback parsed-html))))))
 
-;; (spotify-genius-search
-;;  "Aesop Rock" "Shrunk"
-;;  (lambda (lyrics-url)
-;;    (spotify-genius-get-lyrics
-;;     lyrics-url
-;;     (lambda (result)
-;;       (setq foobar result)
-;;       (message "done")))))
-
-;;(shr-insert-document foobar)
-
-
-
+(provide 'spotify-lyrics)
 ;;; spotify-genius.el ends here

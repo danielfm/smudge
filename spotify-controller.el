@@ -96,6 +96,9 @@ The following placeholders are supported:
 
 (defvar spotify-timer nil)
 
+(defvar spotify-player-metadata nil
+  "The metadata about the currently playing track.")
+
 (defun spotify-apply (suffix &rest args)
   "Simple facility to emulate multimethods.
 Apply SUFFIX to spotify-prefixed functions, applying ARGS."
@@ -123,8 +126,8 @@ This corresponds to the current REPEATING state."
       spotify-player-status-repeating-text
     spotify-player-status-not-repeating-text))
 
-(defun spotify-replace-player-status-flags (metadata)
-  "Compose the playing status string to be displayed in the player-status from METADATA."
+(defun spotify-update-metadata (metadata)
+  "Compose the playing status string to be displayed in the mode-line from METADATA."
   (let* ((player-status spotify-player-status-format)
          (duration-format "%m:%02s")
          (json-object-type 'hash-table)
@@ -143,6 +146,7 @@ This corresponds to the current REPEATING state."
         (setq player-status (replace-regexp-in-string "%r" (spotify-player-status-repeating-indicator (gethash 'player_repeating json)) player-status))
         (setq player-status (replace-regexp-in-string "%p" (spotify-player-status-playing-indicator (gethash 'player_state json)) player-status))
         (spotify-update-player-status player-status)))))
+        (setq spotify-player-metadata json)))))
 
 (defun spotify-start-player-status-timer ()
   "Start the timer that will update the mode line according to the Spotify player status."

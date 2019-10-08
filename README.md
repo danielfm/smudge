@@ -21,6 +21,7 @@ of Spotify via the Spotify Connect feature.
 * Search for tracks and playlists that match the given keywords
 * Easily control basic Spotify player features like, play/pause, previous,
   next, shuffle, and repeat with the Spotify Remote minor mode
+* One-key lyrics access
 
 ## Installation
 
@@ -280,6 +281,10 @@ you can set the following, i.e.:
 (setq spotify-title-bar-separator "----")
 ````
 Otherwise, it defaults to 4 spaces.
+
+## Lyrics
+
+<kbd>C-c . l</kbd> will bring up a buffer with the lyrics of the currently playing track.
 
 ## Donate
 

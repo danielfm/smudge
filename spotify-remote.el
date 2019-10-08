@@ -41,6 +41,7 @@
             (define-key map (kbd "p s") #'spotify-playlist-search)
             (define-key map (kbd "p c") #'spotify-create-playlist)
             (define-key map (kbd "t s") #'spotify-track-search)
+            (define-key map (kbd "l") #'spotify-get-lyrics)
             (define-key map (kbd "d") #'spotify-select-device)
             map)
   "Keymap for Spotify commands after 'spotify-keymap-prefix'.")
