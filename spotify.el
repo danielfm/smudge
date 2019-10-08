@@ -138,13 +138,11 @@
 (defun spotify-get-lyrics ()
   "Fetch lyrics for the currently playing track."
   (interactive)
-  (pp spotify-player-metadata)
   (lexical-let ((buffer (get-buffer-create "*Lyrics*")))
     (with-current-buffer buffer
       (spotify-genius-search
        spotify-player-metadata
        (lambda (lyrics-url)
-         (message lyrics-url)
          (spotify-genius-get-lyrics lyrics-url
                                     (lambda (result)
                                       (switch-to-buffer buffer)
@@ -154,7 +152,8 @@
                                       (dotimes (_ 2) (forward-line))
                                       (let ((beg (point)))
                                         (forward-line 10)
-                                        (delete-region beg (point))))))))))
+                                        (delete-region beg (point)))
+                                      (goto-char (point-min)))))))))
 
 
 (provide 'spotify)
