@@ -46,6 +46,34 @@
     map)
   "Keymap for Spotify remote mode.")
 
+(defun spotify-add-frame-title-status (status title-section)
+  "Return the TITLE-SECTION or part thereof with the player STATUS appended."
+  (if (stringp title-section)
+      (cons title-section (list status))
+    (append title-section (list status))))
+
+(defun spotify-set-frame-title (status)
+  "Parse and set the frame title, appending STATUS to all frame scenarios."
+  (setq frame-title-format
+        (if (and (listp frame-title-format) (eq (car frame-title-format) 'multiple-frames))
+            (let ((multiple-frame-format (car (nthcdr 1 frame-title-format)))
+                      (single-frame-format (car (nthcdr 2 frame-title-format))))
+                  (list 'multiple-frames
+                        (spotify-add-frame-title-status status multiple-frame-format)
+                        (spotify-add-frame-title-status status single-frame-format)))
+          (spotify-add-frame-title-status status frame-title-format))))
+
+(defun spotify-remove-status-from-frame-title (status)
+  "Parse the frame title and remove the player STATUS."
+  (setq frame-title-format
+        (if (member status frame-title-format)
+            (remove status frame-title-format)
+          (mapcar (lambda (section)
+                    (if (and (listp section) (member status section))
+                        (remove status section)
+                      section))
+                  frame-title-format))))
+
 (define-minor-mode spotify-remote-mode
   "Toggles Spotify Remote mode.
 A positive prefix argument enables the mode, any other prefix
@@ -59,7 +87,7 @@ See commands \\[spotify-toggle-repeating] and
   :group 'spotify
   :init-value nil
   :keymap spotify-mode-map
-  (let ((s '(:eval (spotify-player-status-text))))
+  (let ((s '("    " (:eval (spotify-player-status-text)))))
     (if spotify-remote-mode
         (progn
           (spotify-start-player-status-timer)
@@ -67,21 +95,14 @@ See commands \\[spotify-toggle-repeating] and
                  (unless (member s global-mode-string)
                    (push s global-mode-string)))
                 ((eq spotify-status-location 'title-bar)
-                 ;; title-bar-format may be just a string.
-                 ;; make it a list so we can push player status on to it
-                 (if (stringp frame-title-format)
-                     (setq frame-title-format (list frame-title-format)))
-                 (unless (member s frame-title-format)
-                   (nconc frame-title-format `("    " ,s))))))
+                 (spotify-set-frame-title s))))
       (progn
         (spotify-stop-player-status-timer)
         (cond ((or (eq spotify-status-location 'modeline) (not (display-graphic-p)))
                (when (member s global-mode-string)
                  (setq global-mode-string (remove s global-mode-string))))
               ((eq spotify-status-location 'title-bar)
-               (when (member s frame-title-format)
-                 (setq frame-title-format
-                       (remove "    " (remove s frame-title-format))))))))))
+               (spotify-remove-status-from-frame-title s)))))))
 
 (easy-menu-add-item nil '("Tools")
   '("Spotify"
