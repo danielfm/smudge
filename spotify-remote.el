@@ -54,6 +54,7 @@
 
 (defun spotify-set-frame-title (status)
   "Parse and set the frame title, appending STATUS to all frame scenarios."
+  (spotify-remove-status-from-frame-title status)
   (setq frame-title-format
         (if (and (listp frame-title-format) (eq (car frame-title-format) 'multiple-frames))
             (let ((multiple-frame-format (car (nthcdr 1 frame-title-format)))
@@ -66,13 +67,15 @@
 (defun spotify-remove-status-from-frame-title (status)
   "Parse the frame title and remove the player STATUS."
   (setq frame-title-format
-        (if (member status frame-title-format)
+        (if (not (listp frame-title-format))
+            frame-title-format
+          (if (member status frame-title-format)
             (remove status frame-title-format)
           (mapcar (lambda (section)
                     (if (and (listp section) (member status section))
                         (remove status section)
                       section))
-                  frame-title-format))))
+                  frame-title-format)))))
 
 (define-minor-mode spotify-remote-mode
   "Toggles Spotify Remote mode.
