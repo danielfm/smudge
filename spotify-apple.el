@@ -98,7 +98,4 @@ end tell
 (defun spotify-apple-player-play-track (track-id context-id)
   (spotify-apple-command (format "play track \"%s\" in context \"%s\"" track-id context-id)))
 
-(defun spotify-apple-player-pause ()
-  (spotify-apple-command "pause"))
-
 (provide 'spotify-apple)

@@ -96,10 +96,4 @@
   (when track-id (spotify-dbus-call "Pause"))
   (run-at-time "1 sec" nil 'spotify-dbus-call "OpenUri" (or track-id context-id)))
 
-(defun spotify-dbus-player-play ()
-  (spotify-dbus-call "Play"))
-
-(defun spotify-dbus-player-pause ()
-  (spotify-dbus-call "Pause"))
-
 (provide 'spotify-dbus)

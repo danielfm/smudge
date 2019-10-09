@@ -183,11 +183,6 @@ This corresponds to the current REPEATING state."
   (interactive)
   (spotify-apply "player-toggle-play"))
 
-(defun spotify-play ()
-  "Sends a `play' command to Spotify process."
-  (interactive)
-  (spotify-apply "player-play"))
-
 (defun spotify-next-track ()
   "Sends a `next track' command to Spotify process."
   (interactive)
@@ -197,11 +192,6 @@ This corresponds to the current REPEATING state."
   "Sends a `previous track' command to Spotify process."
   (interactive)
   (spotify-apply "player-previous-track"))
-
-(defun spotify-pause ()
-  "Sends a `pause' command to Spotify process."
-  (interactive)
-  (spotify-apply "player-pause"))
 
 (defun spotify-volume-up ()
   "Increase the volume for the active device."
