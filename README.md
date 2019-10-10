@@ -146,8 +146,8 @@ the `spotify-player-status-truncate-length` variable.
 The text indicator for each of the following player statuses can be configured
 via their corresponding variables:
 
-| Player State  | Variable                               | Default Value |
-|:--------------|:---------------------------------------|:-------------:|
+| Player State  | Variable                                   | Default Value |
+|:--------------|:-------------------------------------------|:-------------:|
 | Playing       | `spotify-player-status-playing-text`       | `"Playing"`   |
 | Paused        | `spotify-player-status-paused-text`        | `"Paused"`    |
 | Stopped       | `spotify-player-status-stopped-text`       | `"Stopped"`   |

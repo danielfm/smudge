@@ -11,14 +11,21 @@
   :group 'spotify
   :type 'string)
 
-(defvar spotify-player-status ""
-  "The text to be displayed in the global mode line or title bar.")
 (defcustom spotify-status-location 'modeline
   "Specify where to show the player status: one of '(modeline title-bar nil)."
   :type '(choice (const :tag "Modeline" modeline)
-                (const :tag "Title Bar" title-bar)
-                (const :tag "Do not show" nil))
+                 (const :tag "Title Bar" title-bar)
+                 (const :tag "Do not show" nil))
   :group 'spotify)
+
+(defcustom spotify-title-bar-separator "    "
+  "The string used to separate the player status from the remaining text on the title bar."
+  :type 'string
+  :group 'spotify)
+
+(defvar spotify-player-status ""
+  "The text to be displayed in the global mode line or title bar.")
+
 (defvar spotify-command-map
   (let ((map (make-sparse-keymap)))
             (define-key map (kbd "M-r") #'spotify-toggle-repeat)
@@ -90,7 +97,7 @@ See commands \\[spotify-toggle-repeating] and
   :group 'spotify
   :init-value nil
   :keymap spotify-mode-map
-  (let ((s '("    " (:eval (spotify-player-status-text)))))
+  (let ((s `(,spotify-title-bar-separator (:eval (spotify-player-status-text)))))
     (if spotify-remote-mode
         (progn
           (spotify-start-player-status-timer)
