@@ -274,6 +274,13 @@ Valid values include `'title-bar`, `'modeline` and `nil`, where nil turns off th
 player status completely. If the value is set to `title-bar` but you are not using a graphical
 display, the player status will be displayed in the mode line instead.
 
+If you want to customize the separator between the existing title bar text and the player status,
+you can set the following, i.e.:
+````el
+(setq spotify-title-bar-separator "----")
+````
+Otherwise, it defaults to 4 spaces.
+
 ## Donate
 
 If this project is useful for you, buy me a beer!
