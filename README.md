@@ -15,7 +15,7 @@ of Spotify via the Spotify Connect feature.
 * Spotify client integration for GNU/Linux (via D-Bus) and OS X (via AppleScript)
 * Device playback display & selection using the Spotify Connect API (requires premium)
 * Communicates with the Spotify API via Oauth2
-* Displays the current track in mode line
+* Displays the current track in mode line or title bar
 * Create playlists (public or private)
 * Browse the Spotify featured playlists, your own playlists, and their tracks
 * Search for tracks and playlists that match the given keywords
@@ -104,23 +104,23 @@ key bindings:
 
 The current song being played by the Spotify client is displayed in the mode
 line along with the player status (playing, paused). The interval in which the
-mode line is updated can be configured via the
-`spotify-mode-line-refresh-interval` variable:
+player status is updated can be configured via the
+`spotify-player-status-refresh-interval` variable:
 
 ````el
-;; Updates the mode line every 10 seconds (default is 5)
+;; Updates the player status every 10 seconds (default is 5)
 ;; Note: Set 0 to disable this feature, and avoid values between 1 and 4 when
 ;; using the 'connect transport.
-(setq spotify-mode-line-refresh-interval 10)
+(setq spotify-player-status-refresh-interval 10)
 ````
 
 [1] No proper support for this in D-Bus implementation for GNU/Linux  
 [2] This feature uses Spotify Connect and requires a premium subscription
 
-#### Customizing The Mode Line
+#### Customizing The Player Status
 
-The information displayed in the mode line can be customized by setting the
-desired format in `spotify-mode-line-format`. The following placeholders are
+The information displayed in the player status can be customized by setting the
+desired format in `spotify-player-status-format`. The following placeholders are
 supported:
 
 | Symbol | Description                | Example                        |
@@ -137,24 +137,24 @@ supported:
 The default format is `"[%p: %a - %t ◷ %l %r%s]"`.
 
 The number of characters to be shown in truncated fields can be configured via
-the `spotify-mode-line-truncate-length` variable.
+the `spotify-player-status-truncate-length` variable.
 
 ````el
-(setq spotify-mode-line-truncate-length 10) ; default: 15
+(setq spotify-player-status-truncate-length 10) ; default: 15
 ````
 
 The text indicator for each of the following player statuses can be configured
 via their corresponding variables:
 
-| Player State  | Variable                               | Default Value |
-|:--------------|:---------------------------------------|:-------------:|
-| Playing       | `spotify-mode-line-playing-text`       | `"Playing"`   |
-| Paused        | `spotify-mode-line-paused-text`        | `"Paused"`    |
-| Stopped       | `spotify-mode-line-stopped-text`       | `"Stopped"`   |
-| Shuffling On  | `spotify-mode-line-repeating-text`     | `"R"`         |
-| Shuffling Off | `spotify-mode-line-not-repeating-text` | `"-"`         |
-| Repeating On  | `spotify-mode-line-shuffling-text`     | `"S"`         |
-| Repeating Off | `spotify-mode-line-not-shuffling-text` | `"-"`         |
+| Player State  | Variable                                   | Default Value |
+|:--------------|:-------------------------------------------|:-------------:|
+| Playing       | `spotify-player-status-playing-text`       | `"Playing"`   |
+| Paused        | `spotify-player-status-paused-text`        | `"Paused"`    |
+| Stopped       | `spotify-player-status-stopped-text`       | `"Stopped"`   |
+| Shuffling On  | `spotify-player-status-repeating-text`     | `"R"`         |
+| Shuffling Off | `spotify-player-status-not-repeating-text` | `"-"`         |
+| Repeating On  | `spotify-player-status-shuffling-text`     | `"S"`         |
+| Repeating Off | `spotify-player-status-not-shuffling-text` | `"-"`         |
 
 #### Global Remote Mode
 
@@ -258,6 +258,28 @@ Once you open the list of devices, you get the following key bindings in the res
 |:-----------------|:--------------------------------------------------------------------|
 | <kbd>RET</kbd>   | Transfer playback to the device under the cursor.                   |
 | <kbd>g</kbd>     | Reloads the list of devices                                         |
+
+## Specifying the Player Status Location
+
+By default, the player status (playing, paused, track name, time, shuffle, repeat, etc.) are shown
+in the modeline. If you want to display the status in the title bar when using a graphical display,
+you can set the following:
+
+````el
+(setq spotify-status-location 'title-bar)
+
+````
+
+Valid values include `'title-bar`, `'modeline` and `nil`, where nil turns off the display of the
+player status completely. If the value is set to `title-bar` but you are not using a graphical
+display, the player status will be displayed in the mode line instead.
+
+If you want to customize the separator between the existing title bar text and the player status,
+you can set the following, i.e.:
+````el
+(setq spotify-title-bar-separator "----")
+````
+Otherwise, it defaults to 4 spaces.
 
 ## Donate
 

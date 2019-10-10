@@ -38,13 +38,14 @@ Otherwise, play the track selected."
 
 (defun spotify-track-select-default ()
   "Plays the track under the cursor. If the track list represents a playlist,
-the given track is played in the context of that playlist; otherwise, it will
-be played in the context of its album."
+the given track is played in the context of that playlist; if the track list
+represents an album, the given track is played in the context of that album;
+otherwise, it will be played without a context."
   (interactive)
   (let* ((track (tabulated-list-get-id))
-         (context (if (bound-and-true-p spotify-selected-playlist)
-                     spotify-selected-playlist
-                   (spotify-get-track-album track))))
+         (context (cond ((bound-and-true-p spotify-selected-playlist) spotify-selected-playlist)
+                        ((bound-and-true-p spotify-selected-album) spotify-selected-album)
+                        (t nil))))
     (spotify-play-track track context)))
 
 (defun spotify-track-selected-button-type ()

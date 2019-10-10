@@ -41,7 +41,7 @@
                      value))
 
 (defun spotify-dbus-player-status ()
-  "Updates the mode line to display the current Spotify player status."
+  "Updates the player status to display the current Spotify player status."
   (let* ((metadata (spotify-dbus-get-property "Metadata"))
          (playback-status (spotify-dbus-get-property "PlaybackStatus"))
          (player-state (if playback-status (downcase playback-status) "stopped")))
@@ -51,7 +51,7 @@
               (track-number  (car (car (cdr (assoc "xesam:trackNumber" metadata)))))
               (duration      (/ (car (car (cdr (assoc "mpris:length" metadata)))) 1000)))
           (if (> track-number 0)
-              (spotify-replace-mode-line-flags
+              (spotify-replace-player-status-flags
                (concat "{"
                        " \"artist\": \"" artist "\""
                        ",\"duration\": " (number-to-string duration) ""
@@ -61,8 +61,8 @@
                        ",\"player_shuffling\": \"-\""
                        ",\"player_repeating\": \"-\""
                        "}"))
-            (spotify-update-mode-line "")))
-      (spotify-update-mode-line ""))))
+            (spotify-update-player-status "")))
+      (spotify-update-player-status ""))))
 
 (defun spotify-dbus-player-toggle-play ()
   "Toggle Play/Pause."
@@ -95,11 +95,5 @@
 (defun spotify-dbus-player-play-track (track-id context-id)
   (when track-id (spotify-dbus-call "Pause"))
   (run-at-time "1 sec" nil 'spotify-dbus-call "OpenUri" (or track-id context-id)))
-
-(defun spotify-dbus-player-play ()
-  (spotify-dbus-call "Play"))
-
-(defun spotify-dbus-player-pause ()
-  (spotify-dbus-call "Pause"))
 
 (provide 'spotify-dbus)
