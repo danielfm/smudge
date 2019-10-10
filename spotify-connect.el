@@ -43,8 +43,8 @@ Returns a JSON string in the format:
                       (format "\"player_repeating\":%s"
                               (if (string= (gethash 'repeat_state status) "off") "false" "true"))
                       "}")))
-         (spotify-replace-mode-line-flags json)
-       (spotify-replace-mode-line-flags nil)))))
+         (spotify-replace-player-status-flags json)
+       (spotify-replace-player-status-flags nil)))))
 
 (defmacro spotify-when-device-active (body)
   "Evaluate BODY when there is an active device, otherwise shows an error message."

@@ -52,21 +52,21 @@ end tell
    "\n$" ""
    (shell-command-to-string (spotify-apple-command-line cmd))))
 
-(defun spotify-apple-set-mode-line-from-process-output (process output)
-  "Sets the output of the player status process to the mode line."
-  (spotify-replace-mode-line-flags output)
+(defun spotify-apple-set-player-status-from-process-output (process output)
+  "Set the OUTPUT of the player status PROCESS to the player status."
+  (spotify-replace-player-status-flags output)
   (with-current-buffer (process-buffer process)
     (delete-region (point-min) (point-max))))
 
 (defun spotify-apple-player-status ()
-  "Updates the mode line to display the current Spotify player status."
+  "Update the player status to display the current Spotify player status."
   (let* ((process-name "spotify-player-status")
          (process-status (process-status process-name))
          (cmd (format "%s %s" spotify-osascript-bin-path spotify-apple-player-status-script-file)))
     (when (not process-status)
       (let* ((default-directory user-emacs-directory)
              (process (start-process-shell-command process-name "*spotify-player-status*" cmd)))
-        (set-process-filter process 'spotify-apple-set-mode-line-from-process-output)))))
+        (set-process-filter process 'spotify-apple-set-player-status-from-process-output)))))
 
 (defun spotify-apple-player-state ()
   (spotify-apple-command "get player state"))
