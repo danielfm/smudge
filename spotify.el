@@ -27,6 +27,8 @@
 (when (version< emacs-version "24.4")
   (error "Spotify requires at least GNU Emacs 24.4"))
 
+(require 'cl)
+(require 'subr-x)
 (require 'json)
 (require 'oauth2)
 (require 'tabulated-list)
