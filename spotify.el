@@ -147,17 +147,18 @@
       (spotify-genius-search
        spotify-player-metadata
        (lambda (lyrics-url)
-         (spotify-genius-get-lyrics lyrics-url
-                                    (lambda (result)
-                                      (switch-to-buffer buffer)
-                                      (erase-buffer)
-                                      (shr-insert-document result)
-                                      (goto-char (point-min))
-                                      (dotimes (_ 2) (forward-line))
-                                      (let ((beg (point)))
-                                        (forward-line 10)
-                                        (delete-region beg (point)))
-                                      (goto-char (point-min)))))))))
+         (spotify-genius-get-lyrics
+          lyrics-url
+          (lambda (result)
+            (switch-to-buffer buffer)
+            (erase-buffer)
+            (shr-insert-document result)
+            (goto-char (point-min))
+            (dotimes (_ 2) (forward-line))
+            (let ((beg (point)))
+              (forward-line 10)
+              (delete-region beg (point)))
+            (goto-char (point-min)))))))))
 
 
 (provide 'spotify)

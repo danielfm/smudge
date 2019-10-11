@@ -50,9 +50,9 @@
        (goto-char (point-min))
        (search-forward-regexp "<!DOCTYPE html>")
        (forward-char)
-       (let ((parsed-html (libxml-parse-html-region (point) (point-max))))
+       (let ((parsed-html (libxml-parse-html-region (point) (point-max) spotify-genius-website-url)))
          (kill-buffer)
          (funcall callback parsed-html))))))
 
 (provide 'spotify-lyrics)
-;;; spotify-genius.el ends here
+;;; spotify-lyrics.el ends here
