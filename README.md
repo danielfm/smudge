@@ -170,6 +170,7 @@ key bindings:
 
 | Key              | Description                                                      |
 |:-----------------|:-----------------------------------------------------------------|
+| <kbd>a</kbd>     | Adds track to a playlist                                         |
 | <kbd>l</kbd>     | Loads the next page of results (pagination)                      |
 | <kbd>g</kbd>     | Clears the results and reloads the first page of results         |
 | <kbd>M-RET</kbd> | Plays the track under the cursor in the context of its album [1] |
@@ -236,6 +237,7 @@ bindings in the resulting buffer:
 
 | Key              | Description                                                         |
 |:-----------------|:--------------------------------------------------------------------|
+| <kbd>a</kbd>     | Adds track to a playlist                                            |
 | <kbd>l</kbd>     | Loads the next page of results (pagination)                         |
 | <kbd>g</kbd>     | Clears the results and reloads the first page of results            |
 | <kbd>f</kbd>     | Follows the current playlist                                        |
