@@ -288,6 +288,12 @@ Otherwise, it defaults to 4 spaces.
 
 <kbd>C-c . l</kbd> will bring up a buffer with the lyrics of the currently playing track.
 
+Lyrics will normally open in split `eww` window. If you want to have them open without splitting, you can configure that as follows:
+
+````el
+(setq spotify-lyrics-split-window nil)
+````
+
 ## Donate
 
 If this project is useful for you, buy me a beer!
