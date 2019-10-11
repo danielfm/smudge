@@ -27,6 +27,8 @@
 (when (version< emacs-version "24.4")
   (error "Spotify requires at least GNU Emacs 24.4"))
 
+(require 'cl)
+(require 'subr-x)
 (require 'json)
 (require 'oauth2)
 (require 'tabulated-list)
@@ -107,18 +109,20 @@
   (interactive
    (list (read-string "Playlist name: ")
          (y-or-n-p "Make the playlist public? ")))
-  (lexical-let ((name name)
-                (is-public is-public))
-    (spotify-current-user
-     (lambda (user)
-       (spotify-api-playlist-create
-        (spotify-get-item-id user)
-        name
-        is-public
-        (lambda (new-playlist)
-          (if new-playlist
-              (message (format "Playlist '%s' created" (spotify-get-item-name new-playlist)))
-            (message "Error creating the playlist"))))))))
+  (if (string= name "")
+      (message "Playlist name not provided; aborting")
+    (lexical-let ((name name)
+                  (is-public is-public))
+      (spotify-current-user
+       (lambda (user)
+         (spotify-api-playlist-create
+          (spotify-get-item-id user)
+          name
+          is-public
+          (lambda (new-playlist)
+            (if new-playlist
+                (message (format "Playlist '%s' created" (spotify-get-item-name new-playlist)))
+              (message "Error creating the playlist")))))))))
 
 ;;;###autoload
 (defun spotify-select-device ()
