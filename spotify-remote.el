@@ -87,16 +87,16 @@ See commands \\[spotify-toggle-repeating] and
                  (unless (member s global-mode-string)
                    (push s global-mode-string)))
                 ((eq spotify-status-location 'title-bar)
-                 (spotify-set-frame-title s))))
+                 (spotify-set-frame-title s)))
+          (when (eq spotify-transport 'connect)
+            (spotify-device-select-active)))
       (progn
         (spotify-stop-player-status-timer)
         (cond ((or (eq spotify-status-location 'modeline) (not (display-graphic-p)))
                (when (member s global-mode-string)
                  (setq global-mode-string (remove s global-mode-string))))
               ((eq spotify-status-location 'title-bar)
-               (spotify-remove-status-from-frame-title s))))))
-  (when (eq spotify-transport 'connect)
-    (spotify-device-select-active)))
+               (spotify-remove-status-from-frame-title s)))))))
 
 (defvar spotify-remote-player-status-map
   (let ((map (make-sparse-keymap)))
@@ -104,6 +104,12 @@ See commands \\[spotify-toggle-repeating] and
       'spotify-remote-popup-menu)
     map)
   "Keymap for Spotify mode-line status.")
+
+(defun spotify-update-player-status (str)
+  "Set the given STR to the player status, prefixed with the mode identifier."
+  (when (not (string= str spotify-player-status))
+    (setq spotify-player-status str)
+    (force-mode-line-update t)))
 
 (defun spotify-player-status-text ()
   "Return the propertized text to be displayed as the lighter."
