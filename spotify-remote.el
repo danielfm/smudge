@@ -94,7 +94,9 @@ See commands \\[spotify-toggle-repeating] and
                (when (member s global-mode-string)
                  (setq global-mode-string (remove s global-mode-string))))
               ((eq spotify-status-location 'title-bar)
-               (spotify-remove-status-from-frame-title s)))))))
+               (spotify-remove-status-from-frame-title s))))))
+  (when (eq spotify-transport 'connect)
+    (spotify-device-select-active)))
 
 (defvar spotify-remote-player-status-map
   (let ((map (make-sparse-keymap)))
