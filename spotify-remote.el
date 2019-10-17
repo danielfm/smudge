@@ -9,7 +9,9 @@
 (defcustom spotify-keymap-prefix nil
   "Spotify remote keymap prefix."
   :group 'spotify
-  :type 'string)
+  :type '(choice (const :tag "Disable keymap" nil)
+                 (string :tag "Prefix"))
+  :set #'spotify-set-mode-map)
 
 (defcustom spotify-status-location 'modeline
   "Specify where to show the player status: one of '(modeline title-bar nil)."
@@ -43,15 +45,19 @@
             (define-key map (kbd "t s") #'spotify-track-search)
             (define-key map (kbd "d") #'spotify-select-device)
             map)
-  "Keymap for Spotify commands after 'spotify-keymap-prefix'.")
+  "Keymap for Spotify commands after `spotify-keymap-prefix'.")
 (fset 'spotify-command-map spotify-command-map)
 
-(defvar spotify-mode-map
-  (let ((map (make-sparse-keymap)))
-    (when spotify-keymap-prefix
-      (define-key map spotify-keymap-prefix 'spotify-command-map))
-    map)
+(defvar spotify-mode-map nil
   "Keymap for Spotify remote mode.")
+
+(defun spotify-set-mode-map (variable value)
+  "Set value for `spotify-keymap-prefix' and update `spotify-mode-map’"
+  (set-default variable value)
+  (let ((map (make-sparse-keymap)))
+    (when value
+      (define-key map (kbd value) 'spotify-command-map))
+    (set 'spotify-mode-map map)))
 
 (defun spotify-add-frame-title-status (status title-section)
   "Return the TITLE-SECTION or part thereof with the player STATUS appended."
@@ -90,10 +96,8 @@ A positive prefix argument enables the mode, any other prefix
 argument disables it. From Lisp, argument omitted or nil enables
 the mode, `toggle' toggles the state.
 
-When Spotify Remote mode is enabled, it's possible to toggle
-the repeating and shuffling status of the running Spotify process.
-See commands \\[spotify-toggle-repeating] and
-\\[spotify-toggle-shuffling]."
+\\{spotify-mode-map}.
+"
   :group 'spotify
   :init-value nil
   :keymap spotify-mode-map

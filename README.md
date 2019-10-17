@@ -39,13 +39,7 @@ disk, add that directory in the `load-path`, and require the `spotify` module:
 ;; Settings
 (setq spotify-oauth2-client-secret "<spotify-app-client-secret>")
 (setq spotify-oauth2-client-id "<spotify-app-client-id>")
-(define-key spotify-mode-map (kbd "C-c .") 'spotify-command-map)
 ````
-
-That keymap prefix is just a suggestion, following the conventions suggested for minor modes as
-defined in the Emacs manual [Key Binding
-Conventions](https://www.gnu.org/software/emacs/manual/html_node/elisp/Key-Binding-Conventions.html#Key-Binding-Conventions). Previous
-versions of this package used "M-p"
 
 In order to get the the client ID and client secret, you need to create
 [a Spotify app](https://developer.spotify.com/my-applications), specifying
@@ -80,32 +74,37 @@ Finally, scroll to the end of the page and hit **Save**.
 
 ### Remote Minor Mode
 
-Whenever you enable the `spotify-remote-mode` minor mode you get the following
-key bindings:
+Enabling the `spotify-remote-mode` minor mode gives you convenient keybindings
+under a user defined prefix. Set `spotify-keymap-prefix` before loading
+`spotify.el` or use the customize interface to set it. A suggestion is <kbd>C-c
+.</kbd>, following the conventions suggested for minor modes as defined in the
+Emacs manual [Key Binding
+Conventions](https://www.gnu.org/software/emacs/manual/html_node/elisp/Key-Binding-Conventions.html#Key-Binding-Conventions).
+Previous versions of this package used <kbd>M-p</kbd>.
 
-| Key                  | Function                     | Description                                |
-|:---------------------|:-----------------------------|:-------------------------------------------|
-| <kbd>C-c . M-s</kbd> | `spotify-toggle-shuffle`     | Turn shuffle on/off [1]                    |
-| <kbd>C-c . M-r</kbd> | `spotify-toggle-repeat`      | Turn repeat on/off [1]                     |
-| <kbd>C-c . M-p</kbd> | `spotify-toggle-play`        | Play/pause                                 |
-| <kbd>C-c . M-f</kbd> | `spotify-next-track`         | Next track                                 |
-| <kbd>C-c . M-b</kbd> | `spotify-previous-track`     | Previous track                             |
-| <kbd>C-c . p m</kbd> | `spotify-my-playlists`       | Show your playlists                        |
-| <kbd>C-c . p f</kbd> | `spotify-featured-playlists` | Show the featured playlists                |
-| <kbd>C-c . p s</kbd> | `spotify-playlist-search`    | Search for playlists                       |
-| <kbd>C-c . p u</kbd> | `spotify-user-playlists`     | Show playlists for the given user          |
-| <kbd>C-c . p c</kbd> | `spotify-create-playlist`    | Create a new playlist                      |
-| <kbd>C-c . t r</kbd> | `spotify-recently-played`    | List of recently played tracks             |
-| <kbd>C-c . t s</kbd> | `spotify-track-search`       | Search for tracks                          |
-| <kbd>C-c . v u</kbd> | `spotify-volume-up`          | Increase the volume [2]                    |
-| <kbd>C-c . v d</kbd> | `spotify-volume-down`        | Decrease the volume [2]                    |
-| <kbd>C-c . v m</kbd> | `spotify-volume-mute-unmute` | Alternate the volume between 0 and 100 [2] |
-| <kbd>C-c . d</kbd>   | `spotify-select-device`      | Select a playback device [2]               |
+| Key                   | Function                     | Description                                |
+|:----------------------|:-----------------------------|:-------------------------------------------|
+| <kbd>PREFIX M-s</kbd> | `spotify-toggle-shuffle`     | Turn shuffle on/off [1]                    |
+| <kbd>PREFIX M-r</kbd> | `spotify-toggle-repeat`      | Turn repeat on/off [1]                     |
+| <kbd>PREFIX M-p</kbd> | `spotify-toggle-play`        | Play/pause                                 |
+| <kbd>PREFIX M-f</kbd> | `spotify-next-track`         | Next track                                 |
+| <kbd>PREFIX M-b</kbd> | `spotify-previous-track`     | Previous track                             |
+| <kbd>PREFIX p m</kbd> | `spotify-my-playlists`       | Show your playlists                        |
+| <kbd>PREFIX p f</kbd> | `spotify-featured-playlists` | Show the featured playlists                |
+| <kbd>PREFIX p s</kbd> | `spotify-playlist-search`    | Search for playlists                       |
+| <kbd>PREFIX p u</kbd> | `spotify-user-playlists`     | Show playlists for the given user          |
+| <kbd>PREFIX p c</kbd> | `spotify-create-playlist`    | Create a new playlist                      |
+| <kbd>PREFIX t r</kbd> | `spotify-recently-played`    | List of recently played tracks             |
+| <kbd>PREFIX t s</kbd> | `spotify-track-search`       | Search for tracks                          |
+| <kbd>PREFIX v u</kbd> | `spotify-volume-up`          | Increase the volume [2]                    |
+| <kbd>PREFIX v d</kbd> | `spotify-volume-down`        | Decrease the volume [2]                    |
+| <kbd>PREFIX v m</kbd> | `spotify-volume-mute-unmute` | Alternate the volume between 0 and 100 [2] |
+| <kbd>PREFIX d</kbd>   | `spotify-select-device`      | Select a playback device [2]               |
 
 The current song being played by the Spotify client is displayed in the mode
-line along with the player status (playing, paused). The interval in which the
-player status is updated can be configured via the
-`spotify-player-status-refresh-interval` variable:
+line or title bar (see `spotify-status-location`) along with the player status
+(playing, paused). The interval in which the player status is updated can be
+configured via the `spotify-player-status-refresh-interval` variable:
 
 ````el
 ;; Updates the player status every 10 seconds (default is 5)
