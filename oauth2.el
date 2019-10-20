@@ -40,7 +40,7 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'cl))
+(eval-when-compile (require 'cl-lib))
 (require 'plstore)
 (require 'json)
 (require 'url-http)
@@ -83,7 +83,7 @@ It returns the code provided by the service."
         (kill-buffer (current-buffer))
         data))))
 
-(defstruct oauth2-token
+(cl-defstruct oauth2-token
   plstore
   plstore-id
   client-id

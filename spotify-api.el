@@ -1,12 +1,18 @@
-;; spotify-api.el --- Spotify.el API integration layer
+;;; spotify-api.el --- Spotify.el API integration layer -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2014-2019 Daniel Fernandes Martins
 
-;; Code:
+;;; Commentary:
 
-(defvar *spotify-user*         nil "Cached user object")
-(defvar *spotify-oauth2-token* nil "Cached OAuth2 token")
-(defvar *spotify-oauth2-ts*    nil "Unix timestamp in which the OAuth2 token was retrieved. This is used to manually refresh the token when it's about to expire.")
+;;; Code:
+
+(defvar *spotify-user*         nil
+  "Cached user object.")
+(defvar *spotify-oauth2-token* nil
+  "Cached OAuth2 token.")
+(defvar *spotify-oauth2-ts*    nil
+  "Unix timestamp in which the OAuth2 token was retrieved.
+This is used to manually refresh the token when it's about to expire.")
 
 (defconst spotify-api-endpoint     "https://api.spotify.com/v1")
 (defconst spotify-oauth2-auth-url  "https://accounts.spotify.com/authorize")
@@ -15,38 +21,44 @@
 (defconst spotify-oauth2-callback  "http://localhost:8591/")
 
 (defcustom spotify-oauth2-client-id ""
-  "The unique identifier for your application. More info at
-https://developer.spotify.com/web-api/tutorial/."
+  "The unique identifier for your application.
+More info at https://developer.spotify.com/web-api/tutorial/."
+  :group 'spotify
   :type 'string)
 
 (defcustom spotify-oauth2-client-secret ""
-  "The key that you will need to pass in secure calls to the Spotify Accounts and
-Web API services. More info at
+  "The OAuth2 key provided by Spotify.
+This is the key that you will need to pass in secure calls to the Spotify
+Accounts and Web API services.  More info at
 https://developer.spotify.com/web-api/tutorial/."
+  :group 'spotify
   :type 'string)
 
 (defcustom spotify-api-search-limit 50
   "Number of items returned when searching for something using the Spotify API."
+  :group 'spotify
   :type 'integer)
 
 (defcustom spotify-api-locale "en_US"
-  "Optional. The desired language, consisting of an ISO 639 language code and
-an ISO 3166-1 alpha-2 country code, joined by an underscore.
-For example: es_MX, meaning Spanish (Mexico). Provide this parameter if you
-want the category metadata returned in a particular language."
+  "Optional.  The desired language.
+This consists of an ISO 639 language code and an ISO 3166-1 alpha-2 country
+code, joined by an underscore.  Example: es_MX, meaning Spanish (Mexico).
+Provide this parameter if you want the category metadata returned in a
+ particular language."
+  :group 'spotify
   :type 'string)
 
 (defcustom spotify-api-country "US"
-  "Optional. A country: an ISO 3166-1 alpha-2 country code. Provide this
-parameter if you want to narrow the list of returned categories to those
-relevant to a particular country. If omitted, the returned items will be
+  "Optional.  An ISO 3166-1 alpha-2 country code.
+Provide this parameter if you want to narrow the list of returned categories
+to those to a particular country.  If omitted, the returned items will be
 globally relevant."
+  :group 'spotify
   :type 'string)
 
 ;; Do not rely on the auto-refresh logic from oauth2.el, which seems broken for async requests
 (defun spotify-oauth2-token ()
-  "Retrieve the Oauth2 access token that must be used to interact with the
-Spotify API."
+  "Retrieve the Oauth2 access token that must be used to interact with the Spotify API."
   (let ((now (string-to-number (format-time-string "%s"))))
     (if (null *spotify-oauth2-token*)
         (let ((token (oauth2-auth spotify-oauth2-auth-url
@@ -71,9 +83,9 @@ Spotify API."
         *spotify-oauth2-token*))))
 
 (defun spotify-api-call-async (method uri &optional data callback is-retry)
-  "Make a request to the given Spotify service endpoint and calls CALLBACK with
-the parsed JSON response."
-  (lexical-let ((method method)
+  "Make a request to the given Spotify service endpoint URI via METHOD.
+Call CALLBACK with the parsed JSON response."
+  (let ((method method)
                 (uri uri)
                 (data data)
                 (callback callback)
@@ -84,7 +96,7 @@ the parsed JSON response."
      (lambda (_)
        (toggle-enable-multibyte-characters t)
        (goto-char (point-min))
-       (condition-case err
+       (condition-case _
            (when (search-forward-regexp "^$" nil t)
              (let* ((json-object-type 'hash-table)
                     (json-array-type 'list)
@@ -110,10 +122,10 @@ the parsed JSON response."
      '(("Content-Type" . "application/json")))))
 
 (defun spotify-current-user (callback)
-  ""
+  "Call CALLBACK with the currently logged in user."
   (if *spotify-user*
       (funcall callback *spotify-user*)
-    (lexical-let ((callback callback))
+    (let ((callback callback))
       (spotify-api-call-async
        "GET"
        "/me"
@@ -144,10 +156,6 @@ the parsed JSON response."
               (gethash 'track item))
           (spotify-get-items json)))
 
-(defun spotify-get-search-playlist-items (json)
-  "Return the playlist items from the given search results JSON object."
-  (spotify-get-items (gethash 'playlists json)))
-
 (defun spotify-get-track-album (json)
   "Return the simplified album object from the given track JSON object."
   (gethash 'album json))
@@ -174,7 +182,7 @@ the parsed JSON response."
 
 (defun spotify-get-track-artist (json)
   "Return the first simplified artist object from the given track JSON object."
-  (first (gethash 'artists json)))
+  (car (gethash 'artists json)))
 
 (defun spotify-get-track-artist-name (json)
   "Return the first artist name from the given track JSON object."
@@ -185,8 +193,7 @@ the parsed JSON response."
   (gethash 'popularity json))
 
 (defun spotify-is-track-playable (json)
-  "Return whether the given track JSON object represents a playable track by
-the current user."
+  "Return whether the given track JSON object is playable by the current user."
   (not (eq :json-false (gethash 'is_playable json))))
 
 (defun spotify-get-item-name (json)
@@ -210,8 +217,8 @@ the current user."
   (spotify-get-item-id (gethash 'owner json)))
 
 (defun spotify-api-search (type query page callback)
-  "Search artists, albums, tracks or playlists that match a keyword string,
-depending on the `type' argument."
+  "Search artists, albums, tracks or playlists.
+Call CALLBACK with PAGE of items that match QUERY, depending on TYPE."
   (let ((offset (* spotify-api-search-limit (1- page))))
     (spotify-api-call-async
      "GET"
@@ -226,7 +233,7 @@ depending on the `type' argument."
      callback)))
 
 (defun spotify-api-featured-playlists (page callback)
-  "Return the given page of Spotify's featured playlists."
+  "Call CALLBACK with the given PAGE of Spotify's featured playlists."
   (let ((offset (* spotify-api-search-limit (1- page))))
     (spotify-api-call-async
      "GET"
@@ -240,7 +247,7 @@ depending on the `type' argument."
      callback)))
 
 (defun spotify-api-user-playlists (user-id page callback)
-  "Return the playlists for the given user."
+  "Call CALLBACK with the PAGE of playlists for the given USER-ID."
   (let ((offset (* spotify-api-search-limit (1- page))))
     (spotify-api-call-async
      "GET"
@@ -251,24 +258,29 @@ depending on the `type' argument."
      nil
      callback)))
 
-(defun spotify-api-playlist-create (user-id name is-public callback)
-  "Create a new playlist with the given name for the given user."
+(defun spotify-api-playlist-create (user-id name public callback)
+  "Create a new playlist with NAME for the given USER-ID.
+Make PUBLIC if true.  Call CALLBACK with results"
   (spotify-api-call-async
    "POST"
    (format "/users/%s/playlists" (url-hexify-string user-id))
-   (format "{\"name\":\"%s\",\"public\":\"%s\"}" name (if is-public "true" "false"))
+   (format "{\"name\":\"%s\",\"public\":\"%s\"}" name (if public "true" "false"))
    callback))
 
 (defun spotify-api-playlist-add-track (user-id playlist-id track-id callback)
-  "Add single track to playlist."
+  "Add TRACK-ID to PLAYLIST-ID.
+Added by USER-ID.  Call CALLBACK with results."
   (spotify-api-playlist-add-tracks user-id playlist-id (list track-id) callback))
 
 (defun spotify-format-id (type id)
-  "Wrap raw id to type if necessary."
-   (if (string-match-p "spotify" id) (format "\"%s\"" id) (format "\"spotify:%s:%s\"" type id)))
+  "Format ID.  Wrap with TYPE if necessary."
+  (if (string-match-p "spotify" id)
+      (format "\"%s\"" id)
+    (format "\"spotify:%s:%s\"" type id)))
 
 (defun spotify-api-playlist-add-tracks (user-id playlist-id track-ids callback)
-  "Add tracks in list track-ids in playlist."
+  "Add TRACK-IDs to PLAYLIST-ID for USER-ID.
+Call CALLBACK with results."
   (let ((tracks (format "%s" (mapconcat (lambda (x) (spotify-format-id "track" x)) track-ids ","))))
     (spotify-api-call-async
      "POST"
@@ -278,7 +290,8 @@ depending on the `type' argument."
      callback)))
 
 (defun spotify-api-playlist-follow (playlist callback)
-  "Add the current user as a follower of a playlist."
+  "Add the current user as a follower of PLAYLIST.
+Call CALLBACK with results."
   (let ((owner (spotify-get-playlist-owner-id playlist))
         (id (spotify-get-item-id playlist)))
     (spotify-api-call-async
@@ -290,7 +303,8 @@ depending on the `type' argument."
      callback)))
 
 (defun spotify-api-playlist-unfollow (playlist callback)
-  "Remove the current user as a follower of a playlist."
+  "Remove the current user as a follower of PLAYLIST.
+Call CALLBACK with results."
   (let ((owner (spotify-get-playlist-owner-id playlist))
         (id (spotify-get-item-id playlist)))
     (spotify-api-call-async
@@ -302,7 +316,7 @@ depending on the `type' argument."
      callback)))
 
 (defun spotify-api-playlist-tracks (playlist page callback)
-  "Return the tracks of the given user's playlist."
+  "Call CALLBACK with PAGE of results of tracks from PLAYLIST."
   (let ((owner (spotify-get-playlist-owner-id playlist))
         (id (spotify-get-item-id playlist))
         (offset (* spotify-api-search-limit (1- page))))
@@ -319,7 +333,7 @@ depending on the `type' argument."
      callback)))
 
 (defun spotify-api-album-tracks (album page callback)
-  "Return the tracks for the given album."
+  "Call CALLBACK with PAGE of tracks for ALBUM."
   (let ((album-id (spotify-get-item-id album))
         (offset (* spotify-api-search-limit (1- page))))
     (spotify-api-call-async
@@ -334,14 +348,14 @@ depending on the `type' argument."
      callback)))
 
 (defun spotify-popularity-bar (popularity)
-  "Return the popularity indicator bar proportional to the given parameter,
-which must be a number between 0 and 100."
+  "Return the popularity indicator bar proportional to POPULARITY.
+Parameter must be a number between 0 and 100."
   (let ((num-bars (truncate (/ popularity 10))))
     (concat (make-string num-bars ?X)
             (make-string (- 10 num-bars) ?-))))
 
 (defun spotify-api-recently-played (page callback)
-  "Retrieve the list of recently played tracks."
+  "Call CALLBACK with PAGE of recently played tracks."
   (let ((offset (* spotify-api-search-limit (1- page))))
     (spotify-api-call-async
      "GET"
@@ -354,7 +368,7 @@ which must be a number between 0 and 100."
 
 (defun spotify-api-device-list (callback)
   "Call CALLBACK with the list of devices available for use with Spotify Connect."
-  (lexical-let ((callback callback))
+  (let ((callback callback))
     (spotify-api-call-async
      "GET"
      "/me/player/devices"
@@ -362,7 +376,8 @@ which must be a number between 0 and 100."
      callback)))
 
 (defun spotify-api-transfer-player (device-id &optional callback)
-  "Transfer playback to DEVICE-ID and determine if it should start playing."
+  "Transfer playback to DEVICE-ID and determine if it should start playing.
+Call CALLBACK with result if provided."
   (spotify-api-call-async
    "PUT"
    "/me/player"
@@ -381,7 +396,7 @@ which must be a number between 0 and 100."
    callback))
 
 (defun spotify-api-get-player-status (callback)
-  "Get the Spotify Connect status of the currently active player."
+  "Call CALLBACK with the Spotify Connect status of the currently active player."
   (spotify-api-call-async
    "GET"
    "/me/player"
@@ -389,7 +404,8 @@ which must be a number between 0 and 100."
    callback))
 
 (defun spotify-api-play (&optional callback uri context)
-  "Play a track. If no args, resume playing current track. Otherwise, play URI in CONTEXT."
+  "Play a track.  If no args, resume playing current track.
+Otherwise, play URI in CONTEXT.  Call CALLBACK with results if provided."
   (spotify-api-call-async
    "PUT"
    "/me/player/play"
@@ -402,7 +418,8 @@ which must be a number between 0 and 100."
    callback))
 
 (defun spotify-api-pause (&optional callback)
-  "Pause the currently playing track."
+  "Pause the currently playing track.
+Call CALLBACK if provided."
   (spotify-api-call-async
    "PUT"
    "/me/player/pause"
@@ -410,7 +427,8 @@ which must be a number between 0 and 100."
    callback))
 
 (defun spotify-api-next (&optional callback)
-  "Skip to the next track."
+  "Skip to the next track.
+Call CALLBACK if provided."
   (spotify-api-call-async
    "POST"
    "/me/player/next"
@@ -418,7 +436,8 @@ which must be a number between 0 and 100."
    callback))
 
 (defun spotify-api-previous (&optional callback)
-  "Skip to the previous track."
+  "Skip to the previous track.
+Call CALLBACK if provided."
   (spotify-api-call-async
    "POST"
    "/me/player/previous"
@@ -426,7 +445,8 @@ which must be a number between 0 and 100."
    callback))
 
 (defun spotify-api-repeat (state &optional callback)
-  "Set repeat of current track to STATE."
+  "Set repeat of current track to STATE.
+Call CALLBACK if provided."
   (spotify-api-call-async
    "PUT"
    (concat "/me/player/repeat?"
@@ -436,7 +456,8 @@ which must be a number between 0 and 100."
    callback))
 
 (defun spotify-api-shuffle (state &optional callback)
-  "Set repeat of current track to STATE."
+  "Set repeat of current track to STATE.
+Call CALLBACK if provided."
   (spotify-api-call-async
    "PUT"
    (concat "/me/player/shuffle?"
@@ -445,5 +466,5 @@ which must be a number between 0 and 100."
    nil
    callback))
 
-
 (provide 'spotify-api)
+;;; spotify-api.el ends here

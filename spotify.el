@@ -1,11 +1,11 @@
-;;; spotify.el --- control the Spotify app from Emacs
+;;; spotify.el --- control the Spotify app from Emacs -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2014-2018 Daniel Fernandes Martins
 
 ;; Keywords: multimedia, music, spotify
 ;; Package: spotify
 
-;; Commentary:
+;;; Commentary:
 
 ;; This mode requires at least GNU Emacs 24.4 and Python 2.7
 
@@ -22,12 +22,11 @@
 ;;
 ;; See 'README.md' for usage information.
 
-;; Code:
+;;; Code:
 
 (when (version< emacs-version "24.4")
   (error "Spotify requires at least GNU Emacs 24.4"))
 
-(require 'cl)
 (require 'subr-x)
 (require 'json)
 (require 'oauth2)
@@ -52,7 +51,7 @@
 
 ;;;###autoload
 (defun spotify-track-search (query)
-  "Search for tracks that match the given query string."
+  "Search for tracks that match the given QUERY string."
   (interactive "sSpotify Search (Tracks): ")
   (let ((buffer (get-buffer-create (format "*Track Search: %s*" query))))
     (with-current-buffer buffer
@@ -61,7 +60,7 @@
 
 ;;;###autoload
 (defun spotify-playlist-search (query)
-  "Search for playlists that match the given query string."
+  "Search for playlists that match the given QUERY string."
   (interactive "sSpotify Search (Playlists): ")
   (let ((buffer (get-buffer-create (format "*Playlist Search: %s*" query))))
     (with-current-buffer buffer
@@ -87,7 +86,7 @@
 
 ;;;###autoload
 (defun spotify-user-playlists (user-id)
-  "Display the public playlists of the given user."
+  "Display the public playlists of the given user with USER-ID."
   (interactive "sSpotify User ID: ")
   (let ((buffer (get-buffer-create (format "*Playlists: %s*" user-id))))
     (with-current-buffer buffer
@@ -104,21 +103,22 @@
       (spotify-featured-playlists-update 1))))
 
 ;;;###autoload
-(defun spotify-create-playlist (name is-public)
-  "Create an empty playlist owned by the current user."
+(defun spotify-create-playlist (name public)
+  "Create an empty playlist owned by the current user.
+Prompt for the NAME and whether it should be made PUBLIC."
   (interactive
    (list (read-string "Playlist name: ")
          (y-or-n-p "Make the playlist public? ")))
   (if (string= name "")
       (message "Playlist name not provided; aborting")
-    (lexical-let ((name name)
-                  (is-public is-public))
+    (let ((name name)
+                  (public public))
       (spotify-current-user
        (lambda (user)
          (spotify-api-playlist-create
           (spotify-get-item-id user)
           name
-          is-public
+          public
           (lambda (new-playlist)
             (if new-playlist
                 (message (format "Playlist '%s' created" (spotify-get-item-name new-playlist)))
@@ -138,3 +138,4 @@
            (spotify-device-select-update)))))))
 
 (provide 'spotify)
+;;; spotify.el ends here
