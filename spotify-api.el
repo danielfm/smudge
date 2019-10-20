@@ -85,54 +85,48 @@ globally relevant."
 (defun spotify-api-call-async (method uri &optional data callback is-retry)
   "Make a request to the given Spotify service endpoint URI via METHOD.
 Call CALLBACK with the parsed JSON response."
-  (let ((method method)
-                (uri uri)
-                (data data)
-                (callback callback)
-                (is-retry is-retry))
-    (oauth2-url-retrieve
-     (spotify-oauth2-token)
-     (concat spotify-api-endpoint uri)
-     (lambda (_)
-       (toggle-enable-multibyte-characters t)
-       (goto-char (point-min))
-       (condition-case _
-           (when (search-forward-regexp "^$" nil t)
-             (let* ((json-object-type 'hash-table)
-                    (json-array-type 'list)
-                    (json-key-type 'symbol)
-                    (json (json-read))
-                    (error-json (gethash 'error json)))
-               (kill-buffer)
+  (oauth2-url-retrieve
+   (spotify-oauth2-token)
+   (concat spotify-api-endpoint uri)
+   (lambda (_)
+     (toggle-enable-multibyte-characters t)
+     (goto-char (point-min))
+     (condition-case _
+         (when (search-forward-regexp "^$" nil t)
+           (let* ((json-object-type 'hash-table)
+                  (json-array-type 'list)
+                  (json-key-type 'symbol)
+                  (json (json-read))
+                  (error-json (gethash 'error json)))
+             (kill-buffer)
 
-               ;; Retries the request when the token expires and gets refreshed
-               (if (and (hash-table-p error-json)
-                        (eq 401 (gethash 'status error-json))
-                        (not is-retry))
-                   (spotify-api-call-async method uri data callback t)
-                 (when callback (funcall callback json)))))
+             ;; Retries the request when the token expires and gets refreshed
+             (if (and (hash-table-p error-json)
+                      (eq 401 (gethash 'status error-json))
+                      (not is-retry))
+                 (spotify-api-call-async method uri data callback t)
+               (when callback (funcall callback json)))))
 
-         ;; Handle empty responses
-         (end-of-file
-          (kill-buffer)
-          (when callback (funcall callback nil)))))
-     nil
-     method
-     (or data "")
-     '(("Content-Type" . "application/json")))))
+       ;; Handle empty responses
+       (end-of-file
+        (kill-buffer)
+        (when callback (funcall callback nil)))))
+   nil
+   method
+   (or data "")
+   '(("Content-Type" . "application/json"))))
 
 (defun spotify-current-user (callback)
   "Call CALLBACK with the currently logged in user."
   (if *spotify-user*
       (funcall callback *spotify-user*)
-    (let ((callback callback))
-      (spotify-api-call-async
-       "GET"
-       "/me"
-       nil
-       (lambda (user)
-         (setq *spotify-user* user)
-         (funcall callback user))))))
+    (spotify-api-call-async
+     "GET"
+     "/me"
+     nil
+     (lambda (user)
+       (setq *spotify-user* user)
+       (funcall callback user)))))
 
 (defun spotify-get-items (json)
   "Return the list of items from the given JSON object."
@@ -368,12 +362,11 @@ Parameter must be a number between 0 and 100."
 
 (defun spotify-api-device-list (callback)
   "Call CALLBACK with the list of devices available for use with Spotify Connect."
-  (let ((callback callback))
-    (spotify-api-call-async
-     "GET"
-     "/me/player/devices"
-     nil
-     callback)))
+  (spotify-api-call-async
+   "GET"
+   "/me/player/devices"
+   nil
+   callback))
 
 (defun spotify-api-transfer-player (device-id &optional callback)
   "Transfer playback to DEVICE-ID and determine if it should start playing.

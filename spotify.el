@@ -111,18 +111,16 @@ Prompt for the NAME and whether it should be made PUBLIC."
          (y-or-n-p "Make the playlist public? ")))
   (if (string= name "")
       (message "Playlist name not provided; aborting")
-    (let ((name name)
-                  (public public))
-      (spotify-current-user
-       (lambda (user)
-         (spotify-api-playlist-create
-          (spotify-get-item-id user)
-          name
-          public
-          (lambda (new-playlist)
-            (if new-playlist
-                (message (format "Playlist '%s' created" (spotify-get-item-name new-playlist)))
-              (message "Error creating the playlist")))))))))
+    (spotify-current-user
+     (lambda (user)
+       (spotify-api-playlist-create
+        (spotify-get-item-id user)
+        name
+        public
+        (lambda (new-playlist)
+          (if new-playlist
+              (message (format "Playlist '%s' created" (spotify-get-item-name new-playlist)))
+            (message "Error creating the playlist"))))))))
 
 ;;;###autoload
 (defun spotify-select-device ()
