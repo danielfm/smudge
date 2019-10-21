@@ -31,6 +31,7 @@
 (require 'json)
 (require 'oauth2)
 (require 'tabulated-list)
+(require 'easymenu)
 
 (require 'spotify-api)
 (require 'spotify-track-search)
@@ -134,6 +135,67 @@ Prompt for the NAME and whether it should be made PUBLIC."
          (with-current-buffer buffer
            (spotify-device-select-mode)
            (spotify-device-select-update)))))))
+
+(defvar spotify-command-map
+  (let ((map (make-sparse-keymap)))
+            (define-key map (kbd "M-r") #'spotify-toggle-repeat)
+            (define-key map (kbd "M-s") #'spotify-toggle-shuffle)
+            (define-key map (kbd "M-p") #'spotify-toggle-play)
+            (define-key map (kbd "M-b") #'spotify-previous-track)
+            (define-key map (kbd "M-u") #'spotify-volume-up)
+            (define-key map (kbd "M-d") #'spotify-volume-down)
+            (define-key map (kbd "M-f") #'spotify-next-track)
+            (define-key map (kbd "p m") #'spotify-my-playlists)
+            (define-key map (kbd "p f") #'spotify-featured-playlists)
+            (define-key map (kbd "p u") #'spotify-user-playlists)
+            (define-key map (kbd "p s") #'spotify-playlist-search)
+            (define-key map (kbd "p c") #'spotify-create-playlist)
+            (define-key map (kbd "t s") #'spotify-track-search)
+            (define-key map (kbd "d") #'spotify-select-device)
+            map)
+  "Keymap for Spotify commands after 'spotify-keymap-prefix'.")
+(fset 'spotify-command-map spotify-command-map)
+
+(easy-menu-add-item nil '("Tools")
+  '("Spotify"
+    ["Play/Pause"     spotify-toggle-play    :active spotify-remote-mode]
+    ["Previous Track" spotify-previous-track :active spotify-remote-mode]
+    ["Next Track"     spotify-next-track     :active spotify-remote-mode]
+    "--"
+    ["Shuffle" spotify-toggle-shuffle :active spotify-remote-mode]
+    ["Repeat"  spotify-toggle-repeat  :active spotify-remote-mode]
+    "--"
+    ["Search Tracks..."    spotify-track-search       :active spotify-remote-mode]
+    ["Featured Playlists"  spotify-featured-playlists :active spotify-remote-mode]
+    ["My Playlists"        spotify-my-playlists       :active spotify-remote-mode]
+    ["User Playlists..."   spotify-user-playlists     :active spotify-remote-mode]
+    ["Search Playlists..." spotify-playlist-search    :active spotify-remote-mode]
+    ["Create Playlist..."  spotify-create-playlist    :active spotify-remote-mode]
+    "--"
+    ["Spotify Remote Mode" spotify-remote-mode :style toggle :selected spotify-remote-mode]))
+
+(defun spotify-remote-popup-menu ()
+  "Popup menu when in spotify-remote-mode."
+  (interactive)
+  (popup-menu
+   '("Spotify"
+     ["Play/Pause" spotify-toggle-play]
+     ["Previous Track" spotify-previous-track]
+     ["Next Track" spotify-next-track]
+     "--"
+     ["Volume Up" spotify-volume-up]
+     ["Volume Down" spotify-volume-down]
+     ["Mute/Unmute" spotify-volume-mute-unmute]
+     "--"
+     ["Shuffle" spotify-toggle-shuffle]
+     ["Repeat"  spotify-toggle-repeat]
+     "--"
+     ["Search Tracks..."    spotify-track-search]
+     ["Featured Playlists"  spotify-featured-playlists]
+     ["My Playlists"        spotify-my-playlists]
+     ["User Playlists..."   spotify-user-playlists]
+     ["Search Playlists..." spotify-playlist-search]
+     ["Create Playlist..."  spotify-create-playlist])))
 
 (provide 'spotify)
 ;;; spotify.el ends here

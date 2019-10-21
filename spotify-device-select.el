@@ -1,10 +1,9 @@
-;;; package --- Summary
+;;; spotify-device-select.el --- Spotify.el device selection major mode  -*- lexical-binding: t; -*-
+
+;; Copyright (C) 2019 Jason Dufair
 
 ;;; Commentary:
 
-;; spotify-device-select.el --- Spotify.el device selection major mode
-
-;; Copyright (C) 2019 Jason Dufair
 
 ;;; Code:
 
@@ -12,6 +11,7 @@
 
 (defcustom spotify-selected-device-id ""
   "The id of the device selected for transport."
+  :group 'spotify
   :type 'string)
 
 (defvar spotify-device-select-mode-map
@@ -27,7 +27,7 @@
 (defun spotify-device-select-update ()
   "Fetches the list of devices using the device list endpoint."
   (interactive)
-  (lexical-let ((buffer (current-buffer)))
+  (let ((buffer (current-buffer)))
     (spotify-api-device-list
      (lambda (json)
        (if-let ((devices (gethash 'devices json))
