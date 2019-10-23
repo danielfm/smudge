@@ -44,6 +44,7 @@
 (require 'plstore)
 (require 'json)
 (require 'url-http)
+(require 'simple-httpd)
 
 (defvar url-http-method nil)
 (defvar url-http-data nil)
@@ -51,20 +52,64 @@
 (defvar url-callback-function nil)
 (defvar url-callback-arguments nil)
 
+(defcustom spotify-oauth2-callback-port "8080"
+  "The port for the httpd to listen on for the OAuth2 callback."
+  :group 'spotify
+  :type 'string)
+
+(defun oauth2-httpd-stop ()
+  "Workaround due to bug in simple-httpd '#httpd-stop."
+  (dolist
+      (process
+       (seq-filter
+        (lambda (p)
+          (let ((name (process-name p)))
+            (or (string-prefix-p "httpd" name) (string-prefix-p "localhost" name))))
+        (process-list)))
+    (delete-process process)))
+
+(defun oauth2-httpd-process-status ()
+  "Answer the process status of the httpd."
+  (let ((httpd-process (car (seq-filter
+                             (lambda (p)
+                               (let ((name (process-name p)))
+                                 (string-prefix-p "httpd" name)))
+                             (process-list)))))
+    (and httpd-process (process-status httpd-process))))
+
+(defun oauth2-start-httpd ()
+  "Start the httpd if not already running.  Answer status."
+  (let ((is-already-running (oauth2-httpd-process-status)))
+    (unless is-already-running
+      (setq httpd-port spotify-oauth2-callback-port)
+      (httpd-start))
+    is-already-running))
+
 (defun oauth2-request-authorization (auth-url client-id &optional scope state redirect-uri)
-  "Request OAuth authorization at AUTH-URL by launching `browse-url'.
+  "Request OAuth authorization at AUTH-URL.
 CLIENT-ID is the client id provided by the provider.
 It returns the code provided by the service."
-  (browse-url (concat auth-url
-                      (if (string-match-p "\?" auth-url) "&" "?")
-                      "client_id=" (url-hexify-string client-id)
-                      "&response_type=code"
-                      "&redirect_uri=" (url-hexify-string (or redirect-uri "urn:ietf:wg:oauth:2.0:oob"))
-                      (if scope (concat "&scope=" (url-hexify-string scope)) "")
-                      (if state (concat "&state=" (url-hexify-string state)) "")))
-  (first (split-string (shell-command-to-string
-                        (format "python %s"
-                                (locate-library "spotify_oauth2_callback_server.py"))) "\n")))
+  (let ((is-already-running (oauth2-start-httpd))
+        (oauth-code nil))
+    (defservlet* spotify-callback text/html (code)
+      (setq oauth-code code)
+      (insert "<p>Spotify.el is connected. You can return to Emacs</p>
+<script type='text/javascript'>setTimeout(function () {close()}, 1500);</script>"))
+    (browse-url (concat auth-url
+                        (if (string-match-p "\?" auth-url) "&" "?")
+                        "client_id=" (url-hexify-string client-id)
+                        "&response_type=code"
+                        "&redirect_uri=" (url-hexify-string (or redirect-uri "urn:ietf:wg:oauth:2.0:oob"))
+                        (if scope (concat "&scope=" (url-hexify-string scope)) "")
+                        (if state (concat "&state=" (url-hexify-string state)) "")))
+    (let ((retries 0))
+      (while (and (not oauth-code)
+                  (< retries 5))
+        (sleep-for 0 500)
+        (setq retries (1+ retries))))
+    (unless is-already-running
+      (run-at-time 1 nil #'oauth2-httpd-stop))
+    oauth-code))
 
 (defun oauth2-request-access-parse ()
   "Parse the result of an OAuth request."

@@ -14,12 +14,6 @@
   "Unix timestamp in which the OAuth2 token was retrieved.
 This is used to manually refresh the token when it's about to expire.")
 
-(defconst spotify-api-endpoint     "https://api.spotify.com/v1")
-(defconst spotify-oauth2-auth-url  "https://accounts.spotify.com/authorize")
-(defconst spotify-oauth2-token-url "https://accounts.spotify.com/api/token")
-(defconst spotify-oauth2-scopes    "playlist-read-private playlist-modify-public playlist-modify-private user-read-private user-read-playback-state user-modify-playback-state user-read-playback-state user-read-recently-played")
-(defconst spotify-oauth2-callback  "http://localhost:8591/")
-
 (defcustom spotify-oauth2-client-id ""
   "The unique identifier for your application.
 More info at https://developer.spotify.com/web-api/tutorial/."
@@ -55,6 +49,24 @@ to those to a particular country.  If omitted, the returned items will be
 globally relevant."
   :group 'spotify
   :type 'string)
+
+(defcustom spotify-oauth2-callback-port "8080"
+  "The port for the httpd to listen on for the OAuth2 callback."
+  :group 'spotify
+  :type 'string)
+
+(defcustom spotify-oauth2-callback-endpoint "/spotify-callback"
+  "The endpoint for the httpd to listen on for the OAuth2 callback."
+  :group 'spotify
+  :type 'string)
+
+(defconst spotify-api-endpoint     "https://api.spotify.com/v1")
+(defconst spotify-oauth2-auth-url  "https://accounts.spotify.com/authorize")
+(defconst spotify-oauth2-token-url "https://accounts.spotify.com/api/token")
+(defconst spotify-oauth2-scopes    "playlist-read-private playlist-modify-public playlist-modify-private user-read-private user-read-playback-state user-modify-playback-state user-read-playback-state user-read-recently-played")
+(defconst spotify-oauth2-callback  (concat "http://localhost:" spotify-oauth2-callback-port "/spotify-callback"))
+
+
 
 ;; Do not rely on the auto-refresh logic from oauth2.el, which seems broken for async requests
 (defun spotify-oauth2-token ()
