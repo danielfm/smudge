@@ -6,6 +6,8 @@
 
 ;;; Code:
 
+(require 'simple-httpd)
+
 (defvar *spotify-user*         nil
   "Cached user object.")
 (defvar *spotify-oauth2-token* nil
@@ -66,14 +68,81 @@ globally relevant."
 (defconst spotify-oauth2-scopes    "playlist-read-private playlist-modify-public playlist-modify-private user-read-private user-read-playback-state user-modify-playback-state user-read-playback-state user-read-recently-played")
 (defconst spotify-oauth2-callback  (concat "http://localhost:" spotify-oauth2-callback-port "/spotify-callback"))
 
+(defun spotify-httpd-stop ()
+  "Workaround due to bug in simple-httpd '#httpd-stop."
+  (dolist
+      (process
+       (seq-filter
+        (lambda (p)
+          (let ((name (process-name p)))
+            (or (string-prefix-p "httpd" name) (string-prefix-p "localhost" name))))
+        (process-list)))
+    (delete-process process)))
 
+(defun spotify-httpd-process-status ()
+  "Answer the process status of the httpd."
+  (let ((httpd-process (car (seq-filter
+                             (lambda (p)
+                               (let ((name (process-name p)))
+                                 (string-prefix-p "httpd" name)))
+                             (process-list)))))
+    (and httpd-process (process-status httpd-process))))
+
+(defun spotify-start-httpd ()
+  "Start the httpd if not already running.  Answer status."
+  (let ((is-already-running (spotify-httpd-process-status)))
+    (unless is-already-running
+      (setq httpd-port spotify-oauth2-callback-port)
+      (httpd-start))
+    is-already-running))
+
+(defun spotify-oauth2-request-authorization (auth-url client-id &optional scope state redirect-uri)
+  "Request OAuth authorization at AUTH-URL.
+Provide SCOPE and STATE to endpoint.  CLIENT-ID is the client id provided by the
+provider.  Return the code provided by the service.  Replaces functionality from
+built-in OAuth lib by running a local httpd to parse the code instead of asking
+the user to paste it in."
+  (let ((is-already-running (spotify-start-httpd))
+        (oauth-code nil))
+    (defservlet* spotify-callback text/html (code)
+      (setq oauth-code code)
+      (insert "<p>Spotify.el is connected. You can return to Emacs</p>
+<script type='text/javascript'>setTimeout(function () {close()}, 1500);</script>"))
+    (browse-url (concat auth-url
+                        (if (string-match-p "\?" auth-url) "&" "?")
+                        "client_id=" (url-hexify-string client-id)
+                        "&response_type=code"
+                        "&redirect_uri=" (url-hexify-string (or redirect-uri "urn:ietf:wg:oauth:2.0:oob"))
+                        (if scope (concat "&scope=" (url-hexify-string scope)) "")
+                        (if state (concat "&state=" (url-hexify-string state)) "")))
+    (let ((retries 0))
+      (while (and (not oauth-code)
+                  (< retries 5))
+        (sleep-for 0 500)
+        (setq retries (1+ retries))))
+    (unless is-already-running
+      (run-at-time 1 nil #'spotify-httpd-stop))
+    oauth-code))
+
+(defun spotify-oauth2-auth (auth-url token-url client-id client-secret &optional scope state redirect-uri)
+  "Authenticate application via OAuth2.
+Send CLIENT-ID and CLIENT-SECRET to AUTH-URL.  Get code and send to TOKEN-URL.
+Replaces functionality from built-in OAuth lib to call spotify-specific function
+that runs a local httpd for code -> token exchange."
+  (oauth2-request-access
+   token-url
+   client-id
+   client-secret
+   (spotify-oauth2-request-authorization
+    auth-url client-id scope state redirect-uri)
+   redirect-uri))
 
 ;; Do not rely on the auto-refresh logic from oauth2.el, which seems broken for async requests
 (defun spotify-oauth2-token ()
   "Retrieve the Oauth2 access token that must be used to interact with the Spotify API."
   (let ((now (string-to-number (format-time-string "%s"))))
     (if (null *spotify-oauth2-token*)
-        (let ((token (oauth2-auth spotify-oauth2-auth-url
+        (let ((token (spotify-oauth2-auth spotify-oauth2-auth-url
                                   spotify-oauth2-token-url
                                   spotify-oauth2-client-id
                                   spotify-oauth2-client-secret
