@@ -6,6 +6,7 @@
 
 (defcustom spotify-osascript-bin-path "/usr/bin/osascript"
   "Path to `osascript' binary."
+  :group 'spotify
   :type 'string)
 
 ; Do not change this unless you know what you're doing

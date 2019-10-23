@@ -30,7 +30,6 @@
 
 (require 'subr-x)
 (require 'json)
-(require 'oauth2)
 (require 'tabulated-list)
 (require 'easymenu)
 

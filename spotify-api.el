@@ -8,6 +8,18 @@
 
 (require 'simple-httpd)
 
+;; Due to an issue related to compilation and the way oauth2 uses defadvice
+;; (including a FIXME as of 0.1.1), this declaration exists to prevent
+;; compiler warnings.
+(eval-when-compile
+  (defvar url-http-method nil)
+  (defvar url-http-data nil)
+  (defvar url-http-extra-headers nil)
+  (defvar oauth--token-data nil)
+  (defvar url-callback-function nil)
+  (defvar url-callback-arguments nil)
+  (require 'oauth2))
+
 (defvar *spotify-user*         nil
   "Cached user object.")
 (defvar *spotify-oauth2-token* nil

@@ -58,10 +58,8 @@ Returns a JSON string in the format:
 
 (defun spotify-connect-player-play-track (uri &optional context)
   "Play a track URI via Spotify Connect in an optional CONTEXT."
-  (lexical-let ((uri uri)
-                (context context))
-    (spotify-when-device-active
-     (spotify-api-play nil uri context))))
+  (spotify-when-device-active
+   (spotify-api-play nil uri context)))
 
 (defun spotify-connect-player-pause ()
   "Pause the currently playing track."
@@ -93,7 +91,7 @@ Returns a JSON string in the format:
   (spotify-when-device-active
    (spotify-api-get-player-status
     (lambda (status)
-      (lexical-let ((new-volume (min (+ (spotify-connect-get-volume status) 10) 100)))
+      (let ((new-volume (min (+ (spotify-connect-get-volume status) 10) 100)))
         (spotify-api-set-volume
          (spotify-connect-get-device-id status)
          new-volume
@@ -105,7 +103,7 @@ Returns a JSON string in the format:
   (spotify-when-device-active
    (spotify-api-get-player-status
     (lambda (status)
-      (lexical-let ((new-volume (max (- (spotify-connect-get-volume status) 10) 0)))
+      (let ((new-volume (max (- (spotify-connect-get-volume status) 10) 0)))
         (spotify-api-set-volume
          (spotify-connect-get-device-id status)
          new-volume
