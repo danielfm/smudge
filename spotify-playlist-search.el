@@ -1,8 +1,10 @@
-;;; spotify-playlist-search.el --- Spotify.el playlist search major mode -*- lexical-binding: t; -*-
+;;; spotify-playlist-search.el --- Spotify.el playlist search major mode  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2014-2018 Daniel Fernandes Martins
 
 ;;; Commentary:
+
+;; This library implements UI and a major mode for searching and acting on Spotify playlists.
 
 ;;; Code:
 
@@ -27,7 +29,7 @@
     map)
   "Local keymap for `spotify-playlist-search-mode' buffers.")
 
-;; Enables the `spotify-remote-mode' the track search buffer
+;; Enables the `spotify-remote-mode' in the track search buffer
 (add-hook 'spotify-playlist-search-mode-hook 'spotify-remote-mode)
 
 (define-derived-mode spotify-playlist-search-mode tabulated-list-mode "Playlist-Search"
@@ -170,7 +172,6 @@
     (setq-local tabulated-list-entries (append tabulated-list-entries (nreverse entries)))
     (tabulated-list-init-header)
     (tabulated-list-print t)))
-
 
 (provide 'spotify-playlist-search)
 ;;; spotify-playlist-search.el ends here

@@ -1,10 +1,11 @@
-;;; package --- Summary
+;;; spotify-controller.el --- Generic player controller interface for Spotify.el  -*- lexical-binding: t; -*-
+
+;; Copyright (C) 2014-2019 Daniel Fernandes Martins
 
 ;;; Commentary:
 
-;;; spotify-controller.el --- Generic player controller interface for Spotify.el
-
-;; Copyright (C) 2014-2019 Daniel Fernandes Martins
+;; This library defines a set of commands for controlling an instance of a Spotify client.  The
+;; commands are sent via a multimethod-like dispatch to the chosen transport.
 
 ;;; Code:
 

@@ -1,8 +1,11 @@
-;;; spotify-api.el --- Spotify.el API integration layer -*- lexical-binding: t; -*-
+;;; spotify-api.el --- Spotify.el API integration layer  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2014-2019 Daniel Fernandes Martins
 
 ;;; Commentary:
+
+;; This library is the interface to the Spotify RESTful API.  It also does some custom handling of
+;; the OAuth code exchange via 'simple-httpd
 
 ;;; Code:
 
@@ -19,6 +22,8 @@
   (defvar url-callback-function nil)
   (defvar url-callback-arguments nil)
   (require 'oauth2))
+
+(declare-function oauth2-request-access "oauth2")
 
 (defvar *spotify-user*         nil
   "Cached user object.")

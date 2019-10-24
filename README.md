@@ -27,7 +27,6 @@ of Spotify via the Spotify Connect feature.
 First, make sure your system satisfies the given dependencies:
 
 * Emacs 24.4+
-* Python 2.7+ (needed for the Oauth2 callback server)
 
 To manually install spotify.el, just clone this project somewhere in your
 disk, add that directory in the `load-path`, and require the `spotify` module:

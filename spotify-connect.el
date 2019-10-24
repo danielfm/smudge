@@ -1,14 +1,19 @@
-;;; package --- Summary
+;;; spotify-connect.el --- Control remote and local Spotify instances  -*- lexical-binding: t; -*-
+
+;; Copyright (C) 2019 Jason Dufair
 
 ;;; Commentary:
 
-;; spotify-connect.el --- Spotify.el transport for the Spotify Connect API
+;; This library uses the "connect" APIs to control transport functions of remote and local instances
+;; of Spotify clients.  It implements a set of multimethod-like functions that are dispatched in
+;; spotify-controller.el.
 
-;; Copyright (C) 2019 Jason Dufair
+;; spotify-connect.el --- Spotify.el transport for the Spotify Connect API
 
 ;;; Code:
 
 (require 'spotify-api)
+(require 'spotify-controller)
 
 (defun spotify-connect-player-status ()
   "Get the player status of the currently playing device, if any.
@@ -47,7 +52,7 @@ Returns a JSON string in the format:
        (spotify-replace-player-status-flags nil)))))
 
 (defmacro spotify-when-device-active (body)
-  "Evaluate BODY when there is an active device, otherwise shows an error message."
+  "Evaluate BODY when there is an active device, otherwise show an error message."
   `(spotify-api-device-list
     (lambda (json)
       (if-let ((json json)

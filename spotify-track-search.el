@@ -1,8 +1,10 @@
-;;; spotify-track-search.el --- Spotify.el track search major mode -*- lexical-binding: t; -*-
+;;; spotify-track-search.el --- Spotify.el track search major mode  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2014-2018 Daniel Fernandes Martins
 
 ;;; Commentary:
+
+;; This library implements UI and a major mode for searching and acting on Spotify playlists.
 
 ;;; Code:
 
@@ -13,7 +15,6 @@
 (defvar spotify-query)
 (defvar spotify-selected-album)
 (defvar spotify-recently-played)
-
 
 (defvar spotify-track-search-mode-map
   (let ((map (make-sparse-keymap)))
@@ -27,7 +28,7 @@
     map)
   "Local keymap for `spotify-track-search-mode' buffers.")
 
-;; Enables the `spotify-remote-mode' the track search buffer
+;; Enables the `spotify-remote-mode' in the track search buffer
 (add-hook 'spotify-track-search-mode-hook 'spotify-remote-mode)
 
 (define-derived-mode spotify-track-search-mode tabulated-list-mode "Track-Search"
@@ -283,7 +284,6 @@ Default to sortin tracks by number when listing the tracks from an album."
            (spotify-get-item-uri selected-track)
            (lambda (_)
              (message "Song added.")))))))))
-
 
 (provide 'spotify-track-search)
 ;;; spotify-track-search.el ends here

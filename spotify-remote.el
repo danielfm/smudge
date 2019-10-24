@@ -1,8 +1,11 @@
-;; spotify-remote.el --- Spotify.el remote minor mode
+;; spotify-remote.el --- Spotify.el remote minor mode  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2014-2019 Daniel Fernandes Martins
 
 ;;; Commentary:
+
+;; This library implements a minor mode that allows for interacting with Spotify and displaying
+;; transport status.  This also includes a global minor mode definition.
 
 ;;; Code:
 
@@ -105,7 +108,6 @@ See commands \\[spotify-toggle-repeating] and
 (defun turn-on-spotify-remote-mode ()
   "Turn the `spotify-remote-mode' on in the current buffer."
   (spotify-remote-mode 1))
-
 
 (define-globalized-minor-mode global-spotify-remote-mode
   spotify-remote-mode turn-on-spotify-remote-mode

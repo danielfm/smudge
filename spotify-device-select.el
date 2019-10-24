@@ -4,6 +4,8 @@
 
 ;;; Commentary:
 
+;; This library implements methods, UI, and a minor mode to use the "connect" RESTful APIs to manage
+;; and query Spotify clients on the network.
 
 ;;; Code:
 

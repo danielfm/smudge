@@ -1,4 +1,4 @@
-;;; spotify.el --- control the Spotify app from Emacs -*- lexical-binding: t; -*-
+;;; spotify.el --- control the Spotify app from Emacs  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2014-2018 Daniel Fernandes Martins
 
@@ -7,21 +7,15 @@
 
 ;;; Commentary:
 
-;; This mode requires at least GNU Emacs 24.4 and Python 2.7
+;; This mode requires at least GNU Emacs 24.4
 
 ;; Before using this mode, first go the Spotify Web API console
-;; <https://developer.spotify.com/my-applications> and create a new
-;; application, adding <http://localhost:8080/spotify-callback> as
-;; the redirect URI. (or whichever port you have specified via customize).
-;;
-;; After requiring `spotify', make sure to define the client id and client
-;; secrets, along with some other important settings:
-;;
-;; (custom-set-variables
-;;  '(spotify-oauth2-client-id "client-id")
-;;  '(spotify-oauth2-client-secret "client-secret"))
-;;
-;; See 'README.md' for usage information.
+;; <https://developer.spotify.com/my-applications> and create a new application, adding
+;; <http://localhost:8080/spotify-callback> as the redirect URI (or whichever port you have
+;; specified via customize).
+
+;; After requiring `spotify', make sure to define the client id and client secrets, along with some
+;; other important settings.  See README.md for the complete list of settings and usage information.
 
 ;;; Code:
 
