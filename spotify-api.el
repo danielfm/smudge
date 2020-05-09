@@ -43,6 +43,10 @@ relevant to a particular country. If omitted, the returned items will be
 globally relevant."
   :type 'string)
 
+(defcustom spotify-helm-integration nil
+  "Optional. If true, then use the helm front end for all APIs."
+  :type 'boolean)
+
 ;; Do not rely on the auto-refresh logic from oauth2.el, which seems broken for async requests
 (defun spotify-oauth2-token ()
   "Retrieve the Oauth2 access token that must be used to interact with the
