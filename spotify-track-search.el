@@ -115,11 +115,11 @@ otherwise, it will be played without a context."
         ((bound-and-true-p spotify-query)
          (spotify-track-search-update spotify-query (1+ spotify-current-page)))))
 
-(defun helm-source-tracks-from-current-buffer ()
+(defun helm-source-tracks-from-current-buffer (source-name)
   "Available only if helm integration is enabled & helm is installed
 This will use the tab buffer generated as a source for helm to operate on"
   (lexical-let ((tabulated-list-entries tabulated-list-entries))
-    (helm :sources (helm-build-in-buffer-source "Spotify Tracks"
+    (helm :sources (helm-build-in-buffer-source source-name
                      :data (current-buffer)
                      :get-line #'buffer-substring
                      :display-to-real (lambda (_candidate)
@@ -151,7 +151,8 @@ This will use the tab buffer generated as a source for helm to operate on"
              (if (and spotify-helm-integration (package-installed-p 'helm))
                  (progn
                    (spotify-track-search-print items current-page)
-                   (helm-source-tracks-from-current-buffer))
+                   (helm-source-tracks-from-current-buffer
+                    (format "Spotify Tracks - Search Results for \"%s\"" query)))
                (pop-to-buffer buffer)
                (spotify-track-search-print items current-page)
                (message "Track view updated")))
@@ -172,7 +173,8 @@ This will use the tab buffer generated as a source for helm to operate on"
                (if (and spotify-helm-integration (package-installed-p 'helm))
                    (progn
                      (spotify-track-search-print items current-page)
-                     (helm-source-tracks-from-current-buffer))
+                     (helm-source-tracks-from-current-buffer
+                      (gethash 'name spotify-selected-playlist)))
                  (pop-to-buffer buffer)
                  (spotify-track-search-print items current-page)
                  (message "Track view updated")))

@@ -67,11 +67,11 @@
        (lambda (_)
          (message (format "Unfollowed playlist '%s'" name)))))))
 
-(defun helm-source-playlists-from-current-buffer ()
+(defun helm-source-playlists-from-current-buffer (source-name)
   "Available only if helm integration is enabled & helm is installed
 This will use the tab buffer generated as a source for helm to operate on"
   (lexical-let ((tabulated-list-entries tabulated-list-entries))
-    (helm :sources (helm-build-in-buffer-source "Spotify Playlists"
+    (helm :sources (helm-build-in-buffer-source source-name
                      :data (current-buffer)
                      :get-line #'buffer-substring
                      :display-to-real (lambda (_candidate)
@@ -104,7 +104,8 @@ This will use the tab buffer generated as a source for helm to operate on"
              (if (and spotify-helm-integration (package-installed-p 'helm))
                  (progn
                    (spotify-playlist-search-print items current-page)
-                   (helm-source-playlists-from-current-buffer))
+                   (helm-source-playlists-from-current-buffer
+                    (format "Spotify Playlists - Search Results for \"%s\"" spotify-query)))
                (pop-to-buffer buffer)
                (spotify-playlist-search-print items current-page)
                (message "Playlist view updated")))
@@ -120,12 +121,17 @@ This will use the tab buffer generated as a source for helm to operate on"
      current-page
      (lambda (playlists)
        (if-let ((items (spotify-get-items playlists)))
-         (with-current-buffer buffer
-           (setq-local spotify-user-id user-id)
-           (setq-local spotify-current-page current-page)
-           (pop-to-buffer buffer)
-           (spotify-playlist-search-print items current-page)
-           (message "Playlist view updated"))
+           (with-current-buffer buffer
+             (setq-local spotify-user-id user-id)
+             (setq-local spotify-current-page current-page)
+             (if (and spotify-helm-integration (package-installed-p 'helm))
+                 (progn
+                   (spotify-playlist-search-print items current-page)
+                   (helm-source-playlists-from-current-buffer
+                    (format "Spotify Playlists - %s" spotify-user-id)))
+               (pop-to-buffer buffer)
+               (spotify-playlist-search-print items current-page)
+               (message "Playlist view updated")))
          (message "No more playlists"))))))
 
 (defun spotify-featured-playlists-update (current-page)
@@ -137,12 +143,16 @@ This will use the tab buffer generated as a source for helm to operate on"
      (lambda (json)
        (if-let ((items (spotify-get-search-playlist-items json))
                 (msg (spotify-get-message json)))
-         (with-current-buffer buffer
-           (setq-local spotify-current-page current-page)
-           (setq-local spotify-browse-message msg)
-           (pop-to-buffer buffer)
-           (spotify-playlist-search-print items current-page)
-           (message "Playlist view updated"))
+           (with-current-buffer buffer
+             (setq-local spotify-current-page current-page)
+             (setq-local spotify-browse-message msg)
+             (if (and spotify-helm-integration (package-installed-p 'helm))
+                 (progn
+                   (spotify-playlist-search-print items current-page)
+                   (helm-source-playlists-from-current-buffer "Spotify Playlists - Featured"))
+               (pop-to-buffer buffer)
+               (spotify-playlist-search-print items current-page)
+               (message "Playlist view updated")))
          (message "No more playlists"))))))
 
 (defun spotify-playlist-tracks (&optional helm-selection-id)
