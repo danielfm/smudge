@@ -175,7 +175,7 @@ This corresponds to the current REPEATING state."
   (interactive)
   (spotify-apply
    "player-play-track"
-   (when track (spotify-get-item-uri track))
+   (when track (spotify-get-item-uri (or (gethash 'linked_from track) track)))
    (when context (spotify-get-item-uri context))))
 
 (defun spotify-toggle-play ()
