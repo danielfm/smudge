@@ -81,6 +81,9 @@ This will use the tab buffer generated as a source for helm to operate on"
                                                 (get-text-property 0 'tabulated-list-id candidate)))
                                           tabulated-list-id))
                      :action '(("Visit playlist" . spotify-playlist-tracks))
+                     :persistent-action (lambda (candidate)
+                                          (helm-exit-minibuffer)
+                                          (spotify-playlist-tracks candidate))
                      :fuzzy-match t)
           :buffer "*helm spotify*")))
 

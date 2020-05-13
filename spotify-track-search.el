@@ -118,8 +118,6 @@ otherwise, it will be played without a context."
 (defun helm-source-tracks-from-current-buffer ()
   "Available only if helm integration is enabled & helm is installed
 This will use the tab buffer generated as a source for helm to operate on"
-  (when helm-alive-p                    ;;  Enable persistence from a playlist to viewing its tracks
-    (helm-exit-minibuffer))
   (lexical-let ((tabulated-list-entries tabulated-list-entries))
     (helm :sources (helm-build-in-buffer-source "Spotify Tracks"
                      :data (current-buffer)
