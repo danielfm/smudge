@@ -24,6 +24,34 @@
 (define-derived-mode spotify-device-select-mode tabulated-list-mode "Device-Select"
   "Major mode for selecting a Spotify Connect device for transport.")
 
+(defun helm-source-devices-from-current-buffer (source-name)
+  "Available only if helm integration is enabled & helm is installed
+This will use the tab buffer generated as a source for helm to operate on"
+  (lexical-let ((tabulated-list-entries tabulated-list-entries))
+    (helm :sources (helm-build-in-buffer-source source-name
+                     :data (current-buffer)
+                     :get-line #'buffer-substring
+                     :display-to-real (lambda (_candidate)
+                                        (let* ((candidate
+                                                (helm-get-selection nil 'withprop))
+                                               (tabulated-list-id
+                                                (get-text-property 0 'tabulated-list-id candidate)))
+                                          tabulated-list-id))
+                     :action '(("Select device" . (lambda (candidate)
+                                                    (lexical-let ((device-id
+                                                                   (spotify-get-device-id
+                                                                    candidate))
+                                                                  (name
+                                                                   (spotify-get-device-name
+                                                                    candidate)))
+                                                      (spotify-api-transfer-player
+                                                       device-id
+                                                       (lambda (json)
+                                                         (setq spotify-selected-device-id device-id)
+                                                         (message "Device '%s' selected" name)))))))
+                     :fuzzy-match t)
+          :buffer "*helm spotify*")))
+
 (defun spotify-device-select-update ()
   "Fetches the list of devices using the device list endpoint."
   (interactive)
@@ -33,11 +61,16 @@
        (if-let ((devices (gethash 'devices json))
                 (line (string-to-number (format-mode-line "%l"))))
            (progn
-             (pop-to-buffer buffer)
-             (spotify-devices-print devices)
-             (goto-char (point-min))
-             (forward-line (1- line))
-             (message "Device list updated."))
+             (if (and spotify-helm-integration (package-installed-p 'helm))
+                   (with-current-buffer buffer
+                     (spotify-devices-print devices)
+                     (helm-source-devices-from-current-buffer "Spotify Devices")
+                     (kill-current-buffer))
+               (pop-to-buffer buffer)
+               (spotify-devices-print devices)
+               (goto-char (point-min))
+               (forward-line (1- line))
+               (message "Device list updated.")))
          (message "No devices are available."))))))
 
 (defun spotify-devices-print (devices)
