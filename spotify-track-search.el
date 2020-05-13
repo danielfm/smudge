@@ -36,13 +36,13 @@ Otherwise, play the track selected."
 	   (spotify-track-album-select))
 	  (t (spotify-track-select-default)))))
 
-(defun spotify-track-select-default ()
+(defun spotify-track-select-default (&optional helm-selection-id)
   "Plays the track under the cursor. If the track list represents a playlist,
 the given track is played in the context of that playlist; if the track list
 represents an album, the given track is played in the context of that album;
 otherwise, it will be played without a context."
   (interactive)
-  (let* ((track (tabulated-list-get-id))
+  (let* ((track (or helm-selection-id (tabulated-list-get-id)))
          (context (cond ((bound-and-true-p spotify-selected-playlist) spotify-selected-playlist)
                         ((bound-and-true-p spotify-selected-album) spotify-selected-album)
                         (t nil))))
@@ -115,45 +115,24 @@ otherwise, it will be played without a context."
         ((bound-and-true-p spotify-query)
          (spotify-track-search-update spotify-query (1+ spotify-current-page)))))
 
-(defun helm-validate-track-tab-entry (entry candidate)
-  "Checks if the tab entry's vector string representation is equal to the candidate string.
-This will return the tab entry's JSON data if true else nil "
-  (setq-local json (first entry))
-  (setq-local vector (second entry))
-  (let ((entry-disc-number (elt vector 0))
-        (entry-track-name (elt vector 1))
-        (entry-artist-name (first (elt vector 2)))
-        (entry-album-name (first (elt vector 3)))
-        (entry-time (elt vector 4))
-        (entry-popularity (elt vector 5)))
-    (setq-local candidate-string (replace-regexp-in-string "\s+" "\s" (s-trim candidate)))
-    (setq-local tab-entry-string (format "%s %s %s %s %s %s"
-                                         entry-disc-number
-                                         entry-track-name
-                                         entry-artist-name
-                                         entry-album-name
-                                         entry-time
-                                         entry-popularity))
-    (if (or (string-equal candidate-string tab-entry-string)
-            ;; when the selected candidate is truncated
-            (and (string-match-p (regexp-quote "...") candidate-string)
-                 (every (lambda (split) (string-match-p split tab-entry-string))
-                        (split-string candidate-string (regexp-quote "...")))))
-        json
-      nil)))
-
-(defun helm-source-from-current-buffer ()
+(defun helm-source-tracks-from-current-buffer ()
   "Available only if helm integration is enabled & helm is installed
 This will use the tab buffer generated as a source for helm to operate on"
+  (when helm-alive-p                    ;;  Enable persistence from a playlist to viewing its tracks
+    (helm-exit-minibuffer))
   (lexical-let ((tabulated-list-entries tabulated-list-entries))
     (helm :sources (helm-build-in-buffer-source "Spotify Tracks"
                      :data (current-buffer)
                      :get-line #'buffer-substring
-                     :display-to-real (lambda (candidate)
-                                        (some (lambda (entry)
-                                                (helm-validate-track-tab-entry entry candidate))
-                                              tabulated-list-entries))
-                     :action '(("Play track" . spotify-play-track))
+                     :display-to-real (lambda (_candidate)
+                                        (let* ((candidate
+                                                (helm-get-selection nil 'withprop))
+                                               (tabulated-list-id
+                                                (get-text-property 0 'tabulated-list-id candidate)))
+                                          tabulated-list-id))
+                     :action '(("Play track" . spotify-track-select-default)
+                               ("Load more tracks" . (lambda (_candidate)
+                                                       (spotify-track-load-more))))
                      :fuzzy-match t)
           :buffer "*helm spotify*")))
 
@@ -174,7 +153,7 @@ This will use the tab buffer generated as a source for helm to operate on"
              (if (and spotify-helm-integration (package-installed-p 'helm))
                  (progn
                    (spotify-track-search-print items current-page)
-                   (helm-source-from-current-buffer))
+                   (helm-source-tracks-from-current-buffer))
                (pop-to-buffer buffer)
                (spotify-track-search-print items current-page)
                (message "Track view updated")))
@@ -192,9 +171,13 @@ This will use the tab buffer generated as a source for helm to operate on"
          (if-let ((items (spotify-get-playlist-tracks json)))
              (with-current-buffer buffer
                (setq-local spotify-current-page current-page)
-               (pop-to-buffer buffer)
-               (spotify-track-search-print items current-page)
-               (message "Track view updated"))
+               (if (and spotify-helm-integration (package-installed-p 'helm))
+                   (progn
+                     (spotify-track-search-print items current-page)
+                     (helm-source-tracks-from-current-buffer))
+                 (pop-to-buffer buffer)
+                 (spotify-track-search-print items current-page)
+                 (message "Track view updated")))
            (message "No more tracks")))))))
 
 (defun spotify-album-tracks-update (album current-page)

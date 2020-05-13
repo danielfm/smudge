@@ -67,6 +67,23 @@
        (lambda (_)
          (message (format "Unfollowed playlist '%s'" name)))))))
 
+(defun helm-source-playlists-from-current-buffer ()
+  "Available only if helm integration is enabled & helm is installed
+This will use the tab buffer generated as a source for helm to operate on"
+  (lexical-let ((tabulated-list-entries tabulated-list-entries))
+    (helm :sources (helm-build-in-buffer-source "Spotify Playlists"
+                     :data (current-buffer)
+                     :get-line #'buffer-substring
+                     :display-to-real (lambda (_candidate)
+                                        (let* ((candidate
+                                                (helm-get-selection nil 'withprop))
+                                               (tabulated-list-id
+                                                (get-text-property 0 'tabulated-list-id candidate)))
+                                          tabulated-list-id))
+                     :action '(("Visit playlist" . spotify-playlist-tracks))
+                     :fuzzy-match t)
+          :buffer "*helm spotify*")))
+
 (defun spotify-playlist-search-update (query current-page)
   "Fetches the given page of results using the search endpoint."
   (lexical-let ((current-page current-page)
@@ -81,9 +98,13 @@
            (with-current-buffer buffer
              (setq-local spotify-current-page current-page)
              (setq-local spotify-query query)
-             (pop-to-buffer buffer)
-             (spotify-playlist-search-print items current-page)
-             (message "Playlist view updated"))
+             (if (and spotify-helm-integration (package-installed-p 'helm))
+                 (progn
+                   (spotify-playlist-search-print items current-page)
+                   (helm-source-playlists-from-current-buffer))
+               (pop-to-buffer buffer)
+               (spotify-playlist-search-print items current-page)
+               (message "Playlist view updated")))
          (message "No more playlists"))))))
 
 (defun spotify-user-playlists-update (user-id current-page)
@@ -121,10 +142,11 @@
            (message "Playlist view updated"))
          (message "No more playlists"))))))
 
-(defun spotify-playlist-tracks ()
-  "Displays the tracks that belongs to the playlist under the cursor."
+(defun spotify-playlist-tracks (&optional helm-selection-id)
+  "Displays the tracks that belongs to the playlist by either the value under the cursor or
+from the selection in helm."
   (interactive)
-  (let* ((selected-playlist (tabulated-list-get-id))
+  (let* ((selected-playlist (or helm-selection-id (tabulated-list-get-id)))
          (name (spotify-get-item-name selected-playlist))
          (buffer (get-buffer-create (format "*Playlist Tracks: %s*" name))))
     (with-current-buffer buffer
