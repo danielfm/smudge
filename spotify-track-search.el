@@ -6,6 +6,35 @@
 
 (require 'spotify-api)
 
+;; Internal.
+(defvar helm-tracks-doc-header
+  " (\\<helm-tracks-map>\\[helm-tracks-load-more-interactive]: Load more tracks)"
+  "*The doc that is inserted in the Name header of the helm spotify source.")
+
+(defun helm-tracks-load-more-interactive ()
+  " Helm action to load more tracks "
+  (interactive)
+  (with-helm-alive-p
+    (helm-exit-and-execute-action 'helm-tracks-load-more-core)))
+
+(defun helm-tracks-load-more-core (_candidate)
+  " Helm action to load more tracks "
+  (spotify-track-load-more))
+
+(defcustom helm-tracks-actions (helm-make-actions
+                                "Play track `RET'" 'spotify-track-select-default
+                                "Load more tracks `C-l'" 'helm-tracks-load-more-core)
+  "Actions for tracks in helm buffers"
+  :group 'spotify
+  :type '(alist :key-type string :value-type function))
+
+(defvar helm-tracks-map
+  (let ((map (make-sparse-keymap)))
+    (set-keymap-parent map helm-map)
+    (define-key map (kbd "C-l") 'helm-tracks-load-more-interactive)
+    map)
+  "Local keymap for tracks in helm buffers")
+
 (defvar spotify-track-search-mode-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map tabulated-list-mode-map)
@@ -109,7 +138,9 @@ otherwise, it will be played without a context."
   (cond ((bound-and-true-p spotify-recently-played)
          (spotify-recently-played-tracks-update (1+ spotify-current-page)))
         ((bound-and-true-p spotify-selected-playlist)
-         (spotify-playlist-tracks-update (1+ spotify-current-page)))
+         (if (eq tracks-loaded total-tracks)
+             (spotify-playlist-tracks-update spotify-current-page)
+           (spotify-playlist-tracks-update (1+ spotify-current-page))))
         ((bound-and-true-p spotify-selected-album)
          (spotify-album-tracks-update spotify-selected-album (1+ spotify-current-page)))
         ((bound-and-true-p spotify-query)
@@ -120,6 +151,8 @@ otherwise, it will be played without a context."
 This will use the tab buffer generated as a source for helm to operate on"
   (lexical-let ((tabulated-list-entries tabulated-list-entries))
     (helm :sources (helm-build-in-buffer-source source-name
+                     :header-name (lambda (name)
+                         (concat name (substitute-command-keys helm-tracks-doc-header)))
                      :data (current-buffer)
                      :get-line #'buffer-substring
                      :display-to-real (lambda (_candidate)
@@ -128,9 +161,8 @@ This will use the tab buffer generated as a source for helm to operate on"
                                                (tabulated-list-id
                                                 (get-text-property 0 'tabulated-list-id candidate)))
                                           tabulated-list-id))
-                     :action '(("Play track" . spotify-track-select-default)
-                               ("Load more tracks" . (lambda (_candidate)
-                                                       (spotify-track-load-more))))
+                     :action helm-tracks-actions
+                     :keymap helm-tracks-map
                      :fuzzy-match t)
           :buffer "*helm spotify*")))
 
@@ -172,9 +204,15 @@ This will use the tab buffer generated as a source for helm to operate on"
                (setq-local spotify-current-page current-page)
                (if (and spotify-helm-integration (package-installed-p 'helm))
                    (progn
+                     (setq-local current-page-size (length (gethash 'items json)))
+                     (setq-local tracks-loaded (+ (* 50 (1- current-page)) current-page-size))
+                     (setq-local total-tracks (gethash 'total json))
                      (spotify-track-search-print items current-page)
                      (helm-source-tracks-from-current-buffer
-                      (gethash 'name spotify-selected-playlist)))
+                      (format "%s (%s/%s tracks loaded)"
+                              (gethash 'name spotify-selected-playlist)
+                              tracks-loaded
+                              total-tracks)))
                  (pop-to-buffer buffer)
                  (spotify-track-search-print items current-page)
                  (message "Track view updated")))
