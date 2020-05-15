@@ -11,6 +11,12 @@
   " (\\<helm-tracks-map>\\[helm-tracks-load-more-interactive]: Load more tracks)"
   "*The doc that is inserted in the Name header of the helm spotify source.")
 
+(defun helm-tracks-select-default-core (candidate)
+  "Helm action to play a selected track & clean up dangling Spotify buffers"
+  (spotify-track-select-default candidate)
+  (unless helm-in-persistent-action
+    (helm-spotify-cleanup-buffers)))
+
 (defun helm-tracks-load-more-interactive ()
   "Helm action wrapper to bind to a key map"
   (interactive)
@@ -21,15 +27,21 @@
   "Helm action to load more tracks"
   (spotify-track-load-more))
 
-(defun helm-tracks-select-default-core (candidate)
-  "Helm action to play a selected track & clean up dangling Spotify buffers"
-  (spotify-track-select-default candidate)
-  (unless helm-in-persistent-action
-    (helm-spotify-cleanup-buffers)))
+(defun helm-tracks-view-album-interactive ()
+  "Helm action wrapper to bind to a key map"
+  (interactive)
+  (with-helm-alive-p
+   (helm-exit-and-execute-action 'helm-tracks-view-album-core)))
+
+(defun helm-tracks-view-album-core (candidate)
+  "Helm action to view a track's album context"
+  (let ((album (spotify-get-track-album candidate)))
+    (spotify-album-tracks album)))
 
 (defcustom helm-tracks-actions (helm-make-actions
                                 "Play track `RET'" 'helm-tracks-select-default-core
-                                "Load more tracks `C-l'" 'helm-tracks-load-more-core)
+                                "Load more tracks `C-l'" 'helm-tracks-load-more-core
+                                "View album of track `C-M-a'" 'helm-tracks-view-album-core)
   "Actions for tracks in helm buffers"
   :group 'spotify
   :type '(alist :key-type string :value-type function))
@@ -38,6 +50,7 @@
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map helm-map)
     (define-key map (kbd "C-l") 'helm-tracks-load-more-interactive)
+    (define-key map (kbd "C-M-a") 'helm-tracks-view-album-interactive)
     map)
   "Local keymap for tracks in helm buffers")
 
@@ -148,7 +161,9 @@ otherwise, it will be played without a context."
              (spotify-playlist-tracks-update spotify-current-page)
            (spotify-playlist-tracks-update (1+ spotify-current-page))))
         ((bound-and-true-p spotify-selected-album)
-         (spotify-album-tracks-update spotify-selected-album (1+ spotify-current-page)))
+         (if (eq tracks-loaded total-tracks)
+             (spotify-album-tracks-update spotify-selected-album spotify-current-page)
+           (spotify-album-tracks-update spotify-selected-album (1+ spotify-current-page))))
         ((bound-and-true-p spotify-query)
          (spotify-track-search-update spotify-query (1+ spotify-current-page)))))
 
@@ -255,9 +270,20 @@ This will use the tab buffer generated as a source for helm to operate on"
            (with-current-buffer buffer
              (setq-local spotify-current-page current-page)
              (setq-local spotify-selected-album album)
-             (pop-to-buffer buffer)
-             (spotify-track-search-print items current-page)
-             (message "Track view updated"))
+             (if (and spotify-helm-integration (package-installed-p 'helm))
+                 (progn
+                   (setq-local current-page-size (length (gethash 'items json)))
+                   (setq-local tracks-loaded (+ (* 50 (1- current-page)) current-page-size))
+                   (setq-local total-tracks (gethash 'total json))
+                   (spotify-track-search-print items current-page)
+                   (helm-source-tracks-from-current-buffer
+                    (format "%s (%s/%s tracks loaded)"
+                            (gethash 'name spotify-selected-album)
+                            tracks-loaded
+                            total-tracks)))
+               (pop-to-buffer buffer)
+               (spotify-track-search-print items current-page)
+               (message "Track view updated")))
          (message "No more tracks"))))))
 
 (defun spotify-recently-played-tracks-update (current-page)
@@ -271,9 +297,13 @@ This will use the tab buffer generated as a source for helm to operate on"
            (with-current-buffer buffer
              (setq-local spotify-current-page current-page)
              (setq-local spotify-recently-played t)
-             (pop-to-buffer buffer)
-             (spotify-track-search-print items current-page)
-             (message "Track view updated"))
+             (if (and spotify-helm-integration (package-installed-p 'helm))
+                 (progn
+                   (spotify-track-search-print items current-page)
+                   (helm-source-tracks-from-current-buffer "Spotify Tracks - Recently Played"))
+               (pop-to-buffer buffer)
+               (spotify-track-search-print items current-page)
+               (message "Track view updated")))
          (message "No more tracks"))))))
 
 (defun spotify-track-search-set-list-format ()
