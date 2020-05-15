@@ -12,17 +12,23 @@
   "*The doc that is inserted in the Name header of the helm spotify source.")
 
 (defun helm-tracks-load-more-interactive ()
-  " Helm action to load more tracks "
+  "Helm action wrapper to bind to a key map"
   (interactive)
   (with-helm-alive-p
     (helm-exit-and-execute-action 'helm-tracks-load-more-core)))
 
 (defun helm-tracks-load-more-core (_candidate)
-  " Helm action to load more tracks "
+  "Helm action to load more tracks"
   (spotify-track-load-more))
 
+(defun helm-tracks-select-default-core (candidate)
+  "Helm action to play a selected track & clean up dangling Spotify buffers"
+  (spotify-track-select-default candidate)
+  (unless helm-in-persistent-action
+    (helm-spotify-cleanup-buffers)))
+
 (defcustom helm-tracks-actions (helm-make-actions
-                                "Play track `RET'" 'spotify-track-select-default
+                                "Play track `RET'" 'helm-tracks-select-default-core
                                 "Load more tracks `C-l'" 'helm-tracks-load-more-core)
   "Actions for tracks in helm buffers"
   :group 'spotify
@@ -145,6 +151,24 @@ otherwise, it will be played without a context."
          (spotify-album-tracks-update spotify-selected-album (1+ spotify-current-page)))
         ((bound-and-true-p spotify-query)
          (spotify-track-search-update spotify-query (1+ spotify-current-page)))))
+
+(defun helm-spotify-cleanup-buffers ()
+  "Cleanup dangling tabulated-mode buffers from the core search APIs."
+  (let ((buffer-list (mapcar (lambda (buffer) (buffer-name buffer)) (buffer-list)))
+        (spotify-buffer-candidates '("*Devices*"
+                                     "*Featured Playlists*"
+                                     "*Recently Played*"
+                                     "\*Playlists: .*\*"
+                                     "\*Playlist Search: .*\*"
+                                     "\*Track Search: .*\*"
+                                     "\*Playlist Tracks: .*\*"
+                                     "\*Album: %s\*")))
+    (mapc (lambda (spotify-buffer) (kill-buffer spotify-buffer))
+          (seq-filter (lambda (buffer)
+                        (when (some (lambda (candidate) (string-match-p candidate buffer))
+                                    spotify-buffer-candidates)
+                          buffer))
+                      buffer-list))))
 
 (defun helm-source-tracks-from-current-buffer (source-name)
   "Available only if helm integration is enabled & helm is installed

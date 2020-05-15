@@ -48,7 +48,8 @@ This will use the tab buffer generated as a source for helm to operate on"
                                                        device-id
                                                        (lambda (json)
                                                          (setq spotify-selected-device-id device-id)
-                                                         (message "Device '%s' selected" name)))))))
+                                                         (message "Device '%s' selected" name)))
+                                                      (helm-spotify-cleanup-buffers)))))
                      :fuzzy-match t)
           :buffer "*helm spotify*")))
 
@@ -64,8 +65,7 @@ This will use the tab buffer generated as a source for helm to operate on"
              (if (and spotify-helm-integration (package-installed-p 'helm))
                    (with-current-buffer buffer
                      (spotify-devices-print devices)
-                     (helm-source-devices-from-current-buffer "Spotify Devices")
-                     (kill-current-buffer))
+                     (helm-source-devices-from-current-buffer "Spotify Devices"))
                (pop-to-buffer buffer)
                (spotify-devices-print devices)
                (goto-char (point-min))
