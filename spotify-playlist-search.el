@@ -43,7 +43,9 @@
   (let ((next-page (1+ spotify-current-page)))
     (cond ((bound-and-true-p spotify-query)          (spotify-playlist-search-update spotify-query next-page))
           ((bound-and-true-p spotify-browse-message) (spotify-featured-playlists-update next-page))
-          (t                                         (spotify-user-playlists-update spotify-user-id next-page)))))
+          (t (if (and spotify-helm-integration (eq playlists-loaded total-playlists))
+                 (spotify-user-playlists-update spotify-user-id spotify-current-page)
+               (spotify-user-playlists-update spotify-user-id next-page))))))
 
 (defun spotify-playlist-follow ()
   "Adds the current user as the follower of the playlist under the cursor."

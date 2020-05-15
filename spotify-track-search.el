@@ -157,11 +157,11 @@ otherwise, it will be played without a context."
   (cond ((bound-and-true-p spotify-recently-played)
          (spotify-recently-played-tracks-update (1+ spotify-current-page)))
         ((bound-and-true-p spotify-selected-playlist)
-         (if (eq tracks-loaded total-tracks)
+         (if (and spotify-helm-integration (eq tracks-loaded total-tracks))
              (spotify-playlist-tracks-update spotify-current-page)
            (spotify-playlist-tracks-update (1+ spotify-current-page))))
         ((bound-and-true-p spotify-selected-album)
-         (if (eq tracks-loaded total-tracks)
+         (if (and spotify-helm-integration (eq tracks-loaded total-tracks))
              (spotify-album-tracks-update spotify-selected-album spotify-current-page)
            (spotify-album-tracks-update spotify-selected-album (1+ spotify-current-page))))
         ((bound-and-true-p spotify-query)
@@ -177,7 +177,7 @@ otherwise, it will be played without a context."
                                      "\*Playlist Search: .*\*"
                                      "\*Track Search: .*\*"
                                      "\*Playlist Tracks: .*\*"
-                                     "\*Album: %s\*")))
+                                     "\*Album: .*\*")))
     (mapc (lambda (spotify-buffer) (kill-buffer spotify-buffer))
           (seq-filter (lambda (buffer)
                         (when (some (lambda (candidate) (string-match-p candidate buffer))
@@ -331,7 +331,7 @@ This will use the tab buffer generated as a source for helm to operate on"
   "Appends the given songs to the current track view."
   (let (entries)
     (dolist (song songs)
-      (when (spotify-is-track-playable song)
+      (when (and song (spotify-is-track-playable song))
         (let* ((artist-name (spotify-get-track-artist-name song))
                (album (or (spotify-get-track-album song) spotify-selected-album))
                (album-name (spotify-get-item-name album))
