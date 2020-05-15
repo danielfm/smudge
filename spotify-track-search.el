@@ -38,8 +38,24 @@
   (let ((album (spotify-get-track-album candidate)))
     (spotify-album-tracks album)))
 
+(defun helm-tracks-enqueue-interactive ()
+  "Helm action wrapper to bind to a key map"
+  (interactive)
+  (with-helm-alive-p
+    (helm-attrset 'enqueue '(helm-tracks-enqueue-core . never-split))
+    (helm-execute-persistent-action 'enqueue)))
+
+(defun helm-tracks-enqueue-core (candidate)
+  "Helm action to enqueue a track into the active device's playback"
+  (hash-table-keys candidate)
+  (lexical-let ((name (spotify-get-item-name candidate))
+                (uri (spotify-get-item-uri candidate)))
+    (spotify-api-enqueue uri (lambda (_)
+                               (message (format "Added '%s' to playback queue" name))))))
+
 (defcustom helm-tracks-actions (helm-make-actions
                                 "Play track `RET'" 'helm-tracks-select-default-core
+                                "Enqueue track `C-q'" 'helm-tracks-enqueue-core
                                 "Load more tracks `C-l'" 'helm-tracks-load-more-core
                                 "View album of track `C-M-a'" 'helm-tracks-view-album-core)
   "Actions for tracks in helm buffers"
@@ -49,6 +65,7 @@
 (defvar helm-tracks-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map helm-map)
+    (define-key map (kbd "C-q") 'helm-tracks-enqueue-interactive)
     (define-key map (kbd "C-l") 'helm-tracks-load-more-interactive)
     (define-key map (kbd "C-M-a") 'helm-tracks-view-album-interactive)
     map)
