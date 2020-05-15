@@ -6,6 +6,66 @@
 
 (require 'spotify-api)
 
+(defvar helm-playlists-doc-header
+  " (\\<helm-playlists-map>\\[helm-playlists-load-more-interactive]: Load more playlists)"
+  "*The doc that is inserted in the Name header of the helm spotify source.")
+
+(defun helm-playlists-view-tracks-core (candidate)
+  "Helm action to view all tracks of the selected playlist"
+  (when helm-in-persistent-action
+    (helm-exit-minibuffer))
+  (spotify-playlist-tracks candidate))
+
+(defun helm-playlists-load-more-interactive ()
+  "Helm action wrapper to bind to a key map"
+  (interactive)
+  (with-helm-alive-p
+    (helm-exit-and-execute-action 'helm-playlists-load-more-core)))
+
+(defun helm-playlists-load-more-core (_candidate)
+  "Helm action to load more playlists"
+  (spotify-playlist-load-more))
+
+(defun helm-playlists-follow-interactive ()
+  "Helm action wrapper to bind to a key map"
+  (interactive)
+  (with-helm-alive-p
+    (helm-attrset 'follow '(helm-playlists-follow-core . never-split))
+    (helm-execute-persistent-action 'follow)))
+
+(defun helm-playlists-follow-core (candidate)
+  "Helm action to follow the selected playlist"
+  (spotify-playlist-follow candidate))
+
+(defun helm-playlists-unfollow-interactive ()
+  "Helm action wrapper to bind to a key map"
+  (interactive)
+  (with-helm-alive-p
+    (helm-attrset 'unfollow '(helm-playlists-unfollow-core . never-split))
+    (helm-execute-persistent-action 'unfollow)))
+
+(defun helm-playlists-unfollow-core (candidate)
+  "Helm action to unfollow the selected playlist"
+  (spotify-playlist-unfollow candidate))
+
+(defcustom helm-playlists-actions (helm-make-actions
+                                   "View playlist's tracks `RET'" 'helm-playlists-view-tracks-core
+                                   "Load more playlists `C-l'" 'helm-playlists-load-more-core
+                                   "Follow playlist `C-M-f'" 'helm-playlists-follow-core
+                                   "Unfollow playlist `C-M-u'" 'helm-playlists-unfollow-core)
+  "Actions for playlists in helm buffers"
+  :group 'spotify
+  :type '(alist :key-type string :value-type function))
+
+(defvar helm-playlists-map
+  (let ((map (make-sparse-keymap)))
+    (set-keymap-parent map helm-map)
+    (define-key map (kbd "C-l") 'helm-playlists-load-more-interactive)
+    (define-key map (kbd "C-M-f") 'helm-playlists-follow-interactive)
+    (define-key map (kbd "C-M-u") 'helm-playlists-unfollow-interactive)
+    map)
+  "Local keymap for playlists in helm buffers")
+
 (defvar spotify-playlist-search-mode-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map tabulated-list-mode-map)
@@ -47,10 +107,10 @@
                  (spotify-user-playlists-update spotify-user-id spotify-current-page)
                (spotify-user-playlists-update spotify-user-id next-page))))))
 
-(defun spotify-playlist-follow ()
+(defun spotify-playlist-follow (&optional helm-selection-id)
   "Adds the current user as the follower of the playlist under the cursor."
   (interactive)
-  (lexical-let* ((selected-playlist (tabulated-list-get-id))
+  (lexical-let* ((selected-playlist (or helm-selection-id (tabulated-list-get-id)))
                  (name (spotify-get-item-name selected-playlist)))
     (when (y-or-n-p (format "Follow playlist '%s'?" name))
       (spotify-api-playlist-follow
@@ -58,10 +118,10 @@
        (lambda (_)
          (message (format "Followed playlist '%s'" name)))))))
 
-(defun spotify-playlist-unfollow ()
+(defun spotify-playlist-unfollow (&optional helm-selection-id)
   "Removes the current user as the follower of the playlist under the cursor."
   (interactive)
-  (lexical-let* ((selected-playlist (tabulated-list-get-id))
+  (lexical-let* ((selected-playlist (or helm-selection-id (tabulated-list-get-id)))
                  (name (spotify-get-item-name selected-playlist)))
     (when (y-or-n-p (format "Unfollow playlist '%s'?" name))
       (spotify-api-playlist-unfollow
@@ -74,6 +134,8 @@
 This will use the tab buffer generated as a source for helm to operate on"
   (lexical-let ((tabulated-list-entries tabulated-list-entries))
     (helm :sources (helm-build-in-buffer-source source-name
+                     :header-name (lambda (name)
+                         (concat name (substitute-command-keys helm-playlists-doc-header)))
                      :data (current-buffer)
                      :get-line #'buffer-substring
                      :display-to-real (lambda (_candidate)
@@ -82,10 +144,8 @@ This will use the tab buffer generated as a source for helm to operate on"
                                                (tabulated-list-id
                                                 (get-text-property 0 'tabulated-list-id candidate)))
                                           tabulated-list-id))
-                     :action '(("Visit playlist" . spotify-playlist-tracks))
-                     :persistent-action (lambda (candidate)
-                                          (helm-exit-minibuffer)
-                                          (spotify-playlist-tracks candidate))
+                     :action helm-playlists-actions
+                     :keymap helm-playlists-map
                      :fuzzy-match t)
           :buffer "*helm spotify*")))
 
@@ -128,9 +188,15 @@ This will use the tab buffer generated as a source for helm to operate on"
              (setq-local spotify-current-page current-page)
              (if (and spotify-helm-integration (package-installed-p 'helm))
                  (progn
+                   (setq-local current-page-size (length (gethash 'items json)))
+                   (setq-local playlists-loaded (+ (* 50 (1- current-page)) current-page-size))
+                   (setq-local total-playlists (gethash 'total json))
                    (spotify-playlist-search-print items current-page)
                    (helm-source-playlists-from-current-buffer
-                    (format "Spotify Playlists - %s" spotify-user-id)))
+                    (format "Spotify Playlists - %s (%s/%s playlists loaded)"
+                            spotify-user-id
+                            playlists-loaded
+                            total-playlists)))
                (pop-to-buffer buffer)
                (spotify-playlist-search-print items current-page)
                (message "Playlist view updated")))
