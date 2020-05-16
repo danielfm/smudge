@@ -5,7 +5,9 @@
 ;; Code:
 
 (require 'spotify-api)
-(require 'spotify-helm-integration)
+
+(when (require 'helm nil 'noerror)
+  (require 'spotify-helm-integration))
 
 (defvar spotify-track-search-mode-map
   (let ((map (make-sparse-keymap)))
@@ -134,7 +136,7 @@ otherwise, it will be played without a context."
            (with-current-buffer buffer
              (setq-local spotify-current-page current-page)
              (setq-local spotify-query query)
-             (if (and spotify-helm-integration (package-installed-p 'helm))
+             (if (and spotify-helm-integration (require 'helm nil 'noerror))
                  (progn
                    (spotify-track-search-print items current-page)
                    (helm-tracks (format "Spotify Tracks - Search Results for '%s'" query)))
@@ -155,7 +157,7 @@ otherwise, it will be played without a context."
          (if-let ((items (spotify-get-playlist-tracks json)))
              (with-current-buffer buffer
                (setq-local spotify-current-page current-page)
-               (if (and spotify-helm-integration (package-installed-p 'helm))
+               (if (and spotify-helm-integration (require 'helm nil 'noerror))
                    (progn
                      (setq-local current-page-size (length (gethash 'items json)))
                      (setq-local tracks-loaded (+ (* 50 (1- current-page)) current-page-size))
@@ -183,7 +185,7 @@ otherwise, it will be played without a context."
            (with-current-buffer buffer
              (setq-local spotify-current-page current-page)
              (setq-local spotify-selected-album album)
-             (if (and spotify-helm-integration (package-installed-p 'helm))
+             (if (and spotify-helm-integration (require 'helm nil 'noerror))
                  (progn
                    (setq-local current-page-size (length (gethash 'items json)))
                    (setq-local tracks-loaded (+ (* 50 (1- current-page)) current-page-size))
@@ -209,7 +211,7 @@ otherwise, it will be played without a context."
            (with-current-buffer buffer
              (setq-local spotify-current-page current-page)
              (setq-local spotify-recently-played t)
-             (if (and spotify-helm-integration (package-installed-p 'helm))
+             (if (and spotify-helm-integration (require 'helm nil 'noerror))
                  (progn
                    (spotify-track-search-print items current-page)
                    (helm-tracks "Spotify Tracks - Recently Played"))

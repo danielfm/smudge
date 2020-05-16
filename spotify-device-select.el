@@ -10,6 +10,9 @@
 
 (require 'spotify-api)
 
+(when (require 'helm nil 'noerror)
+  (require 'spotify-helm-integration))
+
 (defcustom spotify-selected-device-id ""
   "The id of the device selected for transport."
   :type 'string)
@@ -33,10 +36,10 @@
        (if-let ((devices (gethash 'devices json))
                 (line (string-to-number (format-mode-line "%l"))))
            (progn
-             (if (and spotify-helm-integration (package-installed-p 'helm))
-                   (with-current-buffer buffer
-                     (spotify-devices-print devices)
-                     (helm-devices "Spotify Devices"))
+             (if (and spotify-helm-integration (require 'helm nil 'noerror))
+                 (with-current-buffer buffer
+                   (spotify-devices-print devices)
+                   (helm-devices "Spotify Devices"))
                (pop-to-buffer buffer)
                (spotify-devices-print devices)
                (goto-char (point-min))

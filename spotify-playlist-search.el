@@ -6,6 +6,9 @@
 
 (require 'spotify-api)
 
+(when (require 'helm nil 'noerror)
+  (require 'spotify-helm-integration))
+
 (defvar spotify-playlist-search-mode-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map tabulated-list-mode-map)
@@ -83,7 +86,7 @@
            (with-current-buffer buffer
              (setq-local spotify-current-page current-page)
              (setq-local spotify-query query)
-             (if (and spotify-helm-integration (package-installed-p 'helm))
+             (if (and spotify-helm-integration (require 'helm nil 'noerror))
                  (progn
                    (spotify-playlist-search-print items current-page)
                    (helm-playlists
@@ -106,7 +109,7 @@
            (with-current-buffer buffer
              (setq-local spotify-user-id user-id)
              (setq-local spotify-current-page current-page)
-             (if (and spotify-helm-integration (package-installed-p 'helm))
+             (if (and spotify-helm-integration (require 'helm nil 'noerror))
                  (progn
                    (setq-local current-page-size (length (gethash 'items json)))
                    (setq-local playlists-loaded (+ (* 50 (1- current-page)) current-page-size))
@@ -134,7 +137,7 @@
            (with-current-buffer buffer
              (setq-local spotify-current-page current-page)
              (setq-local spotify-browse-message msg)
-             (if (and spotify-helm-integration (package-installed-p 'helm))
+             (if (and spotify-helm-integration (require 'helm nil 'noerror))
                  (progn
                    (spotify-playlist-search-print items current-page)
                    (helm-playlists "Spotify Playlists - Featured"))
