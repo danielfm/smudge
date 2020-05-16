@@ -6,6 +6,9 @@
 
 (require 'spotify-api)
 
+(when (require 'helm nil 'noerror)
+  (require 'spotify-helm-integration))
+
 (defvar spotify-playlist-search-mode-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map tabulated-list-mode-map)
@@ -43,12 +46,14 @@
   (let ((next-page (1+ spotify-current-page)))
     (cond ((bound-and-true-p spotify-query)          (spotify-playlist-search-update spotify-query next-page))
           ((bound-and-true-p spotify-browse-message) (spotify-featured-playlists-update next-page))
-          (t                                         (spotify-user-playlists-update spotify-user-id next-page)))))
+          (t (if (and spotify-helm-integration (eq playlists-loaded total-playlists))
+                 (spotify-user-playlists-update spotify-user-id spotify-current-page)
+               (spotify-user-playlists-update spotify-user-id next-page))))))
 
-(defun spotify-playlist-follow ()
+(defun spotify-playlist-follow (&optional helm-selection-id)
   "Adds the current user as the follower of the playlist under the cursor."
   (interactive)
-  (lexical-let* ((selected-playlist (tabulated-list-get-id))
+  (lexical-let* ((selected-playlist (or helm-selection-id (tabulated-list-get-id)))
                  (name (spotify-get-item-name selected-playlist)))
     (when (y-or-n-p (format "Follow playlist '%s'?" name))
       (spotify-api-playlist-follow
@@ -56,10 +61,10 @@
        (lambda (_)
          (message (format "Followed playlist '%s'" name)))))))
 
-(defun spotify-playlist-unfollow ()
+(defun spotify-playlist-unfollow (&optional helm-selection-id)
   "Removes the current user as the follower of the playlist under the cursor."
   (interactive)
-  (lexical-let* ((selected-playlist (tabulated-list-get-id))
+  (lexical-let* ((selected-playlist (or helm-selection-id (tabulated-list-get-id)))
                  (name (spotify-get-item-name selected-playlist)))
     (when (y-or-n-p (format "Unfollow playlist '%s'?" name))
       (spotify-api-playlist-unfollow
@@ -81,9 +86,14 @@
            (with-current-buffer buffer
              (setq-local spotify-current-page current-page)
              (setq-local spotify-query query)
-             (pop-to-buffer buffer)
-             (spotify-playlist-search-print items current-page)
-             (message "Playlist view updated"))
+             (if (and spotify-helm-integration (require 'helm nil 'noerror))
+                 (progn
+                   (spotify-playlist-search-print items current-page)
+                   (helm-playlists
+                    (format "Spotify Playlists - Search Results for '%s'" spotify-query)))
+               (pop-to-buffer buffer)
+               (spotify-playlist-search-print items current-page)
+               (message "Playlist view updated")))
          (message "No more playlists"))))))
 
 (defun spotify-user-playlists-update (user-id current-page)
@@ -96,12 +106,23 @@
      current-page
      (lambda (playlists)
        (if-let ((items (spotify-get-items playlists)))
-         (with-current-buffer buffer
-           (setq-local spotify-user-id user-id)
-           (setq-local spotify-current-page current-page)
-           (pop-to-buffer buffer)
-           (spotify-playlist-search-print items current-page)
-           (message "Playlist view updated"))
+           (with-current-buffer buffer
+             (setq-local spotify-user-id user-id)
+             (setq-local spotify-current-page current-page)
+             (if (and spotify-helm-integration (require 'helm nil 'noerror))
+                 (progn
+                   (setq-local current-page-size (length (gethash 'items json)))
+                   (setq-local playlists-loaded (+ (* 50 (1- current-page)) current-page-size))
+                   (setq-local total-playlists (gethash 'total json))
+                   (spotify-playlist-search-print items current-page)
+                   (helm-playlists
+                    (format "Spotify Playlists - %s (%s/%s playlists loaded)"
+                            spotify-user-id
+                            playlists-loaded
+                            total-playlists)))
+               (pop-to-buffer buffer)
+               (spotify-playlist-search-print items current-page)
+               (message "Playlist view updated")))
          (message "No more playlists"))))))
 
 (defun spotify-featured-playlists-update (current-page)
@@ -113,18 +134,23 @@
      (lambda (json)
        (if-let ((items (spotify-get-search-playlist-items json))
                 (msg (spotify-get-message json)))
-         (with-current-buffer buffer
-           (setq-local spotify-current-page current-page)
-           (setq-local spotify-browse-message msg)
-           (pop-to-buffer buffer)
-           (spotify-playlist-search-print items current-page)
-           (message "Playlist view updated"))
+           (with-current-buffer buffer
+             (setq-local spotify-current-page current-page)
+             (setq-local spotify-browse-message msg)
+             (if (and spotify-helm-integration (require 'helm nil 'noerror))
+                 (progn
+                   (spotify-playlist-search-print items current-page)
+                   (helm-playlists "Spotify Playlists - Featured"))
+               (pop-to-buffer buffer)
+               (spotify-playlist-search-print items current-page)
+               (message "Playlist view updated")))
          (message "No more playlists"))))))
 
-(defun spotify-playlist-tracks ()
-  "Displays the tracks that belongs to the playlist under the cursor."
+(defun spotify-playlist-tracks (&optional helm-selection-id)
+  "Displays the tracks that belongs to the playlist by either the value under the cursor or
+from the selection in helm."
   (interactive)
-  (let* ((selected-playlist (tabulated-list-get-id))
+  (let* ((selected-playlist (or helm-selection-id (tabulated-list-get-id)))
          (name (spotify-get-item-name selected-playlist))
          (buffer (get-buffer-create (format "*Playlist Tracks: %s*" name))))
     (with-current-buffer buffer

@@ -43,6 +43,10 @@ relevant to a particular country. If omitted, the returned items will be
 globally relevant."
   :type 'string)
 
+(defcustom spotify-helm-integration nil
+  "Optional. If true, then use the helm front end for all APIs."
+  :type 'boolean)
+
 ;; Do not rely on the auto-refresh logic from oauth2.el, which seems broken for async requests
 (defun spotify-oauth2-token ()
   "Retrieve the Oauth2 access token that must be used to interact with the
@@ -198,8 +202,11 @@ the current user."
   (gethash 'id json))
 
 (defun spotify-get-item-uri (json)
-  "Return the uri from the given track/album/artist JSON object."
-  (gethash 'uri json))
+  "Return the uri from the given track/album/artist JSON object. 
+Track link objects are preceded if relinking is applied for the track server side"
+  (if-let (linked-from-json (gethash 'linked_from json))
+      (gethash 'uri linked-from-json)
+    (gethash 'uri json)))
 
 (defun spotify-get-playlist-track-count (json)
   "Return the number of tracks of the given playlist JSON object."
@@ -445,5 +452,14 @@ which must be a number between 0 and 100."
    nil
    callback))
 
+(defun spotify-api-enqueue (uri &optional callback)
+  "Add track/episode to playlist queue."
+  (spotify-api-call-async
+   "POST"
+   (concat "/me/player/queue?"
+           (url-build-query-string `((uri ,uri))
+                                   nil t))
+   nil
+   callback))
 
 (provide 'spotify-api)

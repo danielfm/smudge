@@ -6,6 +6,9 @@
 
 (require 'spotify-api)
 
+(when (require 'helm nil 'noerror)
+  (require 'spotify-helm-integration))
+
 (defvar spotify-track-search-mode-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map tabulated-list-mode-map)
@@ -36,13 +39,13 @@ Otherwise, play the track selected."
 	   (spotify-track-album-select))
 	  (t (spotify-track-select-default)))))
 
-(defun spotify-track-select-default ()
+(defun spotify-track-select-default (&optional helm-selection-id)
   "Plays the track under the cursor. If the track list represents a playlist,
 the given track is played in the context of that playlist; if the track list
 represents an album, the given track is played in the context of that album;
 otherwise, it will be played without a context."
   (interactive)
-  (let* ((track (tabulated-list-get-id))
+  (let* ((track (or helm-selection-id (tabulated-list-get-id)))
          (context (cond ((bound-and-true-p spotify-selected-playlist) spotify-selected-playlist)
                         ((bound-and-true-p spotify-selected-album) spotify-selected-album)
                         (t nil))))
@@ -109,9 +112,13 @@ otherwise, it will be played without a context."
   (cond ((bound-and-true-p spotify-recently-played)
          (spotify-recently-played-tracks-update (1+ spotify-current-page)))
         ((bound-and-true-p spotify-selected-playlist)
-         (spotify-playlist-tracks-update (1+ spotify-current-page)))
+         (if (and spotify-helm-integration (eq tracks-loaded total-tracks))
+             (spotify-playlist-tracks-update spotify-current-page)
+           (spotify-playlist-tracks-update (1+ spotify-current-page))))
         ((bound-and-true-p spotify-selected-album)
-         (spotify-album-tracks-update spotify-selected-album (1+ spotify-current-page)))
+         (if (and spotify-helm-integration (eq tracks-loaded total-tracks))
+             (spotify-album-tracks-update spotify-selected-album spotify-current-page)
+           (spotify-album-tracks-update spotify-selected-album (1+ spotify-current-page))))
         ((bound-and-true-p spotify-query)
          (spotify-track-search-update spotify-query (1+ spotify-current-page)))))
 
@@ -129,9 +136,13 @@ otherwise, it will be played without a context."
            (with-current-buffer buffer
              (setq-local spotify-current-page current-page)
              (setq-local spotify-query query)
-             (pop-to-buffer buffer)
-             (spotify-track-search-print items current-page)
-             (message "Track view updated"))
+             (if (and spotify-helm-integration (require 'helm nil 'noerror))
+                 (progn
+                   (spotify-track-search-print items current-page)
+                   (helm-tracks (format "Spotify Tracks - Search Results for '%s'" query)))
+               (pop-to-buffer buffer)
+               (spotify-track-search-print items current-page)
+               (message "Track view updated")))
          (message "No more tracks"))))))
 
 (defun spotify-playlist-tracks-update (current-page)
@@ -146,9 +157,19 @@ otherwise, it will be played without a context."
          (if-let ((items (spotify-get-playlist-tracks json)))
              (with-current-buffer buffer
                (setq-local spotify-current-page current-page)
-               (pop-to-buffer buffer)
-               (spotify-track-search-print items current-page)
-               (message "Track view updated"))
+               (if (and spotify-helm-integration (require 'helm nil 'noerror))
+                   (progn
+                     (setq-local current-page-size (length (gethash 'items json)))
+                     (setq-local tracks-loaded (+ (* 50 (1- current-page)) current-page-size))
+                     (setq-local total-tracks (gethash 'total json))
+                     (spotify-track-search-print items current-page)
+                     (helm-tracks (format "%s (%s/%s tracks loaded)"
+                                          (gethash 'name spotify-selected-playlist)
+                                          tracks-loaded
+                                          total-tracks)))
+                 (pop-to-buffer buffer)
+                 (spotify-track-search-print items current-page)
+                 (message "Track view updated")))
            (message "No more tracks")))))))
 
 (defun spotify-album-tracks-update (album current-page)
@@ -164,9 +185,19 @@ otherwise, it will be played without a context."
            (with-current-buffer buffer
              (setq-local spotify-current-page current-page)
              (setq-local spotify-selected-album album)
-             (pop-to-buffer buffer)
-             (spotify-track-search-print items current-page)
-             (message "Track view updated"))
+             (if (and spotify-helm-integration (require 'helm nil 'noerror))
+                 (progn
+                   (setq-local current-page-size (length (gethash 'items json)))
+                   (setq-local tracks-loaded (+ (* 50 (1- current-page)) current-page-size))
+                   (setq-local total-tracks (gethash 'total json))
+                   (spotify-track-search-print items current-page)
+                   (helm-tracks (format "%s (%s/%s tracks loaded)"
+                                        (gethash 'name spotify-selected-album)
+                                        tracks-loaded
+                                        total-tracks)))
+               (pop-to-buffer buffer)
+               (spotify-track-search-print items current-page)
+               (message "Track view updated")))
          (message "No more tracks"))))))
 
 (defun spotify-recently-played-tracks-update (current-page)
@@ -180,9 +211,13 @@ otherwise, it will be played without a context."
            (with-current-buffer buffer
              (setq-local spotify-current-page current-page)
              (setq-local spotify-recently-played t)
-             (pop-to-buffer buffer)
-             (spotify-track-search-print items current-page)
-             (message "Track view updated"))
+             (if (and spotify-helm-integration (require 'helm nil 'noerror))
+                 (progn
+                   (spotify-track-search-print items current-page)
+                   (helm-tracks "Spotify Tracks - Recently Played"))
+               (pop-to-buffer buffer)
+               (spotify-track-search-print items current-page)
+               (message "Track view updated")))
          (message "No more tracks"))))))
 
 (defun spotify-track-search-set-list-format ()
@@ -210,7 +245,7 @@ otherwise, it will be played without a context."
   "Appends the given songs to the current track view."
   (let (entries)
     (dolist (song songs)
-      (when (spotify-is-track-playable song)
+      (when (and song (spotify-is-track-playable song))
         (let* ((artist-name (spotify-get-track-artist-name song))
                (album (or (spotify-get-track-album song) spotify-selected-album))
                (album-name (spotify-get-item-name album))

@@ -283,6 +283,19 @@ you can set the following, i.e.:
 ````
 Otherwise, it defaults to 4 spaces.
 
+## Helm Integration ##
+
+Helm integration can be enabled for all Spotify features of this package
+by adding this to your config
+
+````el
+(setq spotify-helm-integration 1)
+````
+
+Note: Spotify will use tabulated modes by default if this is turned on without
+helm installed. If you do install helm afterwards, please ensure to reload the
+package or restart emacs for it to take effect.
+
 ## Donate
 
 If this project is useful for you, buy me a beer!
