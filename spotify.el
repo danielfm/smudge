@@ -156,6 +156,9 @@ Prompt for the NAME and whether it should be made PUBLIC."
     ["Previous Track" spotify-previous-track :active spotify-remote-mode]
     ["Next Track"     spotify-next-track     :active spotify-remote-mode]
     "--"
+    ["Select Device"  spotify-select-device      :active spotify-remote-mode]
+    ["Mute/Unmute"    spotify-volume-mute-unmute :active spotify-remote-mode]
+    "--"
     ["Shuffle" spotify-toggle-shuffle :active spotify-remote-mode]
     ["Repeat"  spotify-toggle-repeat  :active spotify-remote-mode]
     "--"
@@ -177,8 +180,7 @@ Prompt for the NAME and whether it should be made PUBLIC."
      ["Previous Track" spotify-previous-track]
      ["Next Track" spotify-next-track]
      "--"
-     ["Volume Up" spotify-volume-up]
-     ["Volume Down" spotify-volume-down]
+     ["Select Device" spotify-select-device]
      ["Mute/Unmute" spotify-volume-mute-unmute]
      "--"
      ["Shuffle" spotify-toggle-shuffle]
