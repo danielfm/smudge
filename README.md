@@ -27,7 +27,6 @@ of Spotify via the Spotify Connect feature.
 First, make sure your system satisfies the given dependencies:
 
 * Emacs 24.4+
-* Python 2.7+ (needed for the Oauth2 callback server)
 
 To manually install spotify.el, just clone this project somewhere in your
 disk, add that directory in the `load-path`, and require the `spotify` module:
@@ -49,7 +48,8 @@ versions of this package used "M-p"
 
 In order to get the the client ID and client secret, you need to create
 [a Spotify app](https://developer.spotify.com/my-applications), specifying
-<http://localhost:8591/> as the redirect URI.
+<http://localhost:8080/spotify-callback> as the redirect URI (or whichever port you have specified via customize).
+The OAuth2 exchange is handled by `simple-httpd`. If you are not already using this package for something else, you should not need to customize this port. Otherwise, you'll want to set it to whatever port you are running on.
 
 To use the "Spotify Connect" transport (vs. controlling only your local instance - though you can
 also control your local instance as well), set `spotify-transport` to `'connect` as follows. This
@@ -69,7 +69,7 @@ and give your application a name and a description:
 At this point, the client ID and the client secret are available, so set those values to
 `spotify-oauth2-client-id` and `spotify-oauth2-client-secret`, respectively.
 
-Then, scroll down a little bit, type <http://localhost:8591/> as the Redirect
+Then, scroll down a little bit, type <http://localhost:8080/spotify-callback> as the Redirect
 URI for the application, and click **Add**:
 
 ![Creating a Spotify App 2/2](./img/spotify-app-02.png)

@@ -1,11 +1,22 @@
-;; spotify-apple.el --- Apple-specific code for Spotify.el
+;;; spotify-apple.el --- Apple-specific code for Spotify.el  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2014-2019 Daniel Fernandes Martins
 
-;; Code:
+;;; Commentary:
+
+;; This library handles controlling Spotify via Applescript commands.  It implements a set of
+;; multimethod-like functions that are dispatched in spotify-controller.el.
+
+;;; Code:
+
+(require 'spotify-controller)
+
+(defvar spotify-apple-player-status-script)
+(defvar spotify-apple-player-status-script-file)
 
 (defcustom spotify-osascript-bin-path "/usr/bin/osascript"
   "Path to `osascript' binary."
+  :group 'spotify
   :type 'string)
 
 ; Do not change this unless you know what you're doing
@@ -40,14 +51,14 @@ end tell
       (make-temp-file "spotify.el" nil nil spotify-apple-player-status-script))
 
 (defun spotify-apple-command-line (cmd)
-  "Returns a command line prefix for any Spotify command."
+  "Return a command line prefix for any Spotify command CMD."
   (format "%s -e %s"
           spotify-osascript-bin-path
           (shell-quote-argument (format "tell application \"Spotify\" to %s" cmd))))
 
 (defun spotify-apple-command (cmd)
-  "Sends the given command to the Spotify client and returns the resulting
-   status string."
+  "Send the given CMD to the Spotify client.
+Return the resulting status string."
   (replace-regexp-in-string
    "\n$" ""
    (shell-command-to-string (spotify-apple-command-line cmd))))
@@ -69,33 +80,44 @@ end tell
         (set-process-filter process 'spotify-apple-set-player-status-from-process-output)))))
 
 (defun spotify-apple-player-state ()
+  "Dispatch get player state."
   (spotify-apple-command "get player state"))
 
 (defun spotify-apple-player-toggle-play ()
+  "Dispatch playpause."
   (spotify-apple-command "playpause"))
 
 (defun spotify-apple-player-next-track ()
+  "Dispatch next track."
   (spotify-apple-command "next track"))
 
 (defun spotify-apple-player-previous-track ()
+  "Dispatch previous track."
   (spotify-apple-command "previous track"))
 
 (defun spotify-apple-volume-up ()
+  "Send message about inability to change volume."
   (message "Changing the volume not supported by the Spotify AppleScript client"))
 
 (defun spotify-apple-volume-down ()
+  "Send message about inability to change volume."
   (message "Changing the volume not supported by the Spotify AppleScript client"))
 
 (defun spotify-apple-volume-mute-unmute ()
+  "Send message about inability to change volume."
   (message "Changing the volume not supported by the Spotify AppleScript client"))
 
 (defun spotify-apple-toggle-repeat ()
+  "Dispatch repeat command."
   (spotify-apple-command "set repeating to not repeating"))
 
 (defun spotify-apple-toggle-shuffle ()
+  "Dispatch shuffle command."
   (spotify-apple-command "set shuffling to not shuffling"))
 
 (defun spotify-apple-player-play-track (track-id context-id)
+  "Dispatch message about playing TRACK-ID in CONTEXT-ID."
   (spotify-apple-command (format "play track \"%s\" in context \"%s\"" track-id context-id)))
 
 (provide 'spotify-apple)
+;;; spotify-apple.el ends here

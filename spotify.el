@@ -1,37 +1,31 @@
-;;; spotify.el --- control the Spotify app from Emacs
+;;; spotify.el --- control the Spotify app from Emacs  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2014-2018 Daniel Fernandes Martins
 
 ;; Keywords: multimedia, music, spotify
 ;; Package: spotify
 
-;; Commentary:
+;;; Commentary:
 
-;; This mode requires at least GNU Emacs 24.4 and Python 2.7
+;; This mode requires at least GNU Emacs 24.4
 
 ;; Before using this mode, first go the Spotify Web API console
-;; <https://developer.spotify.com/my-applications> and create a new
-;; application, adding <http://localhost:8591/> as the redirect URI.
-;;
-;; After requiring `spotify', make sure to define the client id and client
-;; secrets, along with some other important settings:
-;;
-;; (custom-set-variables
-;;  '(spotify-oauth2-client-id "client-id")
-;;  '(spotify-oauth2-client-secret "client-secret"))
-;;
-;; See 'README.md' for usage information.
+;; <https://developer.spotify.com/my-applications> and create a new application, adding
+;; <http://localhost:8080/spotify-callback> as the redirect URI (or whichever port you have
+;; specified via customize).
 
-;; Code:
+;; After requiring `spotify', make sure to define the client id and client secrets, along with some
+;; other important settings.  See README.md for the complete list of settings and usage information.
+
+;;; Code:
 
 (when (version< emacs-version "24.4")
   (error "Spotify requires at least GNU Emacs 24.4"))
 
-(require 'cl)
 (require 'subr-x)
 (require 'json)
-(require 'oauth2)
 (require 'tabulated-list)
+(require 'easymenu)
 
 (require 'spotify-api)
 (require 'spotify-track-search)
@@ -52,7 +46,7 @@
 
 ;;;###autoload
 (defun spotify-track-search (query)
-  "Search for tracks that match the given query string."
+  "Search for tracks that match the given QUERY string."
   (interactive "sSpotify Search (Tracks): ")
   (let ((buffer (get-buffer-create (format "*Track Search: %s*" query))))
     (with-current-buffer buffer
@@ -61,7 +55,7 @@
 
 ;;;###autoload
 (defun spotify-playlist-search (query)
-  "Search for playlists that match the given query string."
+  "Search for playlists that match the given QUERY string."
   (interactive "sSpotify Search (Playlists): ")
   (let ((buffer (get-buffer-create (format "*Playlist Search: %s*" query))))
     (with-current-buffer buffer
@@ -87,7 +81,7 @@
 
 ;;;###autoload
 (defun spotify-user-playlists (user-id)
-  "Display the public playlists of the given user."
+  "Display the public playlists of the given user with USER-ID."
   (interactive "sSpotify User ID: ")
   (let ((buffer (get-buffer-create (format "*Playlists: %s*" user-id))))
     (with-current-buffer buffer
@@ -104,25 +98,24 @@
       (spotify-featured-playlists-update 1))))
 
 ;;;###autoload
-(defun spotify-create-playlist (name is-public)
-  "Create an empty playlist owned by the current user."
+(defun spotify-create-playlist (name public)
+  "Create an empty playlist owned by the current user.
+Prompt for the NAME and whether it should be made PUBLIC."
   (interactive
    (list (read-string "Playlist name: ")
          (y-or-n-p "Make the playlist public? ")))
   (if (string= name "")
       (message "Playlist name not provided; aborting")
-    (lexical-let ((name name)
-                  (is-public is-public))
-      (spotify-current-user
-       (lambda (user)
-         (spotify-api-playlist-create
-          (spotify-get-item-id user)
-          name
-          is-public
-          (lambda (new-playlist)
-            (if new-playlist
-                (message (format "Playlist '%s' created" (spotify-get-item-name new-playlist)))
-              (message "Error creating the playlist")))))))))
+    (spotify-current-user
+     (lambda (user)
+       (spotify-api-playlist-create
+        (spotify-get-item-id user)
+        name
+        public
+        (lambda (new-playlist)
+          (if new-playlist
+              (message (format "Playlist '%s' created" (spotify-get-item-name new-playlist)))
+            (message "Error creating the playlist"))))))))
 
 ;;;###autoload
 (defun spotify-select-device ()
@@ -137,4 +130,66 @@
            (spotify-device-select-mode)
            (spotify-device-select-update)))))))
 
+(defvar spotify-command-map
+  (let ((map (make-sparse-keymap)))
+            (define-key map (kbd "M-r") #'spotify-toggle-repeat)
+            (define-key map (kbd "M-s") #'spotify-toggle-shuffle)
+            (define-key map (kbd "M-p") #'spotify-toggle-play)
+            (define-key map (kbd "M-b") #'spotify-previous-track)
+            (define-key map (kbd "M-u") #'spotify-volume-up)
+            (define-key map (kbd "M-d") #'spotify-volume-down)
+            (define-key map (kbd "M-f") #'spotify-next-track)
+            (define-key map (kbd "p m") #'spotify-my-playlists)
+            (define-key map (kbd "p f") #'spotify-featured-playlists)
+            (define-key map (kbd "p u") #'spotify-user-playlists)
+            (define-key map (kbd "p s") #'spotify-playlist-search)
+            (define-key map (kbd "p c") #'spotify-create-playlist)
+            (define-key map (kbd "t s") #'spotify-track-search)
+            (define-key map (kbd "d") #'spotify-select-device)
+            map)
+  "Keymap for Spotify commands after 'spotify-keymap-prefix'.")
+(fset 'spotify-command-map spotify-command-map)
+
+(easy-menu-add-item nil '("Tools")
+  '("Spotify"
+    ["Play/Pause"     spotify-toggle-play    :active spotify-remote-mode]
+    ["Previous Track" spotify-previous-track :active spotify-remote-mode]
+    ["Next Track"     spotify-next-track     :active spotify-remote-mode]
+    "--"
+    ["Shuffle" spotify-toggle-shuffle :active spotify-remote-mode]
+    ["Repeat"  spotify-toggle-repeat  :active spotify-remote-mode]
+    "--"
+    ["Search Tracks..."    spotify-track-search       :active spotify-remote-mode]
+    ["Featured Playlists"  spotify-featured-playlists :active spotify-remote-mode]
+    ["My Playlists"        spotify-my-playlists       :active spotify-remote-mode]
+    ["User Playlists..."   spotify-user-playlists     :active spotify-remote-mode]
+    ["Search Playlists..." spotify-playlist-search    :active spotify-remote-mode]
+    ["Create Playlist..."  spotify-create-playlist    :active spotify-remote-mode]
+    "--"
+    ["Spotify Remote Mode" spotify-remote-mode :style toggle :selected spotify-remote-mode]))
+
+(defun spotify-remote-popup-menu ()
+  "Popup menu when in spotify-remote-mode."
+  (interactive)
+  (popup-menu
+   '("Spotify"
+     ["Play/Pause" spotify-toggle-play]
+     ["Previous Track" spotify-previous-track]
+     ["Next Track" spotify-next-track]
+     "--"
+     ["Volume Up" spotify-volume-up]
+     ["Volume Down" spotify-volume-down]
+     ["Mute/Unmute" spotify-volume-mute-unmute]
+     "--"
+     ["Shuffle" spotify-toggle-shuffle]
+     ["Repeat"  spotify-toggle-repeat]
+     "--"
+     ["Search Tracks..."    spotify-track-search]
+     ["Featured Playlists"  spotify-featured-playlists]
+     ["My Playlists"        spotify-my-playlists]
+     ["User Playlists..."   spotify-user-playlists]
+     ["Search Playlists..." spotify-playlist-search]
+     ["Create Playlist..."  spotify-create-playlist])))
+
 (provide 'spotify)
+;;; spotify.el ends here

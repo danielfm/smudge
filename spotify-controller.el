@@ -1,14 +1,15 @@
-;;; package --- Summary
-
-;;; Commentary:
-
-;;; spotify-controller.el --- Generic player controller interface for Spotify.el
+;;; spotify-controller.el --- Generic player controller interface for Spotify.el  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2014-2019 Daniel Fernandes Martins
 
+;;; Commentary:
+
+;; This library defines a set of commands for controlling an instance of a Spotify client.  The
+;; commands are sent via a multimethod-like dispatch to the chosen transport.
+
 ;;; Code:
 
-(require 'spotify-remote)
+(require 'spotify-api)
 
 (defmacro if-gnu-linux (then else)
   "Evaluate THEN form if Emacs is running in GNU/Linux, otherwise evaluate ELSE form."
@@ -27,16 +28,17 @@
   `(if-darwin ,then nil))
 
 (defcustom spotify-transport 'connect
-  "How the commands should be sent to Spotify process. Defaults to 'connect, as it provides a consistent UX across all OSes."
+  "How the commands should be sent to Spotify process.
+Defaults to 'connect, as it provides a consistent UX across all OSes."
   :type '(choice (symbol :tag "AppleScript" apple)
                  (symbol :tag "D-Bus" dbus)
                  (symbol :tag "Connect" connect))
   :group 'spotify)
 
 (defcustom spotify-player-status-refresh-interval 5
-  "The interval, in seconds, that the mode line must be updated. When using the
-'connect transport, avoid using values smaller than 5 to avoid being rate
-limited. Set to 0 to disable this feature."
+  "The interval, in seconds, that the mode line must be updated.
+When using the'connect transport, avoid using values smaller than 5
+to avoid being rate limited.  Set to 0 to disable this feature."
   :type 'integer
   :group 'spotify)
 
@@ -96,11 +98,19 @@ The following placeholders are supported:
 
 (defvar spotify-timer nil)
 
+(defvar spotify-player-status ""
+  "The text to be displayed in the global mode line or title bar.")
+
 (defun spotify-apply (suffix &rest args)
   "Simple facility to emulate multimethods.
 Apply SUFFIX to spotify-prefixed functions, applying ARGS."
   (let ((func-name (format "spotify-%s-%s" spotify-transport suffix)))
     (apply (intern func-name) args)))
+
+(defun spotify-update-player-status (str)
+  "Set the given STR to the player status, prefixed with the mode identifier."
+  (when (not (string= str spotify-player-status))
+    (setq spotify-player-status str)))
 
 (defun spotify-player-status-playing-indicator (str)
   "Return the value of the player state variable.
@@ -227,5 +237,4 @@ This corresponds to the current REPEATING state."
   (spotify-apply "is-shuffling"))
 
 (provide 'spotify-controller)
-
 ;;; spotify-controller.el ends here
