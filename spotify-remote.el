@@ -96,14 +96,19 @@ See commands \\[spotify-toggle-repeating] and
               ((eq spotify-status-location 'title-bar)
                (spotify-remove-status-from-frame-title s)))))))
 
-(defvar spotify-remote-player-status-map (make-sparse-keymap))
-(define-key spotify-remote-player-status-map [player-status mouse-1] 'spotify-remote-popup-menu)
+(defvar spotify-remote-player-status-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "<mode-line> <mouse-1>")
+      'spotify-remote-popup-menu)
+    map)
+  "Keymap for Spotify mode-line status.")
 
 (defun spotify-player-status-text ()
   "Return the propertized text to be displayed as the lighter."
   (propertize spotify-player-status
-              'local-map spotify-remote-player-status-map
-              'mouse-face 'player-status-highlight))
+              'keymap spotify-remote-player-status-map
+              'help-echo "mouse-1: Show Spotify.el menu"
+              'mouse-face 'mode-line-highlight))
 
 (defun turn-on-spotify-remote-mode ()
   "Turn the `spotify-remote-mode' on in the current buffer."
