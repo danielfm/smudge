@@ -64,17 +64,18 @@ feature requires a Spotify premium subscription.
 Go to [Create an Application](https://developer.spotify.com/my-applications/#!/applications/create)
 and give your application a name and a description:
 
-![Creating a Spotify App 1/2](./img/spotify-app-01.png)
+![Creating a Spotify App 1/3](./img/spotify-app-01.png)
+
+After creating the new app, click the **Edit Settings**, scroll down a little bit,
+type <http://localhost:8080/spotify-callback> as the Redirect URI for the
+application, and click **Add**. Then, hit **Save**.
+
+![Creating a Spotify App 2/3](./img/spotify-app-02.png)
 
 At this point, the client ID and the client secret are available, so set those values to
 `spotify-oauth2-client-id` and `spotify-oauth2-client-secret`, respectively.
 
-Then, scroll down a little bit, type <http://localhost:8080/spotify-callback> as the Redirect
-URI for the application, and click **Add**:
-
-![Creating a Spotify App 2/2](./img/spotify-app-02.png)
-
-Finally, scroll to the end of the page and hit **Save**.
+![Creating a Spotify App 3/3](./img/spotify-app-03.png)
 
 ## Usage
 
