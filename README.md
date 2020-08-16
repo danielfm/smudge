@@ -284,12 +284,6 @@ you can set the following, i.e.:
 ````
 Otherwise, it defaults to 4 spaces.
 
-## Donate
-
-If this project is useful for you, buy me a beer!
-
-Bitcoin: `bc1qtwyfcj7pssk0krn5wyfaca47caar6nk9yyc4mu`
-
 ## License
 
 Copyright (C) Daniel Fernandes Martins
