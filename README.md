@@ -288,4 +288,4 @@ Otherwise, it defaults to 4 spaces.
 
 Copyright (C) Daniel Fernandes Martins
 
-Distributed under the New BSD License. See COPYING for further details.
+Distributed under the GPL v3 License. See COPYING for further details.
