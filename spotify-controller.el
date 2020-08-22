@@ -105,7 +105,9 @@ The following placeholders are supported:
   "Simple facility to emulate multimethods.
 Apply SUFFIX to spotify-prefixed functions, applying ARGS."
   (let ((func-name (format "spotify-%s-%s" spotify-transport suffix)))
-    (apply (intern func-name) args)))
+    (apply (intern func-name) args)
+    (unless (string= suffix "player-status")
+      (spotify-player-status))))
 
 (defun spotify-update-player-status (str)
   "Set the given STR to the player status, prefixed with the mode identifier."
@@ -172,8 +174,7 @@ This corresponds to the current REPEATING state."
 (defun spotify-player-status ()
   "Update the mode line to display the current Spotify player status."
   (interactive)
-  (spotify-apply "player-status")
-  (force-mode-line-update t))
+  (spotify-apply "player-status"))
 
 (defun spotify-play-uri (uri)
   "Sends a `play' command to Spotify process passing the given URI."

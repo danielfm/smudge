@@ -79,7 +79,7 @@
                                           (lambda (json)
                                             (setq spotify-selected-device-id ,device-id)
                                             (message "Device '%s' selected" ,name)
-                                            (spotify-player-status))))
+                                            (spotify-update-player-status))))
                               'help-echo (format "Select '%s' for transport" name)))
                   (if is-active "X" "")
                   (if is-active (number-to-string volume) "")))
