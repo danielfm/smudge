@@ -66,7 +66,7 @@
     map)
   "Keymap for Spotify remote mode.")
 
-(define-minor-mode spotify-remote-mode
+(define-minor-mode global-spotify-remote-mode
   "Toggles Spotify Remote mode.
 A positive prefix argument enables the mode, any other prefix
 argument disables it. From Lisp, argument omitted or nil enables
@@ -78,9 +78,10 @@ See commands \\[spotify-toggle-repeating] and
 \\[spotify-toggle-shuffling]."
   :group 'spotify
   :init-value nil
+  :global t
   :keymap spotify-mode-map
   (let ((s `(,spotify-title-bar-separator (:eval (spotify-player-status-text)))))
-    (if spotify-remote-mode
+    (if global-spotify-remote-mode
         (progn
           (spotify-start-player-status-timer)
           (cond ((or (eq spotify-status-location 'modeline) (not (display-graphic-p)))
@@ -117,14 +118,6 @@ See commands \\[spotify-toggle-repeating] and
               'keymap spotify-remote-player-status-map
               'help-echo "mouse-1: Show Spotify.el menu"
               'mouse-face 'mode-line-highlight))
-
-(defun turn-on-spotify-remote-mode ()
-  "Turn the `spotify-remote-mode' on in the current buffer."
-  (spotify-remote-mode 1))
-
-(define-globalized-minor-mode global-spotify-remote-mode
-  spotify-remote-mode turn-on-spotify-remote-mode
-  :group 'spotify)
 
 (provide 'spotify-remote)
 ;;; spotify-remote.el ends here

@@ -152,24 +152,24 @@ Prompt for the NAME and whether it should be made PUBLIC."
 
 (easy-menu-add-item nil '("Tools")
   '("Spotify"
-    ["Play/Pause"     spotify-toggle-play    :active spotify-remote-mode]
-    ["Previous Track" spotify-previous-track :active spotify-remote-mode]
-    ["Next Track"     spotify-next-track     :active spotify-remote-mode]
+    ["Play/Pause"     spotify-toggle-play    :active global-spotify-remote-mode]
+    ["Previous Track" spotify-previous-track :active global-spotify-remote-mode]
+    ["Next Track"     spotify-next-track     :active global-spotify-remote-mode]
     "--"
-    ["Select Device"  spotify-select-device      :active spotify-remote-mode]
-    ["Mute/Unmute"    spotify-volume-mute-unmute :active spotify-remote-mode]
+    ["Select Device"  spotify-select-device      :active global-spotify-remote-mode]
+    ["Mute/Unmute"    spotify-volume-mute-unmute :active global-spotify-remote-mode]
     "--"
-    ["Shuffle" spotify-toggle-shuffle :active spotify-remote-mode]
-    ["Repeat"  spotify-toggle-repeat  :active spotify-remote-mode]
+    ["Shuffle" spotify-toggle-shuffle :active global-spotify-remote-mode]
+    ["Repeat"  spotify-toggle-repeat  :active global-spotify-remote-mode]
     "--"
-    ["Search Tracks..."    spotify-track-search       :active spotify-remote-mode]
-    ["Featured Playlists"  spotify-featured-playlists :active spotify-remote-mode]
-    ["My Playlists"        spotify-my-playlists       :active spotify-remote-mode]
-    ["User Playlists..."   spotify-user-playlists     :active spotify-remote-mode]
-    ["Search Playlists..." spotify-playlist-search    :active spotify-remote-mode]
-    ["Create Playlist..."  spotify-create-playlist    :active spotify-remote-mode]
+    ["Search Tracks..."    spotify-track-search       :active global-spotify-remote-mode]
+    ["Featured Playlists"  spotify-featured-playlists :active global-spotify-remote-mode]
+    ["My Playlists"        spotify-my-playlists       :active global-spotify-remote-mode]
+    ["User Playlists..."   spotify-user-playlists     :active global-spotify-remote-mode]
+    ["Search Playlists..." spotify-playlist-search    :active global-spotify-remote-mode]
+    ["Create Playlist..."  spotify-create-playlist    :active global-spotify-remote-mode]
     "--"
-    ["Spotify Remote Mode" spotify-remote-mode :style toggle :selected spotify-remote-mode]))
+    ["Spotify Remote Mode" global-spotify-remote-mode :style toggle :selected global-spotify-remote-mode]))
 
 (defun spotify-remote-popup-menu ()
   "Popup menu when in spotify-remote-mode."
