@@ -82,7 +82,7 @@ globally relevant."
 (defconst spotify-api-endpoint     "https://api.spotify.com/v1")
 (defconst spotify-oauth2-auth-url  "https://accounts.spotify.com/authorize")
 (defconst spotify-oauth2-token-url "https://accounts.spotify.com/api/token")
-(defconst spotify-oauth2-scopes    "playlist-read-private playlist-modify-public playlist-modify-private user-read-private user-read-playback-state user-modify-playback-state user-read-playback-state user-read-recently-played")
+(defconst spotify-oauth2-scopes    "playlist-read-private playlist-read-collaborative playlist-modify-public playlist-modify-private user-read-private user-read-playback-state user-modify-playback-state user-read-playback-state user-read-recently-played")
 (defconst spotify-oauth2-callback  (concat "http://localhost:" spotify-oauth2-callback-port "/spotify-callback"))
 
 (defun spotify-httpd-stop ()
