@@ -32,6 +32,8 @@
 (defvar *spotify-oauth2-ts*    nil
   "Unix timestamp in which the OAuth2 token was retrieved.
 This is used to manually refresh the token when it's about to expire.")
+(defvar *spotify-oauth2-token-file* "~/.emacs.d/.cache/spotify/token"
+	"Location where the OAuth2 token is serialized.")
 
 (defcustom spotify-oauth2-client-id ""
   "The unique identifier for your application.
@@ -152,32 +154,66 @@ that runs a local httpd for code -> token exchange."
    client-secret
    (spotify-oauth2-request-authorization
     auth-url client-id scope state redirect-uri)
-   redirect-uri))
+		redirect-uri))
+
+(defun spotify-serialize-token ()
+	"Save OAuth2 token to file."
+	(and
+		(not (null *spotify-oauth2-token-file*))
+		(not (null *spotify-oauth2-token*))
+		(progn
+			(delete-file *spotify-oauth2-token-file*)
+			(make-empty-file *spotify-oauth2-token-file*)
+			t)
+		(with-temp-file *spotify-oauth2-token-file*
+			(prin1 `(,*spotify-oauth2-token* ,*spotify-oauth2-ts*) (current-buffer)))))
+
+(defun spotify-deserialize-token ()
+	"Read OAuth2 token from file."
+	(and
+		(file-exists-p *spotify-oauth2-token-file*)
+		(with-temp-buffer
+			(insert-file-contents *spotify-oauth2-token-file*)
+			(if (= 0 (buffer-size (current-buffer)))
+				nil
+				(progn
+					(goto-char (point-min))
+					(pcase-let ((`(,spotify-oauth2-token ,spotify-oauth2-ts) (read (current-buffer))))
+						(setq *spotify-oauth2-token* spotify-oauth2-token)
+						(setq *spotify-oauth2-ts* spotify-oauth2-ts)))))))
+
+(defun spotify-persist-token (token now)
+	"Persist TOKEN and current time NOW to disk and set in memory too."
+  (setq *spotify-oauth2-token* token)
+  (setq *spotify-oauth2-ts* now)
+	(spotify-serialize-token))
 
 ;; Do not rely on the auto-refresh logic from oauth2.el, which seems broken for async requests
 (defun spotify-oauth2-token ()
-  "Retrieve the Oauth2 access token that must be used to interact with the Spotify API."
+  "Retrieve the Oauth2 access token used to interact with the Spotify API.
+Use the first available token in order of: memory, disk, retrieve from API via
+OAuth2 protocol.  Refresh if expired."
   (let ((now (string-to-number (format-time-string "%s"))))
-    (if (null *spotify-oauth2-token*)
-        (let ((token (spotify-oauth2-auth spotify-oauth2-auth-url
-                                  spotify-oauth2-token-url
-                                  spotify-oauth2-client-id
-                                  spotify-oauth2-client-secret
-                                  spotify-oauth2-scopes
-                                  nil
-                                  spotify-oauth2-callback)))
-          (setq *spotify-oauth2-token* token)
-          (setq *spotify-oauth2-ts* now)
-          (if (null token)
-              (user-error "OAuth2 authentication failed")
-            token))
+    (if (null (or *spotify-oauth2-token* (spotify-deserialize-token)))
+      (let ((token (spotify-oauth2-auth spotify-oauth2-auth-url
+                     spotify-oauth2-token-url
+                     spotify-oauth2-client-id
+                     spotify-oauth2-client-secret
+                     spotify-oauth2-scopes
+                     nil
+                     spotify-oauth2-callback)))
+				(spotify-persist-token token now)
+        (if (null token)
+          (user-error "OAuth2 authentication failed")
+          token))
+			;; Spotify tokens appear to expire in 3600 seconds (60 min). We renew
+			;; at 3000 (50 min) to play it safe
       (if (> now (+ *spotify-oauth2-ts* 3000))
-          (let ((token (oauth2-refresh-access *spotify-oauth2-token*)))
-            (setq *spotify-oauth2-token* token)
-            (setq *spotify-oauth2-ts* now)
-            (if (null token)
-                (user-error "Could not refresh OAuth2 token")
-              token))
+        (let ((token (oauth2-refresh-access *spotify-oauth2-token*)))
+					(spotify-persist-token token now)
+          (if (null token)
+            (user-error "Could not refresh OAuth2 token")
+            token))
         *spotify-oauth2-token*))))
 
 (defun spotify-api-call-async (method uri &optional data callback is-retry)
