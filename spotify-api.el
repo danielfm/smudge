@@ -10,6 +10,7 @@
 ;;; Code:
 
 (require 'simple-httpd)
+(require 'request)
 
 ;; Due to an issue related to compilation and the way oauth2 uses defadvice
 ;; (including a FIXME as of 0.1.1), this declaration exists to prevent
@@ -216,39 +217,25 @@ OAuth2 protocol.  Refresh if expired."
             token))
         *spotify-oauth2-token*))))
 
-(defun spotify-api-call-async (method uri &optional data callback is-retry)
+(defun spotify-api-call-async (method uri &optional data callback)
   "Make a request to the given Spotify service endpoint URI via METHOD.
 Call CALLBACK with the parsed JSON response."
-  (oauth2-url-retrieve
-   (spotify-oauth2-token)
-   (concat spotify-api-endpoint uri)
-   (lambda (_)
-     (toggle-enable-multibyte-characters t)
-     (goto-char (point-min))
-     (condition-case _
-         (when (search-forward-regexp "^$" nil t)
-           (let* ((json-object-type 'hash-table)
-                  (json-array-type 'list)
-                  (json-key-type 'symbol)
-                  (json (json-read))
-                  (error-json (gethash 'error json)))
-             (kill-buffer)
-
-             ;; Retries the request when the token expires and gets refreshed
-             (if (and (hash-table-p error-json)
-                      (eq 401 (gethash 'status error-json))
-                      (not is-retry))
-                 (spotify-api-call-async method uri data callback t)
-               (when callback (funcall callback json)))))
-
-       ;; Handle empty responses
-       (end-of-file
-        (kill-buffer)
-        (when callback (funcall callback nil)))))
-   nil
-   method
-   (or data "")
-   '(("Content-Type" . "application/json"))))
+	(request (concat spotify-api-endpoint uri)
+		:headers `(("Authorization" .
+								 ,(format "Bearer %s" (oauth2-token-access-token (spotify-oauth2-token))))
+								("Accept" . "application/json")
+								("Content-Type" . "application/json"))
+		:type method
+		:parser (lambda ()
+							(let ((json-object-type 'hash-table)
+										 (json-array-type 'list)
+										 (json-key-type 'symbol))
+								(json-read)))
+		:encoding 'utf-8
+		:data data
+		:success (cl-function
+							 (lambda (&key response &allow-other-keys)
+								 (when callback (funcall callback (request-response-data response)))))))
 
 (defun spotify-current-user (callback)
   "Call CALLBACK with the currently logged in user."
