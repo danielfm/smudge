@@ -231,7 +231,8 @@ Call CALLBACK with the parsed JSON response."
 							(let ((json-object-type 'hash-table)
 										 (json-array-type 'list)
 										 (json-key-type 'symbol))
-								(json-read)))
+								(when (> (buffer-size) 0)
+									(json-read))))
 		:encoding 'utf-8
 		:data data
 		:success (cl-function
