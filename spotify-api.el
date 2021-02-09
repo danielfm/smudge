@@ -224,7 +224,8 @@ Call CALLBACK with the parsed JSON response."
 		:headers `(("Authorization" .
 								 ,(format "Bearer %s" (oauth2-token-access-token (spotify-oauth2-token))))
 								("Accept" . "application/json")
-								("Content-Type" . "application/json"))
+								("Content-Type" . "application/json")
+								("Content-Length" . ,(length data)))
 		:type method
 		:parser (lambda ()
 							(let ((json-object-type 'hash-table)
