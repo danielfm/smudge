@@ -310,6 +310,8 @@ COLS is a vector of column descriptors."
 				(setq spotify-artwork-fetch-count 0)
 				(setq line-spacing 10)
 				(message "Fetching tracks...")
+				;; in case the fetch chokes somehow, don't lock up all of emacs forever
+				(run-at-time "3 sec" nil (lambda () (setq inhibit-redisplay nil)))
 				(setq inhibit-redisplay t))
 			(setq tabulated-list-printer #'tabulated-list-print-entry))
     (spotify-track-search-set-list-format)
