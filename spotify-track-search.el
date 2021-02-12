@@ -253,7 +253,11 @@ COLS is a vector of column descriptors."
 						(save-excursion
 							(goto-char beg)
 							(delete-char 1)
-							(insert-image img)))
+							(insert-image img)
+							;; Ever so slightly faster than calling `put-text-property' twice.
+							(add-text-properties
+								beg (point)
+								`(tabulated-list-id ,id tabulated-list-entry ,cols))))
 					(setq spotify-artwork-fetch-count (1+ spotify-artwork-fetch-count))
 					(when (= spotify-artwork-fetch-count spotify-artwork-fetch-target-count)
 						;; Undocumented function. Could be dangerous if there's a bug
@@ -267,11 +271,7 @@ COLS is a vector of column descriptors."
 			;; don't print the URL column
       (dotimes (n (- ncols 1))
         (setq x (tabulated-list-print-col (+ 1 n) (aref cols (+ 1 n)) x))))
-    (insert ?\n)
-    ;; Ever so slightly faster than calling `put-text-property' twice.
-    (add-text-properties
-			beg (point)
-			`(tabulated-list-id ,id tabulated-list-entry ,cols))))
+    (insert ?\n)))
 
 (defun spotify-track-search-print (songs page)
   "Append SONGS to the PAGE of track view."
