@@ -15,6 +15,11 @@
 (defvar spotify-query)
 (defvar spotify-selected-album)
 (defvar spotify-recently-played)
+(defvar spotify-artwork-fetch-target-count 0)
+(defvar spotify-artwork-fetch-count 0)
+
+(defcustom spotify-show-artwork t
+	"Whether to show album/playlist artwork in search results.")
 
 (defvar spotify-track-search-mode-map
   (let ((map (make-sparse-keymap)))
@@ -199,19 +204,74 @@ Default to sortin tracks by number when listing the tracks from an album."
     (when (not (bound-and-true-p spotify-selected-playlist))
       (setq tabulated-list-sort-key `("#" . nil)))
     (setq tabulated-list-format
-          (vconcat (vector `("#" 3 ,(lambda (row-1 row-2)
-                                      (< (+ (* 100 (spotify-get-disc-number (car row-1)))
-                                            (spotify-get-track-number (car row-1)))
-                                         (+ (* 100 (spotify-get-disc-number (car row-2)))
-                                            (spotify-get-track-number (car row-2))))) :right-align t)
-                           `("Track Name" ,default-width t)
-                           `("Artist" ,default-width t)
-                           `("Album" ,default-width t)
-                           `("Time" 8 (lambda (row-1 row-2)
+      (vconcat (vector `("" ,(if spotify-show-artwork 4 0))
+								       `("#" 3 ,(lambda (row-1 row-2)
+																				 (< (+ (* 100 (spotify-get-disc-number (car row-1)))
+																							(spotify-get-track-number (car row-1)))
+																					 (+ (* 100 (spotify-get-disc-number (car row-2)))
+                                             (spotify-get-track-number (car row-2))))) :right-align t)
+                       `("Track Name" ,default-width t)
+                       `("Artist" ,default-width t)
+                       `("Album" ,default-width t)
+                       `("Time" 8 (lambda (row-1 row-2)
                                         (< (spotify-get-track-duration (car row-1))
                                            (spotify-get-track-duration (car row-2))))))
                    (when (not (bound-and-true-p spotify-selected-album))
                      (vector '("Popularity" 14 t)))))))
+
+(defun spotify-track-tabulated-list-print-entry (id cols)
+  "Insert a Tabulated List entry at point.
+This implementation asynchronously inserts album images in the
+table buffer after the rows are printed.  It reimplements most of
+the `tabulated-list-print-entry' function but depends on a url
+being the first column's data.  It does not print that url in the
+column.  ID is a Lisp object identifying the entry to print, and
+COLS is a vector of column descriptors."
+  (let ((beg   (point))
+				 (x     (max tabulated-list-padding 0))
+				 (ncols (length tabulated-list-format))
+				 (inhibit-read-only t)
+				 (cb (current-buffer)))
+    (if (> tabulated-list-padding 0)
+			(insert (make-string x ?\s)))
+		(insert-image (create-image "~/Downloads/temp.jpg"))
+		(url-retrieve (aref cols 0)
+			(lambda (status)
+				(let ((img (create-image
+										 (progn
+											(goto-char (point-min))
+											(re-search-forward "^$")
+											(forward-char)
+											(delete-region (point) (point-min))
+											 (buffer-substring-no-properties (point-min) (point-max)))
+										 nil t)))
+					;; kill the image data buffer. We have the data now
+					(kill-buffer)
+					;; switch to the table buffer
+					(set-buffer cb)
+					(let ((inhibit-read-only t))
+						(save-excursion
+							(goto-char beg)
+							(delete-char 1)
+							(insert-image img)))
+					(setq spotify-artwork-fetch-count (1+ spotify-artwork-fetch-count))
+					(when (= spotify-artwork-fetch-count spotify-artwork-fetch-target-count)
+						;; Undocumented function. Could be dangerous if there's a bug
+						(setq inhibit-redisplay nil)))))
+		(insert ?\s)
+    (let ((tabulated-list--near-rows ; Bind it if not bound yet (Bug#25506).
+						(or (bound-and-true-p tabulated-list--near-rows)
+              (list (or (tabulated-list-get-entry (point-at-bol 0))
+                      cols)
+                cols))))
+			;; don't print the URL column
+      (dotimes (n (- ncols 1))
+        (setq x (tabulated-list-print-col (+ 1 n) (aref cols (+ 1 n)) x))))
+    (insert ?\n)
+    ;; Ever so slightly faster than calling `put-text-property' twice.
+    (add-text-properties
+			beg (point)
+			`(tabulated-list-id ,id tabulated-list-entry ,cols))))
 
 (defun spotify-track-search-print (songs page)
   "Append SONGS to the PAGE of track view."
@@ -223,7 +283,8 @@ Default to sortin tracks by number when listing the tracks from an album."
                (album-name (spotify-get-item-name album))
                (album (spotify-get-track-album song)))
           (push (list song
-                      (vector (number-to-string (spotify-get-track-number song))
+                  (vector 		(if spotify-show-artwork (gethash 'url (nth 2 (gethash 'images (gethash 'album song)))) "")
+										          (number-to-string (spotify-get-track-number song))
                               (spotify-get-item-name song)
                               (cons artist-name
                                     (list 'face 'link
@@ -240,7 +301,17 @@ Default to sortin tracks by number when listing the tracks from an album."
                               (spotify-get-track-duration-formatted song)
                               (when (not (bound-and-true-p spotify-selected-album))
                                 (spotify-popularity-bar (spotify-get-track-popularity song)))))
-                entries))))
+            entries))))
+		(if spotify-show-artwork
+			(progn
+				(setq tabulated-list-printer #'spotify-track-tabulated-list-print-entry)
+				(setq spotify-artwork-fetch-target-count
+					(+ (length songs) (if (eq 1 page) 0 (count-lines (point-min) (point-max)))))
+				(setq spotify-artwork-fetch-count 0)
+				(setq line-spacing 10)
+				(message "Fetching tracks...")
+				(setq inhibit-redisplay t))
+			(setq tabulated-list-printer #'tabulated-list-print-entry))
     (spotify-track-search-set-list-format)
     (when (eq 1 page) (setq-local tabulated-list-entries nil))
     (setq-local tabulated-list-entries (append tabulated-list-entries (nreverse entries)))
