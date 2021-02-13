@@ -160,27 +160,6 @@ This corresponds to the current REPEATING state."
       spotify-player-status-repeating-text
     spotify-player-status-not-repeating-text))
 
-(defun spotify-replace-player-status-flags (metadata)
-  "Compose the playing status string to be displayed in the player-status from METADATA."
-  (let* ((player-status spotify-player-status-format)
-         (duration-format "%m:%02s")
-         (json-object-type 'hash-table)
-         (json-key-type 'symbol)
-         (json (condition-case nil
-                   (json-read-from-string metadata)
-                 (error (spotify-update-player-status "")
-                        nil))))
-    (when json
-      (progn
-        (setq player-status (replace-regexp-in-string "%a" (truncate-string-to-width (gethash 'artist json) spotify-player-status-truncate-length 0 nil "...") player-status))
-        (setq player-status (replace-regexp-in-string "%t" (truncate-string-to-width (gethash 'name json) spotify-player-status-truncate-length 0 nil "...") player-status))
-        (setq player-status (replace-regexp-in-string "%n" (number-to-string (gethash 'track_number json)) player-status))
-        (setq player-status (replace-regexp-in-string "%l" (format-seconds duration-format (/ (gethash 'duration json) 1000)) player-status))
-        (setq player-status (replace-regexp-in-string "%s" (spotify-player-status-shuffling-indicator (gethash 'player_shuffling json)) player-status))
-        (setq player-status (replace-regexp-in-string "%r" (spotify-player-status-repeating-indicator (gethash 'player_repeating json)) player-status))
-        (setq player-status (replace-regexp-in-string "%p" (spotify-player-status-playing-indicator (gethash 'player_state json)) player-status))
-        (spotify-update-player-status player-status)))))
-
 (defun spotify-start-player-status-timer ()
   "Start the timer that will update the mode line according to the Spotify player status."
   (spotify-stop-player-status-timer)
