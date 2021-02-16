@@ -65,7 +65,7 @@ Return the resulting status string."
 
 (defun spotify-apple-set-player-status-from-process-output (process output)
   "Set the OUTPUT of the player status PROCESS to the player status."
-  (spotify-replace-player-status-flags output)
+  (spotify-update-metadata output)
   (with-current-buffer (process-buffer process)
     (delete-region (point-min) (point-max))))
 

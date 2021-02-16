@@ -118,6 +118,39 @@ player status is updated can be configured via the
 [1] No proper support for this in D-Bus implementation for GNU/Linux  
 [2] This feature uses Spotify Connect and requires a premium subscription
 
+Users of the package hydra may find the code below more convenient for managing
+Spotify:
+
+````el
+;; A hydra for controlling spotify.
+(defhydra hydra-spotify (:hint nil)
+    "
+^Search^                  ^Control^               ^Manage^
+^^^^^^^^-----------------------------------------------------------------
+_t_: Track               _SPC_: Play/Pause        _+_: Volume up
+_m_: My Playlists        _n_  : Next Track        _-_: Volume down
+_f_: Featured Playlists  _p_  : Previous Track    _x_: Mute
+_u_: User Playlists      _r_  : Repeat            _d_: Device
+^^                       _s_  : Shuffle           _q_: Quit
+"
+    ("t" spotify-track-search :exit t)
+    ("m" spotify-my-playlists :exit t)
+    ("f" spotify-featured-playlists :exit t)
+    ("u" spotify-user-playlists :exit t)
+    ("SPC" spotify-toggle-play :exit nil)
+    ("n" spotify-next-track :exit nil)
+    ("p" spotify-previous-track :exit nil)
+    ("r" spotify-toggle-repeat :exit nil)
+    ("s" spotify-toggle-shuffle :exit nil)
+    ("+" spotify-volume-up :exit nil)
+    ("-" spotify-volume-down :exit nil)
+    ("x" spotify-volume-mute-unmute :exit nil)
+    ("d" spotify-select-device :exit nil)
+    ("q" quit-window "quit" :color blue))
+
+(bind-key "a" #'hydra-spotify/body some-map)
+````
+
 #### Customizing The Player Status
 
 The information displayed in the player status can be customized by setting the
