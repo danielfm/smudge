@@ -29,9 +29,6 @@
     map)
   "Local keymap for `spotify-playlist-search-mode' buffers.")
 
-;; Enables the `global-spotify-remote-mode' in the track search buffer
-(add-hook 'spotify-playlist-search-mode-hook 'global-spotify-remote-mode)
-
 (define-derived-mode spotify-playlist-search-mode tabulated-list-mode "Playlist-Search"
   "Major mode for displaying the playlists returned by a Spotify search.")
 
