@@ -10,6 +10,7 @@
 ;;; Code:
 
 (require 'simple-httpd)
+(require 'request)
 
 ;; Due to an issue related to compilation and the way oauth2 uses defadvice
 ;; (including a FIXME as of 0.1.1), this declaration exists to prevent
@@ -32,6 +33,8 @@
 (defvar *spotify-oauth2-ts*    nil
   "Unix timestamp in which the OAuth2 token was retrieved.
 This is used to manually refresh the token when it's about to expire.")
+(defvar *spotify-oauth2-token-file* "~/.emacs.d/.cache/spotify/token"
+	"Location where the OAuth2 token is serialized.")
 
 (defcustom spotify-oauth2-client-id ""
   "The unique identifier for your application.
@@ -152,67 +155,89 @@ that runs a local httpd for code -> token exchange."
    client-secret
    (spotify-oauth2-request-authorization
     auth-url client-id scope state redirect-uri)
-   redirect-uri))
+		redirect-uri))
+
+(defun spotify-serialize-token ()
+	"Save OAuth2 token to file."
+	(and
+		(not (null *spotify-oauth2-token-file*))
+		(not (null *spotify-oauth2-token*))
+		(progn
+			(delete-file *spotify-oauth2-token-file*)
+			(make-empty-file *spotify-oauth2-token-file*)
+			t)
+		(with-temp-file *spotify-oauth2-token-file*
+			(prin1 `(,*spotify-oauth2-token* ,*spotify-oauth2-ts*) (current-buffer)))))
+
+(defun spotify-deserialize-token ()
+	"Read OAuth2 token from file."
+	(and
+		(file-exists-p *spotify-oauth2-token-file*)
+		(with-temp-buffer
+			(insert-file-contents *spotify-oauth2-token-file*)
+			(if (= 0 (buffer-size (current-buffer)))
+				nil
+				(progn
+					(goto-char (point-min))
+					(pcase-let ((`(,spotify-oauth2-token ,spotify-oauth2-ts) (read (current-buffer))))
+						(setq *spotify-oauth2-token* spotify-oauth2-token)
+						(setq *spotify-oauth2-ts* spotify-oauth2-ts)))))))
+
+(defun spotify-persist-token (token now)
+	"Persist TOKEN and current time NOW to disk and set in memory too."
+  (setq *spotify-oauth2-token* token)
+  (setq *spotify-oauth2-ts* now)
+	(spotify-serialize-token))
 
 ;; Do not rely on the auto-refresh logic from oauth2.el, which seems broken for async requests
 (defun spotify-oauth2-token ()
-  "Retrieve the Oauth2 access token that must be used to interact with the Spotify API."
+  "Retrieve the Oauth2 access token used to interact with the Spotify API.
+Use the first available token in order of: memory, disk, retrieve from API via
+OAuth2 protocol.  Refresh if expired."
   (let ((now (string-to-number (format-time-string "%s"))))
-    (if (null *spotify-oauth2-token*)
-        (let ((token (spotify-oauth2-auth spotify-oauth2-auth-url
-                                  spotify-oauth2-token-url
-                                  spotify-oauth2-client-id
-                                  spotify-oauth2-client-secret
-                                  spotify-oauth2-scopes
-                                  nil
-                                  spotify-oauth2-callback)))
-          (setq *spotify-oauth2-token* token)
-          (setq *spotify-oauth2-ts* now)
-          (if (null token)
-              (user-error "OAuth2 authentication failed")
-            token))
+    (if (null (or *spotify-oauth2-token* (spotify-deserialize-token)))
+      (let ((token (spotify-oauth2-auth spotify-oauth2-auth-url
+                     spotify-oauth2-token-url
+                     spotify-oauth2-client-id
+                     spotify-oauth2-client-secret
+                     spotify-oauth2-scopes
+                     nil
+                     spotify-oauth2-callback)))
+				(spotify-persist-token token now)
+        (if (null token)
+          (user-error "OAuth2 authentication failed")
+          token))
+			;; Spotify tokens appear to expire in 3600 seconds (60 min). We renew
+			;; at 3000 (50 min) to play it safe
       (if (> now (+ *spotify-oauth2-ts* 3000))
-          (let ((token (oauth2-refresh-access *spotify-oauth2-token*)))
-            (setq *spotify-oauth2-token* token)
-            (setq *spotify-oauth2-ts* now)
-            (if (null token)
-                (user-error "Could not refresh OAuth2 token")
-              token))
+        (let ((token (oauth2-refresh-access *spotify-oauth2-token*)))
+					(spotify-persist-token token now)
+          (if (null token)
+            (user-error "Could not refresh OAuth2 token")
+            token))
         *spotify-oauth2-token*))))
 
-(defun spotify-api-call-async (method uri &optional data callback is-retry)
+(defun spotify-api-call-async (method uri &optional data callback)
   "Make a request to the given Spotify service endpoint URI via METHOD.
 Call CALLBACK with the parsed JSON response."
-  (oauth2-url-retrieve
-   (spotify-oauth2-token)
-   (concat spotify-api-endpoint uri)
-   (lambda (_)
-     (toggle-enable-multibyte-characters t)
-     (goto-char (point-min))
-     (condition-case _
-         (when (search-forward-regexp "^$" nil t)
-           (let* ((json-object-type 'hash-table)
-                  (json-array-type 'list)
-                  (json-key-type 'symbol)
-                  (json (json-read))
-                  (error-json (gethash 'error json)))
-             (kill-buffer)
-
-             ;; Retries the request when the token expires and gets refreshed
-             (if (and (hash-table-p error-json)
-                      (eq 401 (gethash 'status error-json))
-                      (not is-retry))
-                 (spotify-api-call-async method uri data callback t)
-               (when callback (funcall callback json)))))
-
-       ;; Handle empty responses
-       (end-of-file
-        (kill-buffer)
-        (when callback (funcall callback nil)))))
-   nil
-   method
-   (or data "")
-   '(("Content-Type" . "application/json"))))
+	(request (concat spotify-api-endpoint uri)
+		:headers `(("Authorization" .
+								 ,(format "Bearer %s" (oauth2-token-access-token (spotify-oauth2-token))))
+								("Accept" . "application/json")
+								("Content-Type" . "application/json")
+								("Content-Length" . ,(length data)))
+		:type method
+		:parser (lambda ()
+							(let ((json-object-type 'hash-table)
+										 (json-array-type 'list)
+										 (json-key-type 'symbol))
+								(when (> (buffer-size) 0)
+									(json-read))))
+		:encoding 'utf-8
+		:data data
+		:success (cl-function
+							 (lambda (&key response &allow-other-keys)
+								 (when callback (funcall callback (request-response-data response)))))))
 
 (defun spotify-current-user (callback)
   "Call CALLBACK with the currently logged in user."

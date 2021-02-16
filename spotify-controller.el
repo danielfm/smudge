@@ -101,6 +101,9 @@ The following placeholders are supported:
 (defvar spotify-player-status ""
   "The text to be displayed in the global mode line or title bar.")
 
+(defvar spotify-player-metadata nil
+  "The metadata about the currently playing track.")
+
 (defun spotify-apply (suffix &rest args)
   "Simple facility to emulate multimethods.
 Apply SUFFIX to spotify-prefixed functions, applying ARGS."
@@ -108,6 +111,28 @@ Apply SUFFIX to spotify-prefixed functions, applying ARGS."
     (apply (intern func-name) args)
     (unless (string= suffix "player-status")
       (spotify-player-status))))
+
+(defun spotify-update-metadata (metadata)
+  "Compose the playing status string to be displayed in the mode-line from METADATA."
+  (let* ((player-status spotify-player-status-format)
+         (duration-format "%m:%02s")
+         (json-object-type 'hash-table)
+         (json-key-type 'symbol)
+         (json (condition-case nil
+                   (json-read-from-string metadata)
+                 (error (spotify-update-player-status "")
+                        nil))))
+    (when json
+      (progn
+        (setq player-status (replace-regexp-in-string "%a" (truncate-string-to-width (gethash 'artist json) spotify-player-status-truncate-length 0 nil "...") player-status))
+        (setq player-status (replace-regexp-in-string "%t" (truncate-string-to-width (gethash 'name json) spotify-player-status-truncate-length 0 nil "...") player-status))
+        (setq player-status (replace-regexp-in-string "%n" (number-to-string (gethash 'track_number json)) player-status))
+        (setq player-status (replace-regexp-in-string "%l" (format-seconds duration-format (/ (gethash 'duration json) 1000)) player-status))
+        (setq player-status (replace-regexp-in-string "%s" (spotify-player-status-shuffling-indicator (gethash 'player_shuffling json)) player-status))
+        (setq player-status (replace-regexp-in-string "%r" (spotify-player-status-repeating-indicator (gethash 'player_repeating json)) player-status))
+        (setq player-status (replace-regexp-in-string "%p" (spotify-player-status-playing-indicator (gethash 'player_state json)) player-status))
+        (spotify-update-player-status player-status)
+        (setq spotify-player-metadata json)))))
 
 (defun spotify-update-player-status (str)
   "Set the given STR to the player status, prefixed with the mode identifier."
@@ -134,27 +159,6 @@ This corresponds to the current REPEATING state."
   (if (eq repeating t)
       spotify-player-status-repeating-text
     spotify-player-status-not-repeating-text))
-
-(defun spotify-replace-player-status-flags (metadata)
-  "Compose the playing status string to be displayed in the player-status from METADATA."
-  (let* ((player-status spotify-player-status-format)
-         (duration-format "%m:%02s")
-         (json-object-type 'hash-table)
-         (json-key-type 'symbol)
-         (json (condition-case nil
-                   (json-read-from-string metadata)
-                 (error (spotify-update-player-status "")
-                        nil))))
-    (when json
-      (progn
-        (setq player-status (replace-regexp-in-string "%a" (truncate-string-to-width (gethash 'artist json) spotify-player-status-truncate-length 0 nil "...") player-status))
-        (setq player-status (replace-regexp-in-string "%t" (truncate-string-to-width (gethash 'name json) spotify-player-status-truncate-length 0 nil "...") player-status))
-        (setq player-status (replace-regexp-in-string "%n" (number-to-string (gethash 'track_number json)) player-status))
-        (setq player-status (replace-regexp-in-string "%l" (format-seconds duration-format (/ (gethash 'duration json) 1000)) player-status))
-        (setq player-status (replace-regexp-in-string "%s" (spotify-player-status-shuffling-indicator (gethash 'player_shuffling json)) player-status))
-        (setq player-status (replace-regexp-in-string "%r" (spotify-player-status-repeating-indicator (gethash 'player_repeating json)) player-status))
-        (setq player-status (replace-regexp-in-string "%p" (spotify-player-status-playing-indicator (gethash 'player_state json)) player-status))
-        (spotify-update-player-status player-status)))))
 
 (defun spotify-start-player-status-timer ()
   "Start the timer that will update the mode line according to the Spotify player status."
