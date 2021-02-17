@@ -110,7 +110,7 @@ Apply SUFFIX to spotify-prefixed functions, applying ARGS."
   (let ((func-name (format "spotify-%s-%s" spotify-transport suffix)))
     (apply (intern func-name) args)
     (unless (string= suffix "player-status")
-      (spotify-player-status))))
+      (run-at-time 1 nil 'spotify-player-status))))
 
 (defun spotify-update-metadata (metadata)
   "Compose the playing status string to be displayed in the mode-line from METADATA."
@@ -160,20 +160,20 @@ This corresponds to the current REPEATING state."
       spotify-player-status-repeating-text
     spotify-player-status-not-repeating-text))
 
+(defun spotify-timerp ()
+	"Predicate to determine if the spotify refresh timer is running."
+  (and (boundp 'spotify-timer) (timerp spotify-timer)))
+
 (defun spotify-start-player-status-timer ()
-  "Start the timer that will update the mode line according to the Spotify player status."
-  (spotify-stop-player-status-timer)
-  (when (> spotify-player-status-refresh-interval 0)
-    (let ((first-run (format "%d sec" spotify-player-status-refresh-interval))
-          (interval spotify-player-status-refresh-interval))
-      (setq spotify-timer
-            (run-at-time first-run interval 'spotify-player-status)))))
+ "Start the timer that will update the mode line according to the Spotify player status."
+ (when (and (not (spotify-timerp)) (> spotify-player-status-refresh-interval 0))
+     (setq spotify-timer
+       (run-at-time t spotify-player-status-refresh-interval 'spotify-player-status))))
 
 (defun spotify-stop-player-status-timer ()
-  "Stop the timer that is updating the mode line."
-  (when (and (boundp 'spotify-timer) (timerp spotify-timer))
-    (cancel-timer spotify-timer))
-  (spotify-player-status))
+ "Stop the timer that is updating the mode line."
+ (when (spotify-timerp)
+   (cancel-timer spotify-timer)))
 
 (defun spotify-player-status ()
   "Update the mode line to display the current Spotify player status."

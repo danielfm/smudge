@@ -81,7 +81,7 @@ At this point, the client ID and the client secret are available, so set those v
 
 ### Remote Minor Mode
 
-Whenever you enable the `spotify-remote-mode` minor mode you get the following
+Whenever you enable the `global-spotify-remote-mode` minor mode you get the following
 key bindings:
 
 | Key                  | Function                     | Description                                |
@@ -211,7 +211,7 @@ key bindings:
 [1] D-Bus implementation for GNU/Linux do not support passing the context, so
 only the track under the cursor will be played
 
-The resulting buffer loads the `spotify-remote-mode` by default.
+The resulting buffer loads the `global-spotify-remote-mode` by default.
 
 **Tip:** In order to customize the number of items fetched per page, just change
 the variable `spotify-api-search-limit`:
@@ -277,7 +277,7 @@ bindings in the resulting buffer:
 | <kbd>u</kbd>     | Unfollows the current playlist                                      |
 | <kbd>M-RET</kbd> | Plays the track under the cursor in the context of the playlist [1] |
 
-Both buffers load the `spotify-remote-mode` by default.
+Both buffers load the `global-spotify-remote-mode` by default.
 
 [1] D-Bus implementation for GNU/Linux do not support passing the context, so
 only the track under the cursor will be played
