@@ -1,4 +1,4 @@
-;;; spotemacs-connect.el --- Control remote and local Spotify instances  -*- lexical-binding: t; -*-
+;;; spotify-client-connect.el --- Control remote and local Spotify instances  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2019 Jason Dufair
 
@@ -6,16 +6,16 @@
 
 ;; This library uses the "connect" APIs to control transport functions of remote and local instances
 ;; of Spotify clients.  It implements a set of multimethod-like functions that are dispatched in
-;; spotemacs-controller.el.
+;; spotify-client-controller.el.
 
-;; spotemacs-connect.el --- spotemacs.el transport for the Spotify Connect API
+;; spotify-client-connect.el --- spotify-client.el transport for the Spotify Connect API
 
 ;;; Code:
 
-(require 'spotemacs-api)
-(require 'spotemacs-controller)
+(require 'spotify-client-api)
+(require 'spotify-client-controller)
 
-(defun spotemacs-connect-player-status ()
+(defun spotify-client-connect-player-status ()
   "Get the player status of the currently playing device, if any.
 Returns a JSON string in the format:
 {
@@ -27,7 +27,7 @@ Returns a JSON string in the format:
   \"player_shuffling\": \"t\",
   \"player_repeating\": \"context\"
 }"
-  (spotemacs-api-get-player-status
+  (spotify-client-api-get-player-status
    (lambda (status)
      (if-let* ((status status)
                (track (gethash 'item status))
@@ -48,12 +48,12 @@ Returns a JSON string in the format:
                       (format "\"player_repeating\":%s"
                               (if (string= (gethash 'repeat_state status) "off") "false" "true"))
                       "}")))
-         (spotemacs-controller-update-metadata json)
-       (spotemacs-controller-update-metadata nil)))))
+         (spotify-client-controller-update-metadata json)
+       (spotify-client-controller-update-metadata nil)))))
 
-(defmacro spotemacs-connect-when-device-active (body)
+(defmacro spotify-client-connect-when-device-active (body)
   "Evaluate BODY when there is an active device, otherwise show an error message."
-  `(spotemacs-api-device-list
+  `(spotify-client-api-device-list
     (lambda (json)
       (if-let ((json json)
                (devices (gethash 'devices json))
@@ -61,106 +61,106 @@ Returns a JSON string in the format:
           (progn ,body)
         (message "No active device")))))
 
-(defun spotemacs-connect-player-play-track (uri &optional context)
+(defun spotify-client-connect-player-play-track (uri &optional context)
   "Play a track URI via Spotify Connect in an optional CONTEXT."
-  (spotemacs-connect-when-device-active
-   (spotemacs-api-play nil uri context)))
+  (spotify-client-connect-when-device-active
+   (spotify-client-api-play nil uri context)))
 
-(defun spotemacs-connect-player-pause ()
+(defun spotify-client-connect-player-pause ()
   "Pause the currently playing track."
-  (spotemacs-connect-when-device-active
-   (spotemacs-api-pause)))
+  (spotify-client-connect-when-device-active
+   (spotify-client-api-pause)))
 
-(defun spotemacs-connect-player-toggle-play ()
+(defun spotify-client-connect-player-toggle-play ()
   "Toggle playing status of current track."
-  (spotemacs-connect-when-device-active
-   (spotemacs-api-get-player-status
+  (spotify-client-connect-when-device-active
+   (spotify-client-api-get-player-status
     (lambda (status)
       (if status
           (if (not (eq (gethash 'is_playing status) :json-false))
-              (spotemacs-api-pause)
-            (spotemacs-api-play)))))))
+              (spotify-client-api-pause)
+            (spotify-client-api-play)))))))
 
-(defun spotemacs-connect-player-next-track ()
+(defun spotify-client-connect-player-next-track ()
   "Skip to the next track."
-  (spotemacs-connect-when-device-active
-   (spotemacs-api-next)))
+  (spotify-client-connect-when-device-active
+   (spotify-client-api-next)))
 
-(defun spotemacs-connect-player-previous-track ()
+(defun spotify-client-connect-player-previous-track ()
   "Skip to the previous track."
-  (spotemacs-connect-when-device-active
-   (spotemacs-api-previous)))
+  (spotify-client-connect-when-device-active
+   (spotify-client-api-previous)))
 
-(defun spotemacs-connect-volume-up ()
+(defun spotify-client-connect-volume-up ()
   "Turn up the volume on the actively playing device."
-  (spotemacs-connect-when-device-active
-   (spotemacs-api-get-player-status
+  (spotify-client-connect-when-device-active
+   (spotify-client-api-get-player-status
     (lambda (status)
-      (let ((new-volume (min (+ (spotemacs-connect-get-volume status) 10) 100)))
-        (spotemacs-api-set-volume
-         (spotemacs-connect-get-device-id status)
+      (let ((new-volume (min (+ (spotify-client-connect-get-volume status) 10) 100)))
+        (spotify-client-api-set-volume
+         (spotify-client-connect-get-device-id status)
          new-volume
          (lambda (_)
            (message "Volume increased to %d%%" new-volume))))))))
 
-(defun spotemacs-connect-volume-down ()
+(defun spotify-client-connect-volume-down ()
   "Turn down the volume (for what?) on the actively playing device."
-  (spotemacs-connect-when-device-active
-   (spotemacs-api-get-player-status
+  (spotify-client-connect-when-device-active
+   (spotify-client-api-get-player-status
     (lambda (status)
-      (let ((new-volume (max (- (spotemacs-connect-get-volume status) 10) 0)))
-        (spotemacs-api-set-volume
-         (spotemacs-connect-get-device-id status)
+      (let ((new-volume (max (- (spotify-client-connect-get-volume status) 10) 0)))
+        (spotify-client-api-set-volume
+         (spotify-client-connect-get-device-id status)
          new-volume
          (lambda (_)
            (message "Volume decreased to %d%%" new-volume))))))))
 
-(defun spotemacs-connect-volume-mute-unmute ()
+(defun spotify-client-connect-volume-mute-unmute ()
   "Mute/unmute the volume on the actively playing device by setting the volume to 0."
-  (spotemacs-connect-when-device-active
-   (spotemacs-api-get-player-status
+  (spotify-client-connect-when-device-active
+   (spotify-client-api-get-player-status
     (lambda (status)
-      (let ((volume (spotemacs-connect-get-volume status)))
+      (let ((volume (spotify-client-connect-get-volume status)))
         (if (eq volume 0)
-            (spotemacs-api-set-volume (spotemacs-connect-get-device-id status) 100
+            (spotify-client-api-set-volume (spotify-client-connect-get-device-id status) 100
                                     (lambda (_) (message "Volume unmuted")))
-          (spotemacs-api-set-volume (spotemacs-connect-get-device-id status) 0
+          (spotify-client-api-set-volume (spotify-client-connect-get-device-id status) 0
                                   (lambda (_) (message "Volume muted")))))))))
 
-(defun spotemacs-connect-toggle-repeat ()
+(defun spotify-client-connect-toggle-repeat ()
   "Toggle repeat for the current track."
-  (spotemacs-connect-when-device-active
-   (spotemacs-api-get-player-status
+  (spotify-client-connect-when-device-active
+   (spotify-client-api-get-player-status
     (lambda (status)
-      (spotemacs-api-repeat (if (spotemacs-connect--is-repeating status) "off" "context"))))))
+      (spotify-client-api-repeat (if (spotify-client-connect--is-repeating status) "off" "context"))))))
 
-(defun spotemacs-connect-toggle-shuffle ()
+(defun spotify-client-connect-toggle-shuffle ()
   "Toggle shuffle for the current track."
-  (spotemacs-connect-when-device-active
-   (spotemacs-api-get-player-status
+  (spotify-client-connect-when-device-active
+   (spotify-client-api-get-player-status
     (lambda (status)
-      (spotemacs-api-shuffle (if (spotemacs-connect--is-shuffling status) "false" "true"))))))
+      (spotify-client-api-shuffle (if (spotify-client-connect--is-shuffling status) "false" "true"))))))
 
-(defun spotemacs-connect-get-device-id (player-status)
+(defun spotify-client-connect-get-device-id (player-status)
   "Get the id if from PLAYER-STATUS of the currently playing device, if any."
   (when player-status
     (gethash 'id (gethash 'device player-status))))
 
-(defun spotemacs-connect-get-volume (player-status)
+(defun spotify-client-connect-get-volume (player-status)
   "Get the volume from PLAYER-STATUS of the currently playing device, if any."
   (when player-status
     (gethash 'volume_percent (gethash 'device player-status))))
 
-(defun spotemacs-connect--is-shuffling (player-status)
+(defun spotify-client-connect--is-shuffling (player-status)
   "Business logic for shuffling state of PLAYER-STATUS."
   (and player-status
          (not (eq (gethash 'shuffle_state player-status) :json-false))))
 
-(defun spotemacs-connect--is-repeating (player-status)
+(defun spotify-client-connect--is-repeating (player-status)
   "Business logic for repeat state of PLAYER-STATUS."
   (string= (gethash 'repeat_state player-status) "context"))
 
 
-(provide 'spotemacs-connect)
+(provide 'spotify-client-connect)
 
-;;; spotemacs-connect.el ends here
+;;; spotify-client-connect.el ends here
