@@ -80,7 +80,7 @@ globally relevant."
 (defvar *spotify-client-api-oauth2-ts*    nil
   "Unix timestamp in which the OAuth2 token was retrieved.
 This is used to manually refresh the token when it's about to expire.")
-(defvar *spotify-client-api-oauth2-token-directory* "~/.emacs.d/.cache/spotify"
+(defvar *spotify-client-api-oauth2-token-directory* (concat (file-name-as-directory user-emacs-directory) ".local/cache/spotify")
 	"Directory where the OAuth2 token is serialized.")
 (defvar *spotify-client-api-oauth2-token-file* (concat *spotify-client-api-oauth2-token-directory* "/" "token")
 	"Location where the OAuth2 token is serialized.")
@@ -169,7 +169,7 @@ function that runs a local httpd for code -> token exchange."
 		(not (null *spotify-client-api-oauth2-token*))
 		(progn
 			(delete-file *spotify-client-api-oauth2-token-file*)
-			(make-empty-file *spotify-client-api-oauth2-token-file*)
+			(make-empty-file *spotify-client-api-oauth2-token-file* t)
 			t)
 		(with-temp-file *spotify-client-api-oauth2-token-file*
 			(prin1 `(,*spotify-client-api-oauth2-token* ,*spotify-client-api-oauth2-ts*) (current-buffer)))))
