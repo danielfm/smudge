@@ -4,6 +4,7 @@
 
 ;; Keywords: multimedia, music, spotify, spotify-client
 ;; Package: spotify-client
+;; Package-Requires: ((emacs "24.4") (simple-httpd "1.5") (oauth2 "0.14") (request "0.3"))
 
 ;;; Commentary:
 
