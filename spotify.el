@@ -72,6 +72,19 @@
       (spotify-recently-played-tracks-update 1))))
 
 ;;;###autoload
+(defun spotify-save-current-track ()
+  "Save the currently playing track."
+  (interactive)
+  (spotify-api-get-player-status
+   (lambda (status)
+     (let ((trackid (gethash 'id (gethash 'item status))))
+       (spotify-api-call-async
+        "PUT"
+        (format  "/me/tracks?ids=%s" trackid)
+        nil
+        nil)))))
+
+;;;###autoload
 (defun spotify-my-playlists ()
   "Display the current user's playlists."
   (interactive)
