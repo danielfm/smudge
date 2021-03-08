@@ -231,7 +231,7 @@ Default to sortin tracks by number when listing the tracks from an album."
                               (cons album-name
                                     (list 'face 'link
                                           'follow-link t
-                                          'action `(lambda (_) (spotify-client-album-tracks ,album))
+                                          'action `(lambda (_) (spotify-client-track-album-tracks ,album))
                                           'help-echo (format "Show %s's tracks" album-name)
 					                                'artist-or-album 'album))
                               (spotify-client-api-get-track-duration-formatted song)

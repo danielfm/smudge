@@ -11,18 +11,7 @@
 
 (require 'simple-httpd)
 (require 'request)
-
-;; Due to an issue related to compilation and the way oauth2 uses defadvice
-;; (including a FIXME as of 0.1.1), this declaration exists to prevent
-;; compiler warnings.
-(eval-when-compile
-  (defvar url-http-method nil)
-  (defvar url-http-data nil)
-  (defvar url-http-extra-headers nil)
-  (defvar oauth--token-data nil)
-  (defvar url-callback-function nil)
-  (defvar url-callback-arguments nil)
-  (require 'oauth2))
+(require 'oauth2)
 
 (defcustom spotify-client-oauth2-client-id ""
   "The unique identifier for your application.
@@ -80,7 +69,7 @@ globally relevant."
 (defvar *spotify-client-api-oauth2-ts*    nil
   "Unix timestamp in which the OAuth2 token was retrieved.
 This is used to manually refresh the token when it's about to expire.")
-(defvar *spotify-client-api-oauth2-token-directory* "~/.emacs.d/.cache/spotify"
+(defvar *spotify-client-api-oauth2-token-directory* (concat (file-name-as-directory user-emacs-directory) ".local/cache/spotify")
 	"Directory where the OAuth2 token is serialized.")
 (defvar *spotify-client-api-oauth2-token-file* (concat *spotify-client-api-oauth2-token-directory* "/" "token")
 	"Location where the OAuth2 token is serialized.")
@@ -169,7 +158,7 @@ function that runs a local httpd for code -> token exchange."
 		(not (null *spotify-client-api-oauth2-token*))
 		(progn
 			(delete-file *spotify-client-api-oauth2-token-file*)
-			(make-empty-file *spotify-client-api-oauth2-token-file*)
+			(make-empty-file *spotify-client-api-oauth2-token-file* t)
 			t)
 		(with-temp-file *spotify-client-api-oauth2-token-file*
 			(prin1 `(,*spotify-client-api-oauth2-token* ,*spotify-client-api-oauth2-ts*) (current-buffer)))))
