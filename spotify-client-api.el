@@ -69,7 +69,7 @@ globally relevant."
 (defvar *spotify-client-api-oauth2-ts*    nil
   "Unix timestamp in which the OAuth2 token was retrieved.
 This is used to manually refresh the token when it's about to expire.")
-(defvar *spotify-client-api-oauth2-token-directory* (concat (file-name-as-directory user-emacs-directory) ".local/cache/spotify")
+(defvar *spotify-client-api-oauth2-token-directory* (concat (file-name-as-directory user-emacs-directory) ".cache/spotify")
 	"Directory where the OAuth2 token is serialized.")
 (defvar *spotify-client-api-oauth2-token-file* (concat *spotify-client-api-oauth2-token-directory* "/" "token")
 	"Location where the OAuth2 token is serialized.")
