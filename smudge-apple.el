@@ -1,27 +1,27 @@
-;;; spotify-client-apple.el --- Apple-specific code for spotify-client  -*- lexical-binding: t; -*-
+;;; smudge-apple.el --- Apple-specific code for Smudge  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2014-2019 Daniel Fernandes Martins
 
 ;;; Commentary:
 
 ;; This library handles controlling Spotify via Applescript commands.  It implements a set of
-;; multimethod-like functions that are dispatched in spotify-client-controller.el.
+;; multimethod-like functions that are dispatched in smudge-controller.el.
 
 ;;; Code:
 
-(require 'spotify-client-controller)
+(require 'smudge-controller)
 
-(defvar spotify-client-apple-player-status-script)
-(defvar spotify-client-apple-player-status-script-file)
+(defvar smudge-apple-player-status-script)
+(defvar smudge-apple-player-status-script-file)
 
-(defcustom spotify-client-osascript-bin-path "/usr/bin/osascript"
+(defcustom smudge-osascript-bin-path "/usr/bin/osascript"
   "Path to `osascript' binary."
-  :group 'spotify-client
+  :group 'smudge
   :type 'string)
 
 ; Do not change this unless you know what you're doing
-(setq spotify-client-apple-player-status-script "
-# Source: https://github.com/andrehaveman/spotify-client-node-applescript
+(setq smudge-apple-player-status-script "
+# Source: https://github.com/andrehaveman/smudge-node-applescript
 on escape_quotes(string_to_escape)
   set AppleScript's text item delimiters to the \"\\\"\"
   set the item_list to every text item of string_to_escape
@@ -47,77 +47,77 @@ end tell
 ")
 
 ;; Write script to a temp file
-(setq spotify-client-apple-player-status-script-file
-      (make-temp-file "spotify-client.el" nil nil spotify-client-apple-player-status-script))
+(setq smudge-apple-player-status-script-file
+      (make-temp-file "smudge.el" nil nil smudge-apple-player-status-script))
 
-(defun spotify-client-apple-command-line (cmd)
+(defun smudge-apple-command-line (cmd)
   "Return a command line prefix for any Spotify command CMD."
   (format "%s -e %s"
-          spotify-client-osascript-bin-path
+          smudge-osascript-bin-path
           (shell-quote-argument (format "tell application \"Spotify\" to %s" cmd))))
 
-(defun spotify-client-apple-command (cmd)
+(defun smudge-apple-command (cmd)
   "Send the given CMD to the Spotify client.
 Return the resulting status string."
   (replace-regexp-in-string
    "\n$" ""
-   (shell-command-to-string (spotify-client-apple-command-line cmd))))
+   (shell-command-to-string (smudge-apple-command-line cmd))))
 
-(defun spotify-client-apple-set-player-status-from-process-output (process output)
+(defun smudge-apple-set-player-status-from-process-output (process output)
   "Set the OUTPUT of the player status PROCESS to the player status."
-  (spotify-client-controller-update-metadata output)
+  (smudge-controller-update-metadata output)
   (with-current-buffer (process-buffer process)
     (delete-region (point-min) (point-max))))
 
-(defun spotify-client-apple-player-status ()
+(defun smudge-apple-player-status ()
   "Update the player status to display the current Spotify player status."
-  (let* ((process-name "spotify-client-player-status")
+  (let* ((process-name "smudge-player-status")
          (process-status (process-status process-name))
-         (cmd (format "%s %s" spotify-client-osascript-bin-path spotify-client-apple-player-status-script-file)))
+         (cmd (format "%s %s" smudge-osascript-bin-path smudge-apple-player-status-script-file)))
     (when (not process-status)
       (let* ((default-directory user-emacs-directory)
-             (process (start-process-shell-command process-name "*spotify-client-player-status*" cmd)))
-        (set-process-filter process 'spotify-client-apple-set-player-status-from-process-output)))))
+             (process (start-process-shell-command process-name "*smudge-player-status*" cmd)))
+        (set-process-filter process 'smudge-apple-set-player-status-from-process-output)))))
 
-(defun spotify-client-apple-player-state ()
+(defun smudge-apple-player-state ()
   "Dispatch get player state."
-  (spotify-client-apple-command "get player state"))
+  (smudge-apple-command "get player state"))
 
-(defun spotify-client-apple-player-toggle-play ()
+(defun smudge-apple-player-toggle-play ()
   "Dispatch playpause."
-  (spotify-client-apple-command "playpause"))
+  (smudge-apple-command "playpause"))
 
-(defun spotify-client-apple-player-next-track ()
+(defun smudge-apple-player-next-track ()
   "Dispatch next track."
-  (spotify-client-apple-command "next track"))
+  (smudge-apple-command "next track"))
 
-(defun spotify-client-apple-player-previous-track ()
+(defun smudge-apple-player-previous-track ()
   "Dispatch previous track."
-  (spotify-client-apple-command "previous track"))
+  (smudge-apple-command "previous track"))
 
-(defun spotify-client-apple-volume-up ()
+(defun smudge-apple-volume-up ()
   "Send message about inability to change volume."
   (message "Changing the volume not supported by the Spotify AppleScript client"))
 
-(defun spotify-client-apple-volume-down ()
+(defun smudge-apple-volume-down ()
   "Send message about inability to change volume."
   (message "Changing the volume not supported by the Spotify AppleScript client"))
 
-(defun spotify-client-apple-volume-mute-unmute ()
+(defun smudge-apple-volume-mute-unmute ()
   "Send message about inability to change volume."
   (message "Changing the volume not supported by the Spotify AppleScript client"))
 
-(defun spotify-client-apple-toggle-repeat ()
+(defun smudge-apple-toggle-repeat ()
   "Dispatch repeat command."
-  (spotify-client-apple-command "set repeating to not repeating"))
+  (smudge-apple-command "set repeating to not repeating"))
 
-(defun spotify-client-apple-toggle-shuffle ()
+(defun smudge-apple-toggle-shuffle ()
   "Dispatch shuffle command."
-  (spotify-client-apple-command "set shuffling to not shuffling"))
+  (smudge-apple-command "set shuffling to not shuffling"))
 
-(defun spotify-client-apple-player-play-track (track-id context-id)
+(defun smudge-apple-player-play-track (track-id context-id)
   "Dispatch message about playing TRACK-ID in CONTEXT-ID."
-  (spotify-client-apple-command (format "play track \"%s\" in context \"%s\"" track-id context-id)))
+  (smudge-apple-command (format "play track \"%s\" in context \"%s\"" track-id context-id)))
 
-(provide 'spotify-client-apple)
-;;; spotify-client-apple.el ends here
+(provide 'smudge-apple)
+;;; smudge-apple.el ends here
