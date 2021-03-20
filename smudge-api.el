@@ -74,6 +74,9 @@ This is used to manually refresh the token when it's about to expire.")
 (defvar *smudge-api-oauth2-token-file* (concat *smudge-api-oauth2-token-directory* "/" "token")
 	"Location where the OAuth2 token is serialized.")
 
+(defvar *smudge-is-authorizing* nil
+	"Whether smudge is in the process of obtaining an OAuth2 token.")
+
 (defconst smudge-api-endpoint     "https://api.spotify.com/v1")
 (defconst smudge-api-oauth2-auth-url  "https://accounts.spotify.com/authorize")
 (defconst smudge-api-oauth2-token-url "https://accounts.spotify.com/api/token")
@@ -115,23 +118,26 @@ provider.  Return the code provided by the service.  Replaces functionality from
 built-in OAuth lib by running a local httpd to parse the code instead of asking
 the user to paste it in."
   (let ((is-already-running (smudge-api-start-httpd))
-        (oauth-code nil))
+         (oauth-code nil))
     (defservlet* smudge-api-callback text/html (code)
       (setq oauth-code code)
       (insert "<p>Smudge is connected. You can return to Emacs</p>
 <script type='text/javascript'>setTimeout(function () {close()}, 1500);</script>"))
-    (browse-url (concat auth-url
-                        (if (string-match-p "\?" auth-url) "&" "?")
-                        "client_id=" (url-hexify-string client-id)
-                        "&response_type=code"
-                        "&redirect_uri=" (url-hexify-string (or redirect-uri "urn:ietf:wg:oauth:2.0:oob"))
-                        (if scope (concat "&scope=" (url-hexify-string scope)) "")
-                        (if state (concat "&state=" (url-hexify-string state)) "")))
+    (browse-url-with-browser-kind
+			'external
+			(concat auth-url
+				(if (string-match-p "\?" auth-url) "&" "?")
+				"client_id=" (url-hexify-string client-id)
+				"&response_type=code"
+				"&redirect_uri=" (url-hexify-string (or redirect-uri "urn:ietf:wg:oauth:2.0:oob"))
+				(if scope (concat "&scope=" (url-hexify-string scope)) "")
+				(if state (concat "&state=" (url-hexify-string state)) "")))
     (let ((retries 0))
       (while (and (not oauth-code)
-                  (< retries 5))
-        (sleep-for 0 500)
+               (< retries 10))
+        (sleep-for 1)
         (setq retries (1+ retries))))
+		(message "smudge connected")
     (unless is-already-running
       (run-at-time 1 nil #'smudge-api-httpd-stop))
     oauth-code))
@@ -187,29 +193,38 @@ function that runs a local httpd for code -> token exchange."
 (defun smudge-api-oauth2-token ()
   "Retrieve the Oauth2 access token used to interact with the Spotify API.
 Use the first available token in order of: memory, disk, retrieve from API via
-OAuth2 protocol.  Refresh if expired."
+OAuth2 protocol.  Refresh if expired.  Spin and wait if already in the process
+of fetching via another call to this method."
   (let ((now (string-to-number (format-time-string "%s"))))
     (if (null (or *smudge-api-oauth2-token* (smudge-api-deserialize-token)))
-      (let ((token (smudge-api-oauth2-auth smudge-api-oauth2-auth-url
-                     smudge-api-oauth2-token-url
-                     smudge-oauth2-client-id
-                     smudge-oauth2-client-secret
-                     smudge-api-oauth2-scopes
-                     nil
-                     smudge-api-oauth2-callback)))
-				(smudge-api-persist-token token now)
-        (if (null token)
-          (user-error "OAuth2 authentication failed")
-          token))
+			(if *smudge-is-authorizing*
+				(progn
+					(while (not *smudge-api-oauth2-token*)
+						(message "sleeping")
+						(sleep-for 1))
+					*smudge-api-oauth2-token*)
+				(setq *smudge-is-authorizing* t)
+				(let ((token (smudge-api-oauth2-auth smudge-api-oauth2-auth-url
+											 smudge-api-oauth2-token-url
+											 smudge-oauth2-client-id
+											 smudge-oauth2-client-secret
+											 smudge-api-oauth2-scopes
+											 nil
+											 smudge-api-oauth2-callback)))
+					(setq *smudge-is-authorizing* nil)
+					(smudge-api-persist-token token now)
+					(if (null token)
+						(user-error "OAuth2 authentication failed")
+						token)))
 			;; Spotify tokens appear to expire in 3600 seconds (60 min). We renew
 			;; at 3000 (50 min) to play it safe
-      (if (> now (+ *smudge-api-oauth2-ts* 3000))
-        (let ((token (oauth2-refresh-access *smudge-api-oauth2-token*)))
+			(if (> now (+ *smudge-api-oauth2-ts* 3000))
+				(let ((token (oauth2-refresh-access *smudge-api-oauth2-token*)))
 					(smudge-api-persist-token token now)
-          (if (null token)
-            (user-error "Could not refresh OAuth2 token")
-            token))
-        *smudge-api-oauth2-token*))))
+					(if (null token)
+						(user-error "Could not refresh OAuth2 token")
+						token))
+				*smudge-api-oauth2-token*))))
 
 (defun smudge-api-call-async (method uri &optional data callback)
   "Make a request to the given Spotify service endpoint URI via METHOD.
