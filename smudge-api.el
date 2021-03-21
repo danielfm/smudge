@@ -147,13 +147,14 @@ the user to paste it in."
 Send CLIENT-ID and CLIENT-SECRET to AUTH-URL.  Get code and send to TOKEN-URL.
 Replaces functionality from built-in OAuth lib to call smudge-specific
 function that runs a local httpd for code -> token exchange."
-  (oauth2-request-access
-   token-url
-   client-id
-   client-secret
-   (smudge-api-oauth2-request-authorization
-    auth-url client-id scope state redirect-uri)
-		redirect-uri))
+  (let ((inhibit-message t))
+		(oauth2-request-access
+						token-url
+						client-id
+						client-secret
+						(smudge-api-oauth2-request-authorization
+							auth-url client-id scope state redirect-uri)
+						redirect-uri)))
 
 (defun smudge-api-serialize-token ()
 	"Save OAuth2 token to file."
