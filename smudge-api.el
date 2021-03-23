@@ -220,7 +220,8 @@ of fetching via another call to this method."
 			;; Spotify tokens appear to expire in 3600 seconds (60 min). We renew
 			;; at 3000 (50 min) to play it safe
 			(if (> now (+ *smudge-api-oauth2-ts* 3000))
-				(let ((token (oauth2-refresh-access *smudge-api-oauth2-token*)))
+				(let* ((inhibit-message t)
+								(token (oauth2-refresh-access *smudge-api-oauth2-token*)))
 					(smudge-api-persist-token token now)
 					(if (null token)
 						(user-error "Could not refresh OAuth2 token")
