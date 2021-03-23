@@ -123,8 +123,7 @@ the user to paste it in."
       (setq oauth-code code)
       (insert "<p>Smudge is connected. You can return to Emacs</p>
 <script type='text/javascript'>setTimeout(function () {close()}, 1500);</script>"))
-    (browse-url-with-browser-kind
-			'external
+    (browse-url-default-browser
 			(concat auth-url
 				(if (string-match-p "\?" auth-url) "&" "?")
 				"client_id=" (url-hexify-string client-id)
