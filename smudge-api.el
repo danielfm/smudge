@@ -54,7 +54,7 @@ globally relevant."
   :group 'smudge
   :type 'string)
 
-(defcustom smudge-oauth2-callback-endpoint "/smudge-callback"
+(defcustom smudge-oauth2-callback-endpoint "/smudge-api-callback"
   "The endpoint for the httpd to listen on for the OAuth2 callback."
   :group 'smudge
   :type 'string)
@@ -81,7 +81,7 @@ This is used to manually refresh the token when it's about to expire.")
 (defconst smudge-api-oauth2-auth-url  "https://accounts.spotify.com/authorize")
 (defconst smudge-api-oauth2-token-url "https://accounts.spotify.com/api/token")
 (defconst smudge-api-oauth2-scopes    "playlist-read-private playlist-read-collaborative playlist-modify-public playlist-modify-private user-read-private user-read-playback-state user-modify-playback-state user-read-playback-state user-read-recently-played")
-(defconst smudge-api-oauth2-callback  (concat "http://localhost:" smudge-oauth2-callback-port "/smudge-api-callback"))
+(defconst smudge-api-oauth2-callback  (concat "http://localhost:" smudge-oauth2-callback-port smudge-oauth2-callback-endpoint))
 
 (defun smudge-api-httpd-stop ()
   "Workaround due to bug in simple-httpd '#httpd-stop."
