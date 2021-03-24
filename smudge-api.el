@@ -84,7 +84,7 @@ This is used to manually refresh the token when it's about to expire.")
 (defconst smudge-api-oauth2-callback  (concat "http://localhost:" smudge-oauth2-callback-port smudge-oauth2-callback-endpoint))
 
 (defun smudge-api-httpd-stop ()
-  "Workaround due to bug in simple-httpd '#httpd-stop."
+  "Workaround due to bug in simple-httpd `httpd-stop`."
   (dolist
       (process
        (seq-filter
