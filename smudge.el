@@ -8,6 +8,8 @@
 ;; Version: 1.0.0
 ;; Homepage: https://github.com/danielfm/smudge
 
+;; SPDX-License-Identifier:  GPL-3.0-or-later
+
 ;;; Commentary:
 
 ;; This mode requires at least GNU Emacs 24.4

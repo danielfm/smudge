@@ -2,6 +2,8 @@
 
 ;; Copyright (C) 2014-2018 Daniel Fernandes Martins
 
+;; SPDX-License-Identifier:  GPL-3.0-or-later
+
 ;;; Commentary:
 
 ;; This library implements UI and a major mode for searching and acting on Spotify playlists.

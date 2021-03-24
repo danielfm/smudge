@@ -2,6 +2,8 @@
 
 ;; Copyright (C) 2014-2019 Daniel Fernandes Martins
 
+;; SPDX-License-Identifier:  GPL-3.0-or-later
+
 ;;; Commentary:
 
 ;; This library is the interface to the Spotify RESTful API.  It also does some custom handling of

@@ -2,6 +2,8 @@
 
 ;; Copyright (C) 2014-2019 Daniel Fernandes Martins
 
+;; SPDX-License-Identifier:  GPL-3.0-or-later
+
 ;;; Commentary:
 
 ;; This library defines a set of commands for controlling an instance of a Spotify client.  The

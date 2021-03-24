@@ -2,6 +2,8 @@
 
 ;; Copyright (C) 2014-2019 Daniel Fernandes Martins
 
+;; SPDX-License-Identifier:  GPL-3.0-or-later
+
 ;;; Commentary:
 
 ;; This library handles controlling Spotify via the D-Bus interface.  It implements a set of
