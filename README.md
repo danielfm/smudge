@@ -24,7 +24,7 @@ Connect feature.
 
 ## Installation
 
-(Requires Emacs 24.4+)
+(Requires Emacs 27.1+)
 
 `package.el` is the built-in package manager in Emacs.
 
