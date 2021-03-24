@@ -180,9 +180,9 @@ function that runs a local httpd for code -> token exchange."
 	 nil
        (progn
 	 (goto-char (point-min))
-	 (pcase-let ((`(,smudge-api-oauth2-token ,smudge-api-oauth2-ts) (read (current-buffer))))
-	   (setq smudge-api-oauth2-token smudge-api-oauth2-token)
-	   (setq smudge-api-oauth2-ts smudge-api-oauth2-ts)))))))
+	 (pcase-let ((`(,token ,ts) (read (current-buffer))))
+	   (setq smudge-api-oauth2-token token)
+	   (setq smudge-api-oauth2-ts ts)))))))
 
 (defun smudge-api-persist-token (token now)
   "Persist TOKEN and current time NOW to disk and set in memory too."
@@ -191,7 +191,7 @@ function that runs a local httpd for code -> token exchange."
   (smudge-api-serialize-token))
 
 ;; Do not rely on the auto-refresh logic from oauth2.el, which seems broken for async requests
-(defun smudge-api-oauth2-token ()
+(defun smudge-api-retrieve-oauth2-token ()
   "Retrieve the Oauth2 access token used to interact with the Spotify API.
 Use the first available token in order of: memory, disk, retrieve from API via
 OAuth2 protocol.  Refresh if expired.  Spin and wait if already in the process
@@ -233,7 +233,7 @@ of fetching via another call to this method."
 Call CALLBACK with the parsed JSON response."
   (request (concat smudge-api-endpoint uri)
     :headers `(("Authorization" .
-		,(format "Bearer %s" (oauth2-token-access-token (smudge-api-oauth2-token))))
+		,(format "Bearer %s" (oauth2-token-access-token (smudge-api-retrieve-oauth2-token))))
 	       ("Accept" . "application/json")
 	       ("Content-Type" . "application/json")
 	       ("Content-Length" . ,(length data)))
