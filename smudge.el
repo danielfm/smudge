@@ -1,10 +1,12 @@
-;;; smudge.el --- control the Spotify app from Emacs  -*- lexical-binding: t; -*-
+;;; smudge.el --- Control the Spotify app  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2014-2018 Daniel Fernandes Martins
 
 ;; Keywords: multimedia, music, spotify, smudge
 ;; Package: smudge
-;; Package-Requires: ((emacs "24.4") (simple-httpd "1.5") (oauth2 "0.16") (request "0.3"))
+;; Package-Requires: ((emacs "24.4") (simple-httpd "1.5") (request "0.3"))
+;; Version: 1.0.0
+;; Homepage: https://github.com/danielfm/smudge
 
 ;;; Commentary:
 
