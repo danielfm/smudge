@@ -69,6 +69,7 @@
     map)
   "Keymap for Smudge remote mode.")
 
+;;;###autoload
 (define-minor-mode global-smudge-remote-mode
   "Toggles Smudge Remote mode.
 A positive prefix argument enables the mode, any other prefix
@@ -111,7 +112,7 @@ See commands \\[smudge-toggle-repeating] and
 
 (defun smudge-remote-update-player-status (str)
   "Set the given STR to the player status, prefixed with the mode identifier."
-  (when (not (string= str smudge-controller-player-status))
+  (unless (string= str smudge-controller-player-status)
     (setq smudge-controller-player-status str)
     (force-mode-line-update t)))
 
