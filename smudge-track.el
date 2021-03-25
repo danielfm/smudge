@@ -168,7 +168,7 @@ without a context."
     (smudge-api-album-tracks
      album
      page
-     (lambda (json)
+			(lambda (json)
        (if-let ((items (smudge-api-get-items json)))
            (with-current-buffer buffer
              (setq-local smudge-current-page page)
@@ -229,31 +229,34 @@ COLS is a vector of column descriptors."
 				 (x     (max tabulated-list-padding 0))
 				 (ncols (length tabulated-list-format))
 				 (inhibit-read-only t)
-				 (cb (current-buffer)))
+				 (cb (current-buffer))
+				 (track-image-url (aref cols 0)))
     (if (> tabulated-list-padding 0)
 			(insert (make-string x ?\s)))
-		(url-retrieve (aref cols 0)
-			(lambda (status)
-				(let ((img (create-image
-										 (progn
-											 (goto-char (point-min))
-											 (re-search-forward "^$")
-											 (forward-char)
-											 (delete-region (point) (point-min))
-											 (buffer-substring-no-properties (point-min) (point-max)))
-										 nil t)))
-					;; kill the image data buffer. We have the data now
-					(kill-buffer)
-					;; switch to the table buffer
-					(set-buffer cb)
-					(let ((inhibit-read-only t))
-						(save-excursion
-							(goto-char beg)
-							(put-image img (point) "test" 'left-margin)))
-					(setq smudge-artwork-fetch-count (1+ smudge-artwork-fetch-count))
-					(when (= smudge-artwork-fetch-count smudge-artwork-fetch-target-count)
-						;; Undocumented function. Could be dangerous if there's a bug
-						(setq inhibit-redisplay nil)))))
+		(if track-image-url
+			(url-retrieve track-image-url
+				(lambda (status)
+					(let ((img (create-image
+											 (progn
+												 (goto-char (point-min))
+												 (re-search-forward "^$")
+												 (forward-char)
+												 (delete-region (point) (point-min))
+												 (buffer-substring-no-properties (point-min) (point-max)))
+											 nil t)))
+						;; kill the image data buffer. We have the data now
+						(kill-buffer)
+						;; switch to the table buffer
+						(set-buffer cb)
+						(let ((inhibit-read-only t))
+							(save-excursion
+								(goto-char beg)
+								(put-image img (point) "test" 'left-margin)))
+						(setq smudge-artwork-fetch-count (1+ smudge-artwork-fetch-count))
+						(when (= smudge-artwork-fetch-count smudge-artwork-fetch-target-count)
+							;; Undocumented function. Could be dangerous if there's a bug
+							(setq inhibit-redisplay nil)))))
+			(setq inhibit-redisplay nil))
 		(insert ?\s)
     (let ((tabulated-list--near-rows ; Bind it if not bound yet (Bug#25506).
 						(or (bound-and-true-p tabulated-list--near-rows)
@@ -267,7 +270,7 @@ COLS is a vector of column descriptors."
 		;; Ever so slightly faster than calling `put-text-property' twice.
     (add-text-properties
 			beg (point)
-			`(tabulated-list-id ,id tabulated-list-entry ,cols)))))
+			`(tabulated-list-id ,id tabulated-list-entry ,cols))))
 
 (defun smudge-track-search-print (songs page)
   "Append SONGS to the PAGE of track view."
@@ -276,13 +279,11 @@ COLS is a vector of column descriptors."
       (when (smudge-api-is-track-playable song)
         (let* ((artist-name (smudge-api-get-track-artist-name song))
 								(album (or (smudge-api-get-track-album song) smudge-selected-album))
-								(album-name (smudge-api-get-item-name album))
-								(album (smudge-api-get-track-album song)))
+								(album-name (smudge-api-get-item-name album)))
+					(message "song: %s" (json-encode song))
           (push (list song
                   (vector
-										(if smudge-show-artwork
-											(gethash 'url (nth 2 (gethash 'images (gethash 'album song))))
-											"")
+										(if smudge-show-artwork (smudge-api-get-song-art-url song) "")
 										(number-to-string (smudge-api-get-track-number song))
                     (smudge-api-get-item-name song)
                     (cons artist-name
