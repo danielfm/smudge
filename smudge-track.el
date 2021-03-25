@@ -58,7 +58,7 @@ without a context."
   (let* ((track (tabulated-list-get-id))
          (context (cond ((bound-and-true-p smudge-selected-playlist) smudge-selected-playlist)
                         ((bound-and-true-p smudge-selected-album) smudge-selected-album)
-                        (t nil))))
+                    (t nil))))
     (smudge-controller-play-track track context)))
 
 (defun smudge-track-selected-button-type ()
@@ -78,7 +78,7 @@ without a context."
   "Plays the album of the track under the cursor."
   (interactive)
   (let* ((track (tabulated-list-get-id))
-         (album (smudge-api-get-track-album track)))
+					(album (smudge-api-get-track-album track)))
     (smudge-controller-play-track track album)))
 
 (defun smudge-track-playlist-follow ()
@@ -202,7 +202,7 @@ Default to sortin tracks by number when listing the tracks from an album."
 			(setq tabulated-list-sort-key `("#" . nil)))
 		(setq tabulated-list-format
 			(vconcat (vector
-								 `("" ,(if smudge-show-artwork 4 0))
+								 `("" -1)
 								 `("#" 3 ,(lambda (row-1 row-2)
 														(< (+ (* 100 (smudge-api-get-disc-number (car row-1)))
 																 (smudge-api-get-track-number (car row-1)))
@@ -232,7 +232,6 @@ COLS is a vector of column descriptors."
 				 (cb (current-buffer)))
     (if (> tabulated-list-padding 0)
 			(insert (make-string x ?\s)))
-		(insert-image (create-image "~/Downloads/temp.jpg"))
 		(url-retrieve (aref cols 0)
 			(lambda (status)
 				(let ((img (create-image
@@ -250,12 +249,7 @@ COLS is a vector of column descriptors."
 					(let ((inhibit-read-only t))
 						(save-excursion
 							(goto-char beg)
-							(delete-char 1)
-							(insert-image img)
-							;; Ever so slightly faster than calling `put-text-property' twice.
-							(add-text-properties
-								beg (point)
-								`(tabulated-list-id ,id tabulated-list-entry ,cols))))
+							(put-image img (point) "test" 'left-margin)))
 					(setq smudge-artwork-fetch-count (1+ smudge-artwork-fetch-count))
 					(when (= smudge-artwork-fetch-count smudge-artwork-fetch-target-count)
 						;; Undocumented function. Could be dangerous if there's a bug
@@ -268,8 +262,12 @@ COLS is a vector of column descriptors."
                 cols))))
 			;; don't print the URL column
       (dotimes (n (- ncols 1))
-        (setq x (tabulated-list-print-col (+ 1 n) (aref cols (+ 1 n)) x))))
-    (insert ?\n)))
+        (setq x (tabulated-list-print-col (+ n 1) (aref cols (+ n 1)) x))))
+    (insert ?\n)
+		;; Ever so slightly faster than calling `put-text-property' twice.
+    (add-text-properties
+			beg (point)
+			`(tabulated-list-id ,id tabulated-list-entry ,cols)))))
 
 (defun smudge-track-search-print (songs page)
   "Append SONGS to the PAGE of track view."
@@ -281,7 +279,10 @@ COLS is a vector of column descriptors."
 								(album-name (smudge-api-get-item-name album))
 								(album (smudge-api-get-track-album song)))
           (push (list song
-                  (vector (if smudge-show-artwork (gethash 'url (nth 2 (gethash 'images (gethash 'album song)))) "")
+                  (vector
+										(if smudge-show-artwork
+											(gethash 'url (nth 2 (gethash 'images (gethash 'album song))))
+											"")
 										(number-to-string (smudge-api-get-track-number song))
                     (smudge-api-get-item-name song)
                     (cons artist-name
@@ -310,7 +311,9 @@ COLS is a vector of column descriptors."
 				(message "Fetching tracks...")
 				;; in case the fetch chokes somehow, don't lock up all of emacs forever
 				(run-at-time "3 sec" nil (lambda () (setq inhibit-redisplay nil)))
-				(setq inhibit-redisplay t))
+				(setq inhibit-redisplay t)
+				(setq left-margin-width 6)
+				(set-window-buffer (selected-window) (current-buffer)))
 			(setq tabulated-list-printer #'tabulated-list-print-entry))
     (smudge-track-search-set-list-format)
     (when (eq 1 page) (setq-local tabulated-list-entries nil))
