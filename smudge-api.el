@@ -347,10 +347,10 @@ Call CALLBACK with the parsed JSON response."
   (smudge-api-get-item-id (gethash 'owner json)))
 
 (defun smudge-api-get-song-art-url (song)
-	"Return the first image url for a SONG."
+	"Return the medium sized image url for a SONG."
 	(let* ((album (gethash 'album song))
 					(image (and album (nth 2 (gethash 'images album)))))
-			(and image (gethash 'url image))))
+		(and image (gethash 'url image))))
 
 (defun smudge-api-search (type query page callback)
   "Search artists, albums, tracks or playlists.
@@ -467,6 +467,15 @@ Call CALLBACK with results."
                                      nil t))
      nil
      callback)))
+
+(defun smudge-api-album (album-id callback)
+	"Call CALLBACK with info for album with ALBUM-ID."
+	(smudge-api-call-async
+     "GET"
+     (format "/albums/%s"
+                     (url-hexify-string album-id))
+     nil
+     callback))
 
 (defun smudge-api-album-tracks (album page callback)
   "Call CALLBACK with PAGE of tracks for ALBUM."

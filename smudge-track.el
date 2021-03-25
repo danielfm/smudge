@@ -166,17 +166,26 @@ without a context."
   "Fetch PAGE of of tracks for ALBUM."
   (let ((buffer (current-buffer)))
     (smudge-api-album-tracks
-     album
-     page
+			album
+			page
 			(lambda (json)
-       (if-let ((items (smudge-api-get-items json)))
-           (with-current-buffer buffer
-             (setq-local smudge-current-page page)
-             (setq-local smudge-selected-album album)
-             (pop-to-buffer buffer)
-             (smudge-track-search-print items page)
-             (message "Track view updated"))
-         (message "No more tracks"))))))
+				(if-let ((items (smudge-api-get-items json)))
+          (with-current-buffer buffer
+            (setq-local smudge-current-page page)
+            (setq-local smudge-selected-album album)
+						;; jam the album data into every song so we can extract
+						;; the artwork
+						(smudge-api-album (gethash 'id album)
+							(lambda (album-json)
+								(message "album json: %s" album-json)
+								(pop-to-buffer buffer)
+								(let ((items-with-image-url
+												(mapc (lambda (item)
+																(puthash 'album album-json item))
+													items)))
+									(smudge-track-search-print items page)
+									(message "Track view updated")))))
+					(message "No more tracks"))))))
 
 (defun smudge-track-recently-played-tracks-update (page)
   "Fetch PAGE of results for the recently played tracks."
@@ -280,7 +289,6 @@ COLS is a vector of column descriptors."
         (let* ((artist-name (smudge-api-get-track-artist-name song))
 								(album (or (smudge-api-get-track-album song) smudge-selected-album))
 								(album-name (smudge-api-get-item-name album)))
-					(message "song: %s" (json-encode song))
           (push (list song
                   (vector
 										(if smudge-show-artwork (smudge-api-get-song-art-url song) "")
