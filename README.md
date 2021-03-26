@@ -24,7 +24,7 @@ Connect feature.
 
 ## Installation
 
-(Requires Emacs 24.4+)
+(Requires Emacs 27.1+)
 
 `package.el` is the built-in package manager in Emacs.
 
@@ -94,24 +94,24 @@ At this point, the client ID and the client secret are available, so set those v
 Whenever you enable the `global-smudge-remote-mode` minor mode you get the following
 key bindings:
 
-| Key                  | Function                            | Description                                |
-|:---------------------|:------------------------------------|:-------------------------------------------|
-| <kbd>C-c . M-s</kbd> | `smudge-toggle-shuffle`     | Turn shuffle on/off [1]                    |
-| <kbd>C-c . M-r</kbd> | `smudge-toggle-repeat`      | Turn repeat on/off [1]                     |
-| <kbd>C-c . M-p</kbd> | `smudge-toggle-play`        | Play/pause                                 |
-| <kbd>C-c . M-f</kbd> | `smudge-next-track`         | Next track                                 |
-| <kbd>C-c . M-b</kbd> | `smudge-previous-track`     | Previous track                             |
-| <kbd>C-c . p m</kbd> | `smudge-my-playlists`       | Show your playlists                        |
-| <kbd>C-c . p f</kbd> | `smudge-featured-playlists` | Show the featured playlists                |
-| <kbd>C-c . p s</kbd> | `smudge-playlist-search`    | Search for playlists                       |
-| <kbd>C-c . p u</kbd> | `smudge-user-playlists`     | Show playlists for the given user          |
-| <kbd>C-c . p c</kbd> | `smudge-create-playlist`    | Create a new playlist                      |
-| <kbd>C-c . t r</kbd> | `smudge-recently-played`    | List of recently played tracks             |
-| <kbd>C-c . t s</kbd> | `smudge-track-search`       | Search for tracks                          |
-| <kbd>C-c . v u</kbd> | `smudge-volume-up`          | Increase the volume [2]                    |
-| <kbd>C-c . v d</kbd> | `smudge-volume-down`        | Decrease the volume [2]                    |
-| <kbd>C-c . v m</kbd> | `smudge-volume-mute-unmute` | Alternate the volume between 0 and 100 [2] |
-| <kbd>C-c . d</kbd>   | `smudge-select-device`      | Select a playback device [2]               |
+| Key                  | Function                               | Description                                |
+|:---------------------|:---------------------------------------|:-------------------------------------------|
+| <kbd>C-c . M-s</kbd> | `smudge-controller-toggle-shuffle`     | Turn shuffle on/off [1]                    |
+| <kbd>C-c . M-r</kbd> | `smudge-controller-toggle-repeat`      | Turn repeat on/off [1]                     |
+| <kbd>C-c . M-p</kbd> | `smudge-controller-toggle-play`        | Play/pause                                 |
+| <kbd>C-c . M-f</kbd> | `smudge-controller-next-track`         | Next track                                 |
+| <kbd>C-c . M-b</kbd> | `smudge-controller-previous-track`     | Previous track                             |
+| <kbd>C-c . p m</kbd> | `smudge-my-playlists`                  | Show your playlists                        |
+| <kbd>C-c . p f</kbd> | `smudge-featured-playlists`            | Show the featured playlists                |
+| <kbd>C-c . p s</kbd> | `smudge-playlist-search`               | Search for playlists                       |
+| <kbd>C-c . p u</kbd> | `smudge-user-playlists`                | Show playlists for the given user          |
+| <kbd>C-c . p c</kbd> | `smudge-create-playlist`               | Create a new playlist                      |
+| <kbd>C-c . t r</kbd> | `smudge-recently-played`               | List of recently played tracks             |
+| <kbd>C-c . t s</kbd> | `smudge-track-search`                  | Search for tracks                          |
+| <kbd>C-c . v u</kbd> | `smudge-controller-volume-up`          | Increase the volume [2]                    |
+| <kbd>C-c . v d</kbd> | `smudge-controller-volume-down`        | Decrease the volume [2]                    |
+| <kbd>C-c . v m</kbd> | `smudge-controller-volume-mute-unmute` | Alternate the volume between 0 and 100 [2] |
+| <kbd>C-c . d</kbd>   | `smudge-select-device`                 | Select a playback device [2]               |
 
 The current song being played by Smudge is displayed in the mode
 line along with the player status (playing, paused). The interval in which the
@@ -147,14 +147,14 @@ _u_: User Playlists      _r_  : Repeat            _d_: Device
     ("m" smudge-my-playlists :exit t)
     ("f" smudge-featured-playlists :exit t)
     ("u" smudge-user-playlists :exit t)
-    ("SPC" smudge-toggle-play :exit nil)
-    ("n" smudge-next-track :exit nil)
-    ("p" smudge-previous-track :exit nil)
-    ("r" smudge-toggle-repeat :exit nil)
-    ("s" smudge-toggle-shuffle :exit nil)
-    ("+" smudge-volume-up :exit nil)
-    ("-" smudge-volume-down :exit nil)
-    ("x" smudge-volume-mute-unmute :exit nil)
+    ("SPC" smudge-controller-toggle-play :exit nil)
+    ("n" smudge-controller-next-track :exit nil)
+    ("p" smudge-controller-previous-track :exit nil)
+    ("r" smudge-controller-toggle-repeat :exit nil)
+    ("s" smudge-controller-toggle-shuffle :exit nil)
+    ("+" smudge-controller-volume-up :exit nil)
+    ("-" smudge-controller-volume-down :exit nil)
+    ("x" smudge-controller-volume-mute-unmute :exit nil)
     ("d" smudge-select-device :exit nil)
     ("q" quit-window "quit" :color blue))
 

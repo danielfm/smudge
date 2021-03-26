@@ -2,6 +2,8 @@
 
 ;; Copyright (C) 2019 Jason Dufair
 
+;; SPDX-License-Identifier:  GPL-3.0-or-later
+
 ;;; Commentary:
 
 ;; This library implements methods, UI, and a minor mode to use the "connect" RESTful APIs to manage

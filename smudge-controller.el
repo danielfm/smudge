@@ -2,6 +2,8 @@
 
 ;; Copyright (C) 2014-2019 Daniel Fernandes Martins
 
+;; SPDX-License-Identifier:  GPL-3.0-or-later
+
 ;;; Commentary:
 
 ;; This library defines a set of commands for controlling an instance of a Spotify client.  The
@@ -111,7 +113,7 @@ Apply SUFFIX to smudge-controller-prefixed functions, applying ARGS."
   (let ((func-name (format "smudge-%s-%s" smudge-transport suffix)))
     (apply (intern func-name) args)
     (unless (string= suffix "player-status")
-      (run-at-time 1 nil 'smudge-controller-player-status))))
+      (run-at-time 1 nil #'smudge-controller-player-status))))
 
 (defun smudge-controller-update-metadata (metadata)
   "Compose the playing status string to be displayed in the mode-line from METADATA."
@@ -137,7 +139,7 @@ Apply SUFFIX to smudge-controller-prefixed functions, applying ARGS."
 
 (defun smudge-controller-update-player-status (str)
   "Set the given STR to the player status, prefixed with the mode identifier."
-  (when (not (string= str smudge-controller-player-status))
+  (unless (string= str smudge-controller-player-status)
     (setq smudge-controller-player-status str)))
 
 (defun smudge-controller-player-status-playing-indicator (str)
@@ -162,19 +164,19 @@ This corresponds to the current REPEATING state."
     smudge-player-status-not-repeating-text))
 
 (defun smudge-controller-timerp ()
-	"Predicate to determine if the refresh timer is running."
+  "Predicate to determine if the refresh timer is running."
   (and (boundp 'smudge-controller-timer) (timerp smudge-controller-timer)))
 
 (defun smudge-controller-start-player-status-timer ()
- "Start the timer that will update the mode line according to the Spotify player status."
- (when (and (not (smudge-controller-timerp)) (> smudge-player-status-refresh-interval 0))
-     (setq smudge-controller-timer
-       (run-at-time t smudge-player-status-refresh-interval #'smudge-controller-player-status))))
+  "Start the timer that will update the mode line according to the Spotify player status."
+  (when (and (not (smudge-controller-timerp)) (> smudge-player-status-refresh-interval 0))
+    (setq smudge-controller-timer
+          (run-at-time t smudge-player-status-refresh-interval #'smudge-controller-player-status))))
 
 (defun smudge-controller-stop-player-status-timer ()
- "Stop the timer that is updating the mode line."
- (when (smudge-controller-timerp)
-   (cancel-timer smudge-controller-timer)))
+  "Stop the timer that is updating the mode line."
+  (when (smudge-controller-timerp)
+    (cancel-timer smudge-controller-timer)))
 
 (defun smudge-controller-player-status ()
   "Update the mode line to display the current Spotify player status."

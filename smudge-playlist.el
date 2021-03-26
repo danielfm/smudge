@@ -2,6 +2,8 @@
 
 ;; Copyright (C) 2014-2018 Daniel Fernandes Martins
 
+;; SPDX-License-Identifier:  GPL-3.0-or-later
+
 ;;; Commentary:
 
 ;; This library implements UI and a major mode for searching and acting on Spotify playlists.
@@ -58,23 +60,23 @@
   "Add the current user as the follower of the playlist under the cursor."
   (interactive)
   (let* ((selected-playlist (tabulated-list-get-id))
-                 (name (smudge-api-get-item-name selected-playlist)))
+         (name (smudge-api-get-item-name selected-playlist)))
     (when (y-or-n-p (format "Follow playlist '%s'? " name))
       (smudge-api-playlist-follow
        selected-playlist
        (lambda (_)
-         (message (format "Followed playlist '%s'" name)))))))
+         (message "Followed playlist '%s'" name))))))
 
 (defun smudge-playlist-unfollow ()
   "Remove the current user as the follower of the playlist under the cursor."
   (interactive)
   (let* ((selected-playlist (tabulated-list-get-id))
-                 (name (smudge-api-get-item-name selected-playlist)))
+         (name (smudge-api-get-item-name selected-playlist)))
     (when (y-or-n-p (format "Unfollow playlist '%s'? " name))
       (smudge-api-playlist-unfollow
        selected-playlist
        (lambda (_)
-         (message (format "Unfollowed playlist '%s'" name)))))))
+         (message "Unfollowed playlist '%s'" name))))))
 
 (defun smudge-playlist-search-update (query page)
   "Fetch the given PAGE of QUERY results using the search endpoint."
@@ -101,12 +103,12 @@
      page
      (lambda (playlists)
        (if-let ((items (smudge-api-get-items playlists)))
-         (with-current-buffer buffer
-           (setq-local smudge-user-id user-id)
-           (setq-local smudge-current-page page)
-           (pop-to-buffer buffer)
-           (smudge-playlist-search-print items page)
-           (message "Playlist view updated"))
+           (with-current-buffer buffer
+             (setq-local smudge-user-id user-id)
+             (setq-local smudge-current-page page)
+             (pop-to-buffer buffer)
+             (smudge-playlist-search-print items page)
+             (message "Playlist view updated"))
          (message "No more playlists"))))))
 
 (defun smudge-playlist-featured-playlists-update (page)
@@ -117,12 +119,12 @@
      (lambda (json)
        (if-let ((items (smudge-api-get-search-playlist-items json))
                 (msg (smudge-api-get-message json)))
-         (with-current-buffer buffer
-           (setq-local smudge-current-page page)
-           (setq-local smudge-browse-message msg)
-           (pop-to-buffer buffer)
-           (smudge-playlist-search-print items page)
-           (message "Playlist view updated"))
+           (with-current-buffer buffer
+             (setq-local smudge-current-page page)
+             (setq-local smudge-browse-message msg)
+             (pop-to-buffer buffer)
+             (smudge-playlist-search-print items page)
+             (message "Playlist view updated"))
          (message "No more playlists"))))))
 
 (defun smudge-playlist-tracks ()

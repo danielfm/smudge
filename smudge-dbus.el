@@ -2,6 +2,8 @@
 
 ;; Copyright (C) 2014-2019 Daniel Fernandes Martins
 
+;; SPDX-License-Identifier:  GPL-3.0-or-later
+
 ;;; Commentary:
 
 ;; This library handles controlling Spotify via the D-Bus interface.  It implements a set of
@@ -18,7 +20,7 @@
 
 (defun smudge-dbus-call (method &rest args)
   "Call METHOD with optional ARGS via D-Bus on the Spotify service."
-  (apply 'dbus-call-method-asynchronously
+  (apply #'dbus-call-method-asynchronously
          :session
          "org.mpris.MediaPlayer2.spotify"
          "/org/mpris/MediaPlayer2"
@@ -103,7 +105,7 @@
 (defun smudge-dbus-player-play-track (track-id context-id)
   "Dispatch message about playing TRACK-ID in CONTEXT-ID."
   (when track-id (smudge-dbus-call "Pause"))
-  (run-at-time "1 sec" nil 'smudge-dbus-call "OpenUri" (or track-id context-id)))
+  (run-at-time "1 sec" nil #'smudge-dbus-call "OpenUri" (or track-id context-id)))
 
 (provide 'smudge-dbus)
 ;;; smudge-dbus.el ends here

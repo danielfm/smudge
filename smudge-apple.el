@@ -2,6 +2,8 @@
 
 ;; Copyright (C) 2014-2019 Daniel Fernandes Martins
 
+;; SPDX-License-Identifier:  GPL-3.0-or-later
+
 ;;; Commentary:
 
 ;; This library handles controlling Spotify via Applescript commands.  It implements a set of
@@ -19,7 +21,7 @@
   :group 'smudge
   :type 'string)
 
-; Do not change this unless you know what you're doing
+;; Do not change this unless you know what you're doing
 (setq smudge-apple-player-status-script "
 # Source: https://github.com/andrehaveman/smudge-node-applescript
 on escape_quotes(string_to_escape)
@@ -74,7 +76,7 @@ Return the resulting status string."
   (let* ((process-name "smudge-player-status")
          (process-status (process-status process-name))
          (cmd (format "%s %s" smudge-osascript-bin-path smudge-apple-player-status-script-file)))
-    (when (not process-status)
+    (unless process-status
       (let* ((default-directory user-emacs-directory)
              (process (start-process-shell-command process-name "*smudge-player-status*" cmd)))
         (set-process-filter process 'smudge-apple-set-player-status-from-process-output)))))
