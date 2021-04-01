@@ -10,16 +10,18 @@
 
 (require 'smudge-api)
 (require 'smudge-controller)
+(require 'smudge-image)
 
 (defvar smudge-current-page)
 (defvar smudge-query)
 (defvar smudge-selected-album)
 (defvar smudge-recently-played)
-(defvar smudge-artwork-fetch-target-count 0)
-(defvar smudge-artwork-fetch-count 0)
 
 (defcustom smudge-show-artwork t
 	"Whether to show artwork when searching for tracks.")
+
+(defvar smudge-artwork-fetch-target-count 0)
+(defvar smudge-artwork-fetch-count 0)
 
 (defvar smudge-track-search-mode-map
   (let ((map (make-sparse-keymap)))
@@ -226,60 +228,6 @@ Default to sorting tracks by number when listing the tracks from an album."
     (when (not (bound-and-true-p smudge-selected-album))
       (vector '("Popularity" 14 t)))))))
 
-(defun smudge-track-tabulated-list-print-entry (id cols)
-  "Insert a Tabulated List entry at point.
-This implementation asynchronously inserts album images in the
-table buffer after the rows are printed.  It reimplements most of
-the `tabulated-list-print-entry' function but depends on a url
-being the first column's data.  It does not print that url in the
-column.  ID is a Lisp object identifying the entry to print, and
-COLS is a vector of column descriptors."
-  (let ((beg   (point))
-				 (x     (max tabulated-list-padding 0))
-				 (ncols (length tabulated-list-format))
-				 (inhibit-read-only t)
-				 (cb (current-buffer))
-				 (track-image-url (aref cols 0)))
-    (if (> tabulated-list-padding 0)
-			(insert (make-string x ?\s)))
-		(if track-image-url
-			(url-retrieve track-image-url
-				(lambda (status)
-					(let ((img (create-image
-											 (progn
-												 (goto-char (point-min))
-												 (re-search-forward "^$")
-												 (forward-char)
-												 (delete-region (point) (point-min))
-												 (buffer-substring-no-properties (point-min) (point-max)))
-											 nil t)))
-						;; kill the image data buffer. We have the data now
-						(kill-buffer)
-						;; switch to the table buffer
-						(set-buffer cb)
-						(let ((inhibit-read-only t))
-							(save-excursion
-								(goto-char beg)
-								(put-image img (point) "track image" 'left-margin)))
-						(setq smudge-artwork-fetch-count (1+ smudge-artwork-fetch-count))
-						(when (= smudge-artwork-fetch-count smudge-artwork-fetch-target-count)
-							(setq inhibit-redisplay nil)))))
-			(setq inhibit-redisplay nil))
-		(insert ?\s)
-    (let ((tabulated-list--near-rows ; Bind it if not bound yet (Bug#25506).
-						(or (bound-and-true-p tabulated-list--near-rows)
-              (list (or (tabulated-list-get-entry (point-at-bol 0))
-                      cols)
-                cols))))
-			;; don't print the URL column
-      (dotimes (n (- ncols 1))
-        (setq x (tabulated-list-print-col (+ n 1) (aref cols (+ n 1)) x))))
-    (insert ?\n)
-		;; Ever so slightly faster than calling `put-text-property' twice.
-    (add-text-properties
-			beg (point)
-			`(tabulated-list-id ,id tabulated-list-entry ,cols))))
-
 (defun smudge-track-search-print (songs page)
   "Append SONGS to the PAGE of track view."
   (let (entries)
@@ -309,21 +257,21 @@ COLS is a vector of column descriptors."
                     (when (not (bound-and-true-p smudge-selected-album))
                       (smudge-api-popularity-bar (smudge-api-get-track-popularity song)))))
 						entries))))
-		(if smudge-show-artwork
-			(progn
-				(setq tabulated-list-printer #'smudge-track-tabulated-list-print-entry)
-				(setq smudge-artwork-fetch-target-count
-					(+ (length songs) (if (eq 1 page) 0 (count-lines (point-min) (point-max)))))
-				(setq smudge-artwork-fetch-count 0)
-				(setq line-spacing 10)
-				(message "Fetching tracks...")
-				;; in case the fetch chokes somehow, don't lock up all of emacs forever
-				(run-at-time "3 sec" nil (lambda () (setq inhibit-redisplay nil)))
-				;; Undocumented function. Could be dangerous if there's a bug
-				(setq inhibit-redisplay t)
-				(setq left-margin-width 6)
-				(set-window-buffer (selected-window) (current-buffer)))
-			(setq tabulated-list-printer #'tabulated-list-print-entry))
+		(setq tabulated-list-printer #'tabulated-list-print-entry)
+
+		(when smudge-show-artwork
+			(setq tabulated-list-printer #'smudge-image-tabulated-list-print-entry)
+			(setq smudge-artwork-fetch-target-count
+				(+ (length songs) (if (eq 1 page) 0 (count-lines (point-min) (point-max)))))
+			(setq smudge-artwork-fetch-count 0)
+			(setq line-spacing 10)
+			(message "Fetching tracks...")
+			;; in case the fetch chokes somehow, don't lock up all of emacs forever
+			(run-at-time "3 sec" nil (lambda () (setq inhibit-redisplay nil)))
+			;; Undocumented function. Could be dangerous if there's a bug
+			(setq inhibit-redisplay t)
+			(setq left-margin-width 6)
+			(set-window-buffer (selected-window) (current-buffer)))
     (smudge-track-search-set-list-format)
     (when (eq 1 page) (setq-local tabulated-list-entries nil))
     (setq-local tabulated-list-entries (append tabulated-list-entries (nreverse entries)))
