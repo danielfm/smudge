@@ -203,15 +203,15 @@ without a context."
          (message "No more tracks"))))))
 
 (defun smudge-track-search-set-list-format ()
-	"Configure the column data for the typical track view.
-Default to sortin tracks by number when listing the tracks from an album."
+  "Configure the column data for the typical track view.
+Default to sorting tracks by number when listing the tracks from an album."
 	(let* ((base-width (truncate (/ (- (window-width) 30) 3)))
 					(default-width (if (bound-and-true-p smudge-selected-album) (+ base-width 4) base-width )))
 		(when (not (bound-and-true-p smudge-selected-playlist))
 			(setq tabulated-list-sort-key `("#" . nil)))
 		(setq tabulated-list-format
 			(vconcat (vector
-								 `("" -1)
+								 `("" -1) ;; image url column - do not display
 								 `("#" 3 ,(lambda (row-1 row-2)
 														(< (+ (* 100 (smudge-api-get-disc-number (car row-1)))
 																 (smudge-api-get-track-number (car row-1)))
@@ -260,10 +260,9 @@ COLS is a vector of column descriptors."
 						(let ((inhibit-read-only t))
 							(save-excursion
 								(goto-char beg)
-								(put-image img (point) "test" 'left-margin)))
+								(put-image img (point) "track image" 'left-margin)))
 						(setq smudge-artwork-fetch-count (1+ smudge-artwork-fetch-count))
 						(when (= smudge-artwork-fetch-count smudge-artwork-fetch-target-count)
-							;; Undocumented function. Could be dangerous if there's a bug
 							(setq inhibit-redisplay nil)))))
 			(setq inhibit-redisplay nil))
 		(insert ?\s)
@@ -320,6 +319,7 @@ COLS is a vector of column descriptors."
 				(message "Fetching tracks...")
 				;; in case the fetch chokes somehow, don't lock up all of emacs forever
 				(run-at-time "3 sec" nil (lambda () (setq inhibit-redisplay nil)))
+				;; Undocumented function. Could be dangerous if there's a bug
 				(setq inhibit-redisplay t)
 				(setq left-margin-width 6)
 				(set-window-buffer (selected-window) (current-buffer)))
