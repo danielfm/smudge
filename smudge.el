@@ -4,9 +4,11 @@
 
 ;; Keywords: multimedia, music, spotify, smudge
 ;; Package: smudge
-;; Package-Requires: ((emacs "24.4") (simple-httpd "1.5") (request "0.3"))
+;; Package-Requires: ((emacs "27.1") (simple-httpd "1.5") (request "0.3") (oauth2 "0.16"))
 ;; Version: 1.0.0
 ;; Homepage: https://github.com/danielfm/smudge
+
+;; SPDX-License-Identifier:  GPL-3.0-or-later
 
 ;;; Commentary:
 
@@ -117,7 +119,7 @@ Prompt for the NAME and whether it should be made PUBLIC."
         public
         (lambda (new-playlist)
           (if new-playlist
-              (message (format "Playlist '%s' created" (smudge-api-get-item-name new-playlist)))
+              (message "Playlist '%s' created" (smudge-api-get-item-name new-playlist))
             (message "Error creating the playlist"))))))))
 
 ;;;###autoload
@@ -135,59 +137,59 @@ Prompt for the NAME and whether it should be made PUBLIC."
 
 (defvar smudge-command-map
   (let ((map (make-sparse-keymap)))
-            (define-key map (kbd "M-r") #'smudge-controller-toggle-repeat)
-            (define-key map (kbd "M-s") #'smudge-controller-toggle-shuffle)
-            (define-key map (kbd "M-p") #'smudge-controller-toggle-play)
-            (define-key map (kbd "M-b") #'smudge-controller-previous-track)
-            (define-key map (kbd "M-u") #'smudge-controller-volume-up)
-            (define-key map (kbd "M-d") #'smudge-controller-volume-down)
-            (define-key map (kbd "M-f") #'smudge-controller-next-track)
-            (define-key map (kbd "p m") #'smudge-my-playlists)
-            (define-key map (kbd "p f") #'smudge-featured-playlists)
-            (define-key map (kbd "p u") #'smudge-user-playlists)
-            (define-key map (kbd "p s") #'smudge-playlist-search)
-            (define-key map (kbd "p c") #'smudge-create-playlist)
-            (define-key map (kbd "t s") #'smudge-track-search)
-            (define-key map (kbd "d") #'smudge-select-device)
-            map)
+    (define-key map (kbd "M-r") #'smudge-controller-toggle-repeat)
+    (define-key map (kbd "M-s") #'smudge-controller-toggle-shuffle)
+    (define-key map (kbd "M-p") #'smudge-controller-toggle-play)
+    (define-key map (kbd "M-b") #'smudge-controller-previous-track)
+    (define-key map (kbd "M-u") #'smudge-controller-volume-up)
+    (define-key map (kbd "M-d") #'smudge-controller-volume-down)
+    (define-key map (kbd "M-f") #'smudge-controller-next-track)
+    (define-key map (kbd "p m") #'smudge-my-playlists)
+    (define-key map (kbd "p f") #'smudge-featured-playlists)
+    (define-key map (kbd "p u") #'smudge-user-playlists)
+    (define-key map (kbd "p s") #'smudge-playlist-search)
+    (define-key map (kbd "p c") #'smudge-create-playlist)
+    (define-key map (kbd "t s") #'smudge-track-search)
+    (define-key map (kbd "d") #'smudge-select-device)
+    map)
   "Keymap for Spotify commands after 'smudge-keymap-prefix'.")
 (fset 'smudge-command-map smudge-command-map)
 
 (easy-menu-add-item nil '("Tools")
-  '("Smudge"
-    ["Play/Pause"     smudge-toggle-play    :active global-smudge-remote-mode]
-    ["Previous Track" smudge-previous-track :active global-smudge-remote-mode]
-    ["Next Track"     smudge-next-track     :active global-smudge-remote-mode]
-    "--"
-    ["Select Device"  smudge-select-device      :active global-smudge-remote-mode]
-    ["Mute/Unmute"    smudge-volume-mute-unmute :active global-smudge-remote-mode]
-    "--"
-    ["Shuffle" smudge-toggle-shuffle :active global-smudge-remote-mode]
-    ["Repeat"  smudge-toggle-repeat  :active global-smudge-remote-mode]
-    "--"
-    ["Search Tracks..."    smudge-track-search       :active global-smudge-remote-mode]
-    ["Featured Playlists"  smudge-featured-playlists :active global-smudge-remote-mode]
-    ["My Playlists"        smudge-my-playlists       :active global-smudge-remote-mode]
-    ["User Playlists..."   smudge-user-playlists     :active global-smudge-remote-mode]
-    ["Search Playlists..." smudge-playlist-search    :active global-smudge-remote-mode]
-    ["Create Playlist..."  smudge-create-playlist    :active global-smudge-remote-mode]
-    "--"
-    ["Smudge Remote Mode" global-smudge-remote-mode :style toggle :selected global-smudge-remote-mode]))
+                    '("Smudge"
+                      ["Play/Pause"     smudge-controller-toggle-play    :active global-smudge-remote-mode]
+                      ["Previous Track" smudge-controller-previous-track :active global-smudge-remote-mode]
+                      ["Next Track"     smudge-controller-next-track     :active global-smudge-remote-mode]
+                      "--"
+                      ["Select Device"  smudge-select-device      :active global-smudge-remote-mode]
+                      ["Mute/Unmute"    smudge-controller-volume-mute-unmute :active global-smudge-remote-mode]
+                      "--"
+                      ["Shuffle" smudge-controller-toggle-shuffle :active global-smudge-remote-mode]
+                      ["Repeat"  smudge-controller-toggle-repeat  :active global-smudge-remote-mode]
+                      "--"
+                      ["Search Tracks..."    smudge-track-search       :active global-smudge-remote-mode]
+                      ["Featured Playlists"  smudge-featured-playlists :active global-smudge-remote-mode]
+                      ["My Playlists"        smudge-my-playlists       :active global-smudge-remote-mode]
+                      ["User Playlists..."   smudge-user-playlists     :active global-smudge-remote-mode]
+                      ["Search Playlists..." smudge-playlist-search    :active global-smudge-remote-mode]
+                      ["Create Playlist..."  smudge-create-playlist    :active global-smudge-remote-mode]
+                      "--"
+                      ["Smudge Remote Mode" global-smudge-remote-mode :style toggle :selected global-smudge-remote-mode]))
 
 (defun smudge-remote-popup-menu ()
   "Popup menu when in smudge-remote-mode."
   (interactive)
   (popup-menu
    '("Smudge"
-     ["Play/Pause" smudge-toggle-play]
-     ["Previous Track" smudge-previous-track]
-     ["Next Track" smudge-next-track]
+     ["Play/Pause" smudge-controller-toggle-play]
+     ["Previous Track" smudge-controller-previous-track]
+     ["Next Track" smudge-controller-next-track]
      "--"
      ["Select Device" smudge-select-device]
-     ["Mute/Unmute" smudge-volume-mute-unmute]
+     ["Mute/Unmute" smudge-controller-volume-mute-unmute]
      "--"
-     ["Shuffle" smudge-toggle-shuffle]
-     ["Repeat"  smudge-toggle-repeat]
+     ["Shuffle" smudge-controller-toggle-shuffle]
+     ["Repeat"  smudge-controller-toggle-repeat]
      "--"
      ["Search Tracks..."    smudge-track-search]
      ["Featured Playlists"  smudge-featured-playlists]

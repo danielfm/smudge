@@ -2,6 +2,8 @@
 
 ;; Copyright (C) 2014-2018 Daniel Fernandes Martins
 
+;; SPDX-License-Identifier:  GPL-3.0-or-later
+
 ;;; Commentary:
 
 ;; This library implements UI and a major mode for searching and acting on Spotify playlists.
@@ -42,10 +44,10 @@ If the cursor is on a button representing an artist or album, start playing that
   (interactive)
   (let ((button-type (smudge-track-selected-button-type)))
     (cond ((eq 'artist button-type)
-						(smudge-track-artist-select))
-	    ((eq 'album button-type)
-	      (smudge-track-album-select))
-	    (t (smudge-track-select-default)))))
+	   (smudge-track-artist-select))
+	  ((eq 'album button-type)
+	   (smudge-track-album-select))
+	  (t (smudge-track-select-default)))))
 
 (defun smudge-track-select-default ()
   "Play the track under the cursor.
@@ -84,24 +86,24 @@ without a context."
   "Add the current user as the follower of the selected playlist."
   (interactive)
   (if (bound-and-true-p smudge-selected-playlist)
-    (let ((playlist smudge-selected-playlist))
-      (when (y-or-n-p (format "Follow playlist '%s'? " (smudge-api-get-item-name playlist)))
-        (smudge-api-playlist-follow
-          playlist
-          (lambda (_)
-            (message (format "Followed playlist '%s'" (smudge-api-get-item-name playlist)))))))
+      (let ((playlist smudge-selected-playlist))
+        (when (y-or-n-p (format "Follow playlist '%s'? " (smudge-api-get-item-name playlist)))
+          (smudge-api-playlist-follow
+           playlist
+           (lambda (_)
+             (message "Followed playlist '%s'" (smudge-api-get-item-name playlist))))))
     (message "Cannot Follow a playlist from here")))
 
 (defun smudge-track-playlist-unfollow ()
   "Remove the current user as the follower of the selected playlist."
   (interactive)
   (if (bound-and-true-p smudge-selected-playlist)
-    (let ((playlist smudge-selected-playlist))
-      (when (y-or-n-p (format "Unfollow playlist '%s'? " (smudge-api-get-item-name playlist)))
-        (smudge-api-playlist-unfollow
-          playlist
-          (lambda (_)
-            (message (format "Unfollowed playlist '%s'" (smudge-api-get-item-name playlist)))))))
+      (let ((playlist smudge-selected-playlist))
+        (when (y-or-n-p (format "Unfollow playlist '%s'? " (smudge-api-get-item-name playlist)))
+          (smudge-api-playlist-unfollow
+           playlist
+           (lambda (_)
+             (message "Unfollowed playlist '%s'" (smudge-api-get-item-name playlist))))))
     (message "Cannot unfollow a playlist from here")))
 
 (defun smudge-track-reload ()
@@ -206,7 +208,7 @@ without a context."
 Default to sorting tracks by number when listing the tracks from an album."
 	(let* ((base-width (truncate (/ (- (window-width) 30) 3)))
 					(default-width (if (bound-and-true-p smudge-selected-album) (+ base-width 4) base-width )))
-		(when (not (bound-and-true-p smudge-selected-playlist))
+		(unless (bound-and-true-p smudge-selected-playlist)
 			(setq tabulated-list-sort-key `("#" . nil)))
 		(setq tabulated-list-format
 			(vconcat (vector
@@ -222,7 +224,7 @@ Default to sorting tracks by number when listing the tracks from an album."
 								 `("Time" 8 (lambda (row-1 row-2)
 															(< (smudge-api-get-track-duration (car row-1))
 																(smudge-api-get-track-duration (car row-2))))))
-				(when (not (bound-and-true-p smudge-selected-album))
+				(unless (bound-and-true-p smudge-selected-album)
 					(vector '("Popularity" 14 t)))))))
 
 (defun smudge-track-search-print (songs page)
@@ -251,7 +253,7 @@ Default to sorting tracks by number when listing the tracks from an album."
                         'help-echo (format "Show %s's tracks" album-name)
 					              'artist-or-album 'album))
                     (smudge-api-get-track-duration-formatted song)
-                    (when (not (bound-and-true-p smudge-selected-album))
+                    (unless (bound-and-true-p smudge-selected-album)
                       (smudge-api-popularity-bar (smudge-api-get-track-popularity song)))))
 						entries))))
 		(setq tabulated-list-printer #'tabulated-list-print-entry)
@@ -285,16 +287,16 @@ Default to sorting tracks by number when listing the tracks from an album."
   "Call CALLBACK with results of user playlist selection."
   (interactive)
   (smudge-api-current-user
-		(lambda (user)
-			(smudge-api-user-playlists
-				(smudge-api-get-item-id user)
-				1
-				(lambda (json)
-					(if-let* ((choices (mapcar (lambda (a)
-																			 (list (smudge-api-get-item-name a) (smudge-api-get-item-id a)))
-                               (smudge-api-get-items json)))
-										 (selected (completing-read "Select Playlist: " choices)))
-            (when (not (string= "" selected))
+   (lambda (user)
+     (smudge-api-user-playlists
+      (smudge-api-get-item-id user)
+      1
+      (lambda (json)
+        (if-let* ((choices (mapcar (lambda (a)
+                                     (list (smudge-api-get-item-name a) (smudge-api-get-item-id a)))
+                                   (smudge-api-get-items json)))
+                  (selected (completing-read "Select Playlist: " choices)))
+            (unless (string= "" selected)
               (funcall callback (cadr (assoc selected choices))))))))))
 
 (defun smudge-track-add ()

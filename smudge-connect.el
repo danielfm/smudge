@@ -2,6 +2,8 @@
 
 ;; Copyright (C) 2019 Jason Dufair
 
+;; SPDX-License-Identifier:  GPL-3.0-or-later
+
 ;;; Commentary:
 
 ;; This library uses the "connect" APIs to control transport functions of remote and local instances
