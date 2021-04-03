@@ -352,6 +352,12 @@ Call CALLBACK with the parsed JSON response."
 					(image (and album (nth 2 (gethash 'images album)))))
 		(and image (gethash 'url image))))
 
+(defun smudge-api-get-playlist-art-url (playlist)
+	"Return the smallest possible image url for PLAYLIST (we only need 64x64 and it gets scaled)."
+	(let* ((images (gethash 'images playlist))
+					(image (and images (or (nth 3 images) (nth 2 images) (first images)))))
+		(and image (gethash 'url image))))
+
 (defun smudge-api-search (type query page callback)
   "Search artists, albums, tracks or playlists.
 Call CALLBACK with PAGE of items that match QUERY, depending on TYPE."

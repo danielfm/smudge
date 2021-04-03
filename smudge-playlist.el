@@ -11,12 +11,15 @@
 (require 'smudge-api)
 (require 'smudge-controller)
 (require 'smudge-track)
+(require 'smudge-image)
 
 (defvar smudge-user-id)
 (defvar smudge-current-page)
 (defvar smudge-browse-message)
 (defvar smudge-selected-playlist)
 (defvar smudge-query)
+(defvar smudge-artwork-fetch-target-count 0)
+(defvar smudge-artwork-fetch-count 0)
 
 (defvar smudge-playlist-search-mode-map
   (let ((map (make-sparse-keymap)))
@@ -139,11 +142,13 @@
 (defun smudge-playlist-set-list-format ()
   "Configures the column data for the typical playlist view."
   (setq tabulated-list-format
-        (vector `("Playlist Name" ,(- (window-width) 45) t)
-                '("Owner Id" 30 t)
-                '("# Tracks" 8 (lambda (row-1 row-2)
-                                 (< (smudge-api-get-playlist-track-count (car row-1))
-                                    (smudge-api-get-playlist-track-count (car row-2)))) :right-align t))))
+    (vector
+			`("" -1) ;; image url column - do not display
+			`("Playlist Name" ,(- (window-width) 45) t)
+      '("Owner Id" 30 t)
+      '("# Tracks" 8 (lambda (row-1 row-2)
+                       (< (smudge-api-get-playlist-track-count (car row-1))
+                         (smudge-api-get-playlist-track-count (car row-2)))) :right-align t))))
 
 (defun smudge-playlist-search-print (playlists page)
   "Append PLAYLISTS to PAGE of the current playlist view."
@@ -152,18 +157,35 @@
       (let ((user-id (smudge-api-get-playlist-owner-id playlist))
             (playlist-name (smudge-api-get-item-name playlist)))
         (push (list playlist
-                    (vector (cons playlist-name
-                                  (list 'face 'link
-                                        'follow-link t
-                                        'action `(lambda (_) (smudge-playlist-tracks))
-                                        'help-echo (format "Show %s's tracks" playlist-name)))
-                            (cons user-id
-                                  (list 'face 'link
-                                        'follow-link t
-                                        'action `(lambda (_) (smudge-user-playlists ,user-id))
-                                        'help-echo (format "Show %s's public playlists" user-id)))
-                            (number-to-string (smudge-api-get-playlist-track-count playlist))))
-              entries)))
+                (vector
+									(if smudge-show-artwork (smudge-api-get-playlist-art-url playlist) "")
+									(cons playlist-name
+                    (list 'face 'link
+                      'follow-link t
+                      'action `(lambda (_) (smudge-playlist-tracks))
+                      'help-echo (format "Show %s's tracks" playlist-name)))
+                  (cons user-id
+                    (list 'face 'link
+                      'follow-link t
+                      'action `(lambda (_) (smudge-user-playlists ,user-id))
+                      'help-echo (format "Show %s's public playlists" user-id)))
+                  (number-to-string (smudge-api-get-playlist-track-count playlist))))
+          entries)))
+		(setq tabulated-list-printer #'tabulated-list-print-entry)
+		(when smudge-show-artwork
+			(setq tabulated-list-printer #'smudge-image-tabulated-list-print-entry)
+			(setq smudge-artwork-fetch-target-count
+				(+ (length playlists) (if (eq 1 page) 0 (count-lines (point-min) (point-max)))))
+			(setq smudge-artwork-fetch-count 0)
+			(setq line-spacing 10)
+			(message "Fetching playlists...")
+			;; in case the fetch chokes somehow, don't lock up all of emacs forever
+			(run-at-time "3 sec" nil (lambda () (setq inhibit-redisplay nil)))
+			;; Undocumented function. Could be dangerous if there's a bug
+			(setq inhibit-redisplay t)
+			(message "inhibit-redisplay: %s" inhibit-redisplay)
+			(setq left-margin-width 6)
+			(set-window-buffer (selected-window) (current-buffer)))
     (when (eq 1 page) (setq-local tabulated-list-entries nil))
     (smudge-playlist-set-list-format)
     (setq-local tabulated-list-entries (append tabulated-list-entries (nreverse entries)))

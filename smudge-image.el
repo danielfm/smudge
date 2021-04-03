@@ -8,8 +8,19 @@
 
 ;;; Code:
 
+(defcustom smudge-show-artwork t
+	"Whether to show artwork when searching for tracks."
+	:type 'boolean
+	:group 'smudge)
+
 (defvar smudge-artwork-fetch-target-count 0)
 (defvar smudge-artwork-fetch-count 0)
+
+(defun smudge-image-increment-count ()
+	"Increment count of fetched (or the absence of) images.  Handle redisplay."
+	(setq smudge-artwork-fetch-count (1+ smudge-artwork-fetch-count))
+	(when (= smudge-artwork-fetch-count smudge-artwork-fetch-target-count)
+		(setq inhibit-redisplay nil)))
 
 (defun smudge-image-tabulated-list-print-entry (id cols)
   "Insert a Tabulated List entry at point.
@@ -37,7 +48,7 @@ COLS is a vector of column descriptors."
 												 (forward-char)
 												 (delete-region (point) (point-min))
 												 (buffer-substring-no-properties (point-min) (point-max)))
-											 nil t)))
+											 nil t :width 64)))
 						;; kill the image data buffer. We have the data now
 						(kill-buffer)
 						;; switch to the table buffer
@@ -46,10 +57,8 @@ COLS is a vector of column descriptors."
 							(save-excursion
 								(goto-char beg)
 								(put-image img (point) "track image" 'left-margin)))
-						(setq smudge-artwork-fetch-count (1+ smudge-artwork-fetch-count))
-						(when (= smudge-artwork-fetch-count smudge-artwork-fetch-target-count)
-							(setq inhibit-redisplay nil)))))
-			(setq inhibit-redisplay nil))
+						(smudge-image-increment-count))))
+			(smudge-image-increment-count))
 		(insert ?\s)
     (let ((tabulated-list--near-rows ; Bind it if not bound yet (Bug#25506).
 						(or (bound-and-true-p tabulated-list--near-rows)

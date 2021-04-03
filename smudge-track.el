@@ -17,9 +17,6 @@
 (defvar smudge-selected-album)
 (defvar smudge-recently-played)
 
-(defcustom smudge-show-artwork t
-	"Whether to show artwork when searching for tracks.")
-
 (defvar smudge-artwork-fetch-target-count 0)
 (defvar smudge-artwork-fetch-count 0)
 
@@ -45,10 +42,10 @@ If the cursor is on a button representing an artist or album, start playing that
   (interactive)
   (let ((button-type (smudge-track-selected-button-type)))
     (cond ((eq 'artist button-type)
-	         (smudge-track-artist-select))
-	        ((eq 'album button-type)
-	         (smudge-track-album-select))
-	        (t (smudge-track-select-default)))))
+						(smudge-track-artist-select))
+	    ((eq 'album button-type)
+	      (smudge-track-album-select))
+	    (t (smudge-track-select-default)))))
 
 (defun smudge-track-select-default ()
   "Play the track under the cursor.
@@ -58,9 +55,9 @@ track is played in the context of that album.  Otherwise, it will be played
 without a context."
   (interactive)
   (let* ((track (tabulated-list-get-id))
-         (context (cond ((bound-and-true-p smudge-selected-playlist) smudge-selected-playlist)
-                        ((bound-and-true-p smudge-selected-album) smudge-selected-album)
-                    (t nil))))
+					(context (cond ((bound-and-true-p smudge-selected-playlist) smudge-selected-playlist)
+                     ((bound-and-true-p smudge-selected-album) smudge-selected-album)
+                     (t nil))))
     (smudge-controller-play-track track context)))
 
 (defun smudge-track-selected-button-type ()
@@ -73,7 +70,7 @@ without a context."
   "Plays the artist of the track under the cursor."
   (interactive)
   (let* ((track (tabulated-list-get-id))
-         (artist (smudge-api-get-track-artist track)))
+					(artist (smudge-api-get-track-artist track)))
     (smudge-controller-play-track track artist)))
 
 (defun smudge-track-album-select ()
@@ -87,82 +84,82 @@ without a context."
   "Add the current user as the follower of the selected playlist."
   (interactive)
   (if (bound-and-true-p smudge-selected-playlist)
-      (let ((playlist smudge-selected-playlist))
-        (when (y-or-n-p (format "Follow playlist '%s'? " (smudge-api-get-item-name playlist)))
-          (smudge-api-playlist-follow
-           playlist
-           (lambda (_)
-             (message (format "Followed playlist '%s'" (smudge-api-get-item-name playlist)))))))
+    (let ((playlist smudge-selected-playlist))
+      (when (y-or-n-p (format "Follow playlist '%s'? " (smudge-api-get-item-name playlist)))
+        (smudge-api-playlist-follow
+          playlist
+          (lambda (_)
+            (message (format "Followed playlist '%s'" (smudge-api-get-item-name playlist)))))))
     (message "Cannot Follow a playlist from here")))
 
 (defun smudge-track-playlist-unfollow ()
   "Remove the current user as the follower of the selected playlist."
   (interactive)
   (if (bound-and-true-p smudge-selected-playlist)
-      (let ((playlist smudge-selected-playlist))
-        (when (y-or-n-p (format "Unfollow playlist '%s'? " (smudge-api-get-item-name playlist)))
-          (smudge-api-playlist-unfollow
-           playlist
-           (lambda (_)
-             (message (format "Unfollowed playlist '%s'" (smudge-api-get-item-name playlist)))))))
+    (let ((playlist smudge-selected-playlist))
+      (when (y-or-n-p (format "Unfollow playlist '%s'? " (smudge-api-get-item-name playlist)))
+        (smudge-api-playlist-unfollow
+          playlist
+          (lambda (_)
+            (message (format "Unfollowed playlist '%s'" (smudge-api-get-item-name playlist)))))))
     (message "Cannot unfollow a playlist from here")))
 
 (defun smudge-track-reload ()
   "Reloads the first page of results for the current track view."
   (interactive)
   (cond ((bound-and-true-p smudge-recently-played)
-         (smudge-track-recently-played-tracks-update 1))
-        ((bound-and-true-p smudge-selected-playlist)
-         (smudge-track-playlist-tracks-update 1))
-        ((bound-and-true-p smudge-query)
-         (smudge-track-search-update smudge-query 1))
-        ((bound-and-true-p smudge-selected-album)
-         (smudge-track-album-tracks-update smudge-selected-album 1))))
+					(smudge-track-recently-played-tracks-update 1))
+    ((bound-and-true-p smudge-selected-playlist)
+      (smudge-track-playlist-tracks-update 1))
+    ((bound-and-true-p smudge-query)
+      (smudge-track-search-update smudge-query 1))
+    ((bound-and-true-p smudge-selected-album)
+      (smudge-track-album-tracks-update smudge-selected-album 1))))
 
 (defun smudge-track-load-more ()
   "Load the next page of results for the current track view."
   (interactive)
   (cond ((bound-and-true-p smudge-recently-played)
-         (smudge-track-recently-played-tracks-update (1+ smudge-current-page)))
-        ((bound-and-true-p smudge-selected-playlist)
-         (smudge-track-playlist-tracks-update (1+ smudge-current-page)))
-        ((bound-and-true-p smudge-selected-album)
-         (smudge-track-album-tracks-update smudge-selected-album (1+ smudge-current-page)))
-        ((bound-and-true-p smudge-query)
-         (smudge-track-search-update smudge-query (1+ smudge-current-page)))))
+					(smudge-track-recently-played-tracks-update (1+ smudge-current-page)))
+    ((bound-and-true-p smudge-selected-playlist)
+      (smudge-track-playlist-tracks-update (1+ smudge-current-page)))
+    ((bound-and-true-p smudge-selected-album)
+      (smudge-track-album-tracks-update smudge-selected-album (1+ smudge-current-page)))
+    ((bound-and-true-p smudge-query)
+      (smudge-track-search-update smudge-query (1+ smudge-current-page)))))
 
 (defun smudge-track-search-update (query page)
   "Fetch the PAGE of results using QUERY at the search endpoint."
   (let ((buffer (current-buffer)))
     (smudge-api-search
-     'track
-     query
-     page
-     (lambda (json)
-       (if-let ((items (smudge-api-get-search-track-items json)))
-           (with-current-buffer buffer
-             (setq-local smudge-current-page page)
-             (setq-local smudge-query query)
-             (pop-to-buffer buffer)
-             (smudge-track-search-print items page)
-             (message "Track view updated"))
-         (message "No more tracks"))))))
+			'track
+			query
+			page
+			(lambda (json)
+				(if-let ((items (smudge-api-get-search-track-items json)))
+          (with-current-buffer buffer
+            (setq-local smudge-current-page page)
+            (setq-local smudge-query query)
+            (pop-to-buffer buffer)
+            (smudge-track-search-print items page)
+            (message "Track view updated"))
+					(message "No more tracks"))))))
 
 (defun smudge-track-playlist-tracks-update (page)
   "Fetch PAGE of results for the current playlist."
   (when (bound-and-true-p smudge-selected-playlist)
     (let ((buffer (current-buffer)))
       (smudge-api-playlist-tracks
-       smudge-selected-playlist
-       page
-       (lambda (json)
-         (if-let ((items (smudge-api-get-playlist-tracks json)))
-             (with-current-buffer buffer
-               (setq-local smudge-current-page page)
-               (pop-to-buffer buffer)
-               (smudge-track-search-print items page)
-               (message "Track view updated"))
-           (message "No more tracks")))))))
+				smudge-selected-playlist
+				page
+				(lambda (json)
+					(if-let ((items (smudge-api-get-playlist-tracks json)))
+            (with-current-buffer buffer
+              (setq-local smudge-current-page page)
+              (pop-to-buffer buffer)
+              (smudge-track-search-print items page)
+              (message "Track view updated"))
+						(message "No more tracks")))))))
 
 (defun smudge-track-album-tracks-update (album page)
   "Fetch PAGE of of tracks for ALBUM."
@@ -193,16 +190,16 @@ without a context."
   "Fetch PAGE of results for the recently played tracks."
   (let ((buffer (current-buffer)))
     (smudge-api-recently-played
-     page
-     (lambda (json)
-       (if-let ((items (smudge-api-get-playlist-tracks json)))
-           (with-current-buffer buffer
-             (setq-local smudge-current-page page)
-             (setq-local smudge-recently-played t)
-             (pop-to-buffer buffer)
-             (smudge-track-search-print items page)
-             (message "Track view updated"))
-         (message "No more tracks"))))))
+			page
+			(lambda (json)
+				(if-let ((items (smudge-api-get-playlist-tracks json)))
+          (with-current-buffer buffer
+            (setq-local smudge-current-page page)
+            (setq-local smudge-recently-played t)
+            (pop-to-buffer buffer)
+            (smudge-track-search-print items page)
+            (message "Track view updated"))
+					(message "No more tracks"))))))
 
 (defun smudge-track-search-set-list-format ()
   "Configure the column data for the typical track view.
@@ -224,9 +221,9 @@ Default to sorting tracks by number when listing the tracks from an album."
                  `("Album" ,default-width t)
 								 `("Time" 8 (lambda (row-1 row-2)
 															(< (smudge-api-get-track-duration (car row-1))
-                   (smudge-api-get-track-duration (car row-2))))))
-    (when (not (bound-and-true-p smudge-selected-album))
-      (vector '("Popularity" 14 t)))))))
+																(smudge-api-get-track-duration (car row-2))))))
+				(when (not (bound-and-true-p smudge-selected-album))
+					(vector '("Popularity" 14 t)))))))
 
 (defun smudge-track-search-print (songs page)
   "Append SONGS to the PAGE of track view."
@@ -258,7 +255,6 @@ Default to sorting tracks by number when listing the tracks from an album."
                       (smudge-api-popularity-bar (smudge-api-get-track-popularity song)))))
 						entries))))
 		(setq tabulated-list-printer #'tabulated-list-print-entry)
-
 		(when smudge-show-artwork
 			(setq tabulated-list-printer #'smudge-image-tabulated-list-print-entry)
 			(setq smudge-artwork-fetch-target-count
@@ -272,8 +268,8 @@ Default to sorting tracks by number when listing the tracks from an album."
 			(setq inhibit-redisplay t)
 			(setq left-margin-width 6)
 			(set-window-buffer (selected-window) (current-buffer)))
-    (smudge-track-search-set-list-format)
     (when (eq 1 page) (setq-local tabulated-list-entries nil))
+    (smudge-track-search-set-list-format)
     (setq-local tabulated-list-entries (append tabulated-list-entries (nreverse entries)))
     (tabulated-list-init-header)
     (tabulated-list-print t)))
@@ -289,15 +285,15 @@ Default to sorting tracks by number when listing the tracks from an album."
   "Call CALLBACK with results of user playlist selection."
   (interactive)
   (smudge-api-current-user
-   (lambda (user)
-     (smudge-api-user-playlists
-      (smudge-api-get-item-id user)
-      1
-      (lambda (json)
-        (if-let* ((choices (mapcar (lambda (a)
-                                     (list (smudge-api-get-item-name a) (smudge-api-get-item-id a)))
-                                   (smudge-api-get-items json)))
-                  (selected (completing-read "Select Playlist: " choices)))
+		(lambda (user)
+			(smudge-api-user-playlists
+				(smudge-api-get-item-id user)
+				1
+				(lambda (json)
+					(if-let* ((choices (mapcar (lambda (a)
+																			 (list (smudge-api-get-item-name a) (smudge-api-get-item-id a)))
+                               (smudge-api-get-items json)))
+										 (selected (completing-read "Select Playlist: " choices)))
             (when (not (string= "" selected))
               (funcall callback (cadr (assoc selected choices))))))))))
 
@@ -306,15 +302,15 @@ Default to sorting tracks by number when listing the tracks from an album."
   (interactive)
   (let ((selected-track (tabulated-list-get-id)))
     (smudge-track-select-playlist
-     (lambda (playlist)
-       (smudge-api-current-user
-        (lambda (user)
-          (smudge-api-playlist-add-track
-           (smudge-api-get-item-id user)
-           playlist
-           (smudge-api-get-item-uri selected-track)
-           (lambda (_)
-             (message "Song added.")))))))))
+			(lambda (playlist)
+				(smudge-api-current-user
+					(lambda (user)
+						(smudge-api-playlist-add-track
+							(smudge-api-get-item-id user)
+							playlist
+							(smudge-api-get-item-uri selected-track)
+							(lambda (_)
+								(message "Song added.")))))))))
 
 (provide 'smudge-track)
 ;;; smudge-track.el ends here
