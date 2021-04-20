@@ -420,6 +420,23 @@ Call CALLBACK with results."
      (format "{\"uris\": [ %s ]}" tracks)
      callback)))
 
+(defun smudge-api-playlist-remove-track (user-id playlist-id track-id callback)
+  "Remove TRACK-ID from PLAYLIST-ID.
+Removed by USER-ID. Call CALLBACK with results."
+  (smudge-api-playlist-remove-tracks user-id playlist-id (list track-id) callback))
+
+(defun smudge-api-playlist-remove-tracks (playlist-id track-ids callback)
+  "Remove TRACK-IDs from PLAYLIST-ID for USER-ID.
+Call CALLBACK with results."
+  (let ((tracks (format "%s" (mapconcat
+                              (lambda (x) (format "{\"uri\": %s}" (smudge-api-format-id "track" x)))
+                              track-ids ","))))
+    (smudge-api-call-async
+     "DELETE"
+     (format "/playlists/%s/tracks" (url-hexify-string playlist-id))
+     (format "{\"tracks\": [ %s ]}" tracks)
+     callback)))
+
 (defun smudge-api-playlist-follow (playlist callback)
   "Add the current user as a follower of PLAYLIST.
 Call CALLBACK with results."

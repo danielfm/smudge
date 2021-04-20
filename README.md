@@ -281,6 +281,7 @@ bindings in the resulting buffer:
 | Key              | Description                                                         |
 |:-----------------|:--------------------------------------------------------------------|
 | <kbd>a</kbd>     | Adds track to a playlist                                            |
+| <kbd>r</kbd>     | Removes track from current playlist
 | <kbd>l</kbd>     | Loads the next page of results (pagination)                         |
 | <kbd>g</kbd>     | Clears the results and reloads the first page of results            |
 | <kbd>f</kbd>     | Follows the current playlist                                        |

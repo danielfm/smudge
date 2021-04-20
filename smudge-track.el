@@ -23,6 +23,7 @@
     (set-keymap-parent map tabulated-list-mode-map)
     (define-key map (kbd "M-RET") #'smudge-track-select)
     (define-key map (kbd "a")     #'smudge-track-add)
+    (define-key map (kbd "r")     #'smudge-track-remove)
     (define-key map (kbd "l")     #'smudge-track-load-more)
     (define-key map (kbd "g")     #'smudge-track-reload)
     (define-key map (kbd "f")     #'smudge-track-playlist-follow)
@@ -283,6 +284,19 @@ Default to sortin tracks by number when listing the tracks from an album."
            (smudge-api-get-item-uri selected-track)
            (lambda (_)
              (message "Song added.")))))))))
+
+(defun smudge-track-remove ()
+  "Remove the track under the cursor from the selected playlist."
+  (interactive)
+  (if (bound-and-true-p smudge-selected-playlist)
+      (let ((playlist (smudge-api-get-item-id smudge-selected-playlist))
+            (selected-track (tabulated-list-get-id)))
+        (smudge-api-playlist-remove-track
+         playlist
+         (smudge-api-get-item-uri selected-track)
+         (lambda (_)
+           (message "Song removed."))))
+    (message "Cannot remove a track from a playlist from here")))
 
 (provide 'smudge-track)
 ;;; smudge-track.el ends here
