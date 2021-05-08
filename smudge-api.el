@@ -82,7 +82,7 @@ This is used to manually refresh the token when it's about to expire.")
 (defconst smudge-api-endpoint     "https://api.spotify.com/v1")
 (defconst smudge-api-oauth2-auth-url  "https://accounts.spotify.com/authorize")
 (defconst smudge-api-oauth2-token-url "https://accounts.spotify.com/api/token")
-(defconst smudge-api-oauth2-scopes    "playlist-read-private playlist-read-collaborative playlist-modify-public playlist-modify-private user-read-private user-read-playback-state user-modify-playback-state user-read-playback-state user-read-recently-played")
+(defconst smudge-api-oauth2-scopes    "playlist-read-private playlist-read-collaborative playlist-modify-public playlist-modify-private user-read-private user-read-playback-state user-modify-playback-state user-read-playback-state user-read-recently-played user-library-read")
 (defconst smudge-api-oauth2-callback  (concat "http://localhost:" smudge-oauth2-callback-port smudge-oauth2-callback-endpoint))
 
 (defun smudge-api-httpd-stop ()
@@ -491,6 +491,18 @@ Parameter must be a number between 0 and 100."
     (smudge-api-call-async
      "GET"
      (concat "/me/player/recently-played?"
+             (url-build-query-string `((limit  ,smudge-api-search-limit)
+                                       (offset ,offset))
+                                     nil t))
+     nil
+     callback)))
+
+(defun smudge-api-saved-tracks (page callback)
+  "Call CALLBACK with PAGE of saved tracks."
+  (let ((offset (* smudge-api-search-limit (1- page))))
+    (smudge-api-call-async
+     "GET"
+     (concat "/me/tracks?"
              (url-build-query-string `((limit  ,smudge-api-search-limit)
                                        (offset ,offset))
                                      nil t))

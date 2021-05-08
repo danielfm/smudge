@@ -77,6 +77,15 @@
       (smudge-track-recently-played-tracks-update 1))))
 
 ;;;###autoload
+(defun smudge-saved-tracks ()
+  "Display saved tracks."
+  (interactive)
+  (let ((buffer (get-buffer-create "'Saved Tracks'")))
+    (with-current-buffer buffer
+      (smudge-track-search-mode)
+      (smudge-track-saved-tracks-update 1))))
+
+;;;###autoload
 (defun smudge-my-playlists ()
   "Display the current user's playlists."
   (interactive)
@@ -167,6 +176,7 @@ Prompt for the NAME and whether it should be made PUBLIC."
                       ["Shuffle" smudge-controller-toggle-shuffle :active global-smudge-remote-mode]
                       ["Repeat"  smudge-controller-toggle-repeat  :active global-smudge-remote-mode]
                       "--"
+                      ["Saved Tracks"        smudge-saved-tracks       :active global-smudge-remote-mode]
                       ["Search Tracks..."    smudge-track-search       :active global-smudge-remote-mode]
                       ["Featured Playlists"  smudge-featured-playlists :active global-smudge-remote-mode]
                       ["My Playlists"        smudge-my-playlists       :active global-smudge-remote-mode]
@@ -191,6 +201,7 @@ Prompt for the NAME and whether it should be made PUBLIC."
      ["Shuffle" smudge-controller-toggle-shuffle]
      ["Repeat"  smudge-controller-toggle-repeat]
      "--"
+     ["Saved Tracks"        smudge-saved-tracks]
      ["Search Tracks..."    smudge-track-search]
      ["Featured Playlists"  smudge-featured-playlists]
      ["My Playlists"        smudge-my-playlists]

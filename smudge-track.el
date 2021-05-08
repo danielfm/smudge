@@ -190,6 +190,21 @@ without a context."
              (message "Track view updated"))
          (message "No more tracks"))))))
 
+(defun smudge-track-saved-tracks-update (page)
+  "Fetch PAGE of results for the saved tracks."
+  (let ((buffer (current-buffer)))
+    (smudge-api-saved-tracks
+     page
+     (lambda (json)
+       (if-let ((items (smudge-api-get-playlist-tracks json)))
+           (with-current-buffer buffer
+             (setq-local smudge-current-page page)
+             (setq-local smudge-recently-played nil)
+             (pop-to-buffer buffer)
+             (smudge-track-search-print items page)
+             (message "Track view updated"))
+         (message "No more tracks"))))))
+
 (defun smudge-track-search-set-list-format ()
   "Configure the column data for the typical track view.
 Default to sortin tracks by number when listing the tracks from an album."

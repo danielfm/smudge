@@ -18,6 +18,7 @@ Connect feature.
 * Displays the current track in mode line or title bar
 * Create playlists (public or private)
 * Browse the Spotify featured playlists, your own playlists, and their tracks
+* Browse saved tracks
 * Search for tracks and playlists that match the given keywords
 * Easily control basic Spotify player features like, play/pause, previous,
   next, shuffle, and repeat with the Smudge Remote minor mode
