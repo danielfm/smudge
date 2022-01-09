@@ -195,10 +195,10 @@ via their corresponding variables:
 | Playing       | `smudge-player-status-playing-text`       | `"Playing"`   |
 | Paused        | `smudge-player-status-paused-text`        | `"Paused"`    |
 | Stopped       | `smudge-player-status-stopped-text`       | `"Stopped"`   |
-| Shuffling On  | `smudge-player-status-repeating-text`     | `"R"`         |
-| Shuffling Off | `smudge-player-status-not-repeating-text` | `"-"`         |
-| Repeating On  | `smudge-player-status-shuffling-text`     | `"S"`         |
-| Repeating Off | `smudge-player-status-not-shuffling-text` | `"-"`         |
+| Repeating On  | `smudge-player-status-repeating-text`     | `"R"`         |
+| Repeating Off | `smudge-player-status-not-repeating-text` | `"-"`         |
+| Shuffling On  | `smudge-player-status-shuffling-text`     | `"S"`         |
+| Shuffling Off | `smudge-player-status-not-shuffling-text` | `"-"`         |
 
 #### Global Remote Mode
 
