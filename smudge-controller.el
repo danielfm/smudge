@@ -99,6 +99,11 @@ The following placeholders are supported:
   :type 'string
   :group 'smudge)
 
+(defcustom smudge-player-use-transient-map nil
+  "Whether a transient map should be activated after commands that are likely to be repeated."
+  :type 'bool
+  :group 'smudge)
+
 (defvar smudge-controller-timer nil)
 
 (defvar smudge-controller-player-status ""
@@ -106,6 +111,19 @@ The following placeholders are supported:
 
 (defvar smudge-controller-player-metadata nil
   "The metadata about the currently playing track.")
+
+(defmacro defun-smudge-transient (&rest body)
+  "Create a transient smudge command from BODY.
+
+A transient command allows you to immediately invoke another command from
+`smudge-transient-command-map'. See `set-transient-map'.
+
+The transient map is enabled if `smudge-player-use-transient-map' is non-nil."
+  (declare (doc-string 3)
+           (indent defun))
+  `(defun ,@body
+     (when smudge-player-use-transient-map
+       (set-transient-map smudge-transient-command-map))))
 
 (defun smudge-controller-apply (suffix &rest args)
   "Simple facility to emulate multimethods.
@@ -201,22 +219,22 @@ This corresponds to the current REPEATING state."
   (interactive)
   (smudge-controller-apply "player-toggle-play"))
 
-(defun smudge-controller-next-track ()
+(defun-smudge-transient smudge-controller-next-track ()
   "Sends a `next track' command to Spotify process."
   (interactive)
   (smudge-controller-apply "player-next-track"))
 
-(defun smudge-controller-previous-track ()
+(defun-smudge-transient smudge-controller-previous-track ()
   "Sends a `previous track' command to Spotify process."
   (interactive)
   (smudge-controller-apply "player-previous-track"))
 
-(defun smudge-controller-volume-up ()
+(defun-smudge-transient smudge-controller-volume-up ()
   "Increase the volume for the active device."
   (interactive)
   (smudge-controller-apply "volume-up"))
 
-(defun smudge-controller-volume-down ()
+(defun-smudge-transient smudge-controller-volume-down ()
   "Increase the volume for the active device."
   (interactive)
   (smudge-controller-apply "volume-down"))

@@ -56,6 +56,12 @@ defined in the Emacs manual [Key Binding
 Conventions](https://www.gnu.org/software/emacs/manual/html_node/elisp/Key-Binding-Conventions.html#Key-Binding-Conventions). Previous
 versions of this package used "M-p"
 
+A transient map can be enabled to allow repeating frequent commands (defined in
+`smudge-transient-command-map`) without having to repeat the prefix key for `smudge-command-map`.
+````el
+(setq smudge-player-use-transient-map t)
+````
+
 In order to get the the client ID and client secret, you need to create
 [a Spotify app](https://developer.spotify.com/my-applications), specifying
 <http://localhost:8080/smudge-api-callback> as the redirect URI (or whichever port you have specified via customize).
