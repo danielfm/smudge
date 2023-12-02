@@ -596,5 +596,31 @@ Call CALLBACK if provided."
    nil
    callback))
 
+
+(defun smudge-api-queue-add-track (track-id &optional callback)
+  "Add given TRACK-ID to the queue"
+  (smudge-api-call-async
+   "POST"
+   (concat "/me/player/queue?"
+	   (url-build-query-string `((uri ,track-id))
+				   nil t))
+   nil
+   callback)
+)
+(defun smudge-api-queue-add-tracks (track-ids &optional callback)
+  "Add given TRACK-IDs to the queue"
+  ;; Spotify's API doesn't provide a endpoint that would enable us to
+  ;; add multiple tracks to the queue at the same time.
+  ;; Thus we have to synchronously add the tracks
+  ;; one by one to the queue.
+  (if (car track-ids)
+    (smudge-api-queue-add-track (car track-ids)
+		  (lambda (response)
+		    (smudge-api-queue-add-tracks (cdr track-ids)
+						 nil)))
+    (funcall callback)
+  )
+)
+
 (provide 'smudge-api)
 ;;; smudge-api.el ends here
