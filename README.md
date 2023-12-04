@@ -216,6 +216,7 @@ key bindings:
 | <kbd>a</kbd>     | Adds track to a playlist                                         |
 | <kbd>l</kbd>     | Loads the next page of results (pagination)                      |
 | <kbd>g</kbd>     | Clears the results and reloads the first page of results         |
+| <kbd>k</kbd>     | Adds track to the queue                                          |
 | <kbd>M-RET</kbd> | Plays the track under the cursor in the context of its album [1] |
 
 [1] D-Bus implementation for GNU/Linux do not support passing the context, so
@@ -285,6 +286,7 @@ bindings in the resulting buffer:
 | <kbd>g</kbd>     | Clears the results and reloads the first page of results            |
 | <kbd>f</kbd>     | Follows the current playlist                                        |
 | <kbd>u</kbd>     | Unfollows the current playlist                                      |
+| <kbd>k</kbd>     | Adds track to the queue                                             |
 | <kbd>M-RET</kbd> | Plays the track under the cursor in the context of the playlist [1] |
 
 Both buffers load the `global-smudge-remote-mode` by default.
