@@ -154,6 +154,7 @@ Prompt for the NAME and whether it should be made PUBLIC."
     (define-key map (kbd "d") #'smudge-select-device)
     map)
   "Keymap for Spotify commands after \\='smudge-keymap-prefix\\='.")
+
 (fset 'smudge-command-map smudge-command-map)
 
 (easy-menu-add-item nil '("Tools")

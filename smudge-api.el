@@ -14,6 +14,7 @@
 (require 'simple-httpd)
 (require 'request)
 (require 'oauth2)
+(require 'browse-url)
 
 (defcustom smudge-oauth2-client-id ""
   "The unique identifier for your application.
