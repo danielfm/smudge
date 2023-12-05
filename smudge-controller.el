@@ -15,8 +15,7 @@
 (require 'smudge-api)
 
 (defmacro smudge-if-gnu-linux (then else)
-  "Evaluate THEN form if Emacs is running in GNU/Linux, otherwise evaluate
-ELSE form."
+  "Evaluate THEN form if Emacs is running in Linux, otherwise evaluate ELSE."
   `(if (eq system-type 'gnu/linux) ,then ,else))
 
 (defmacro smudge-when-gnu-linux (then)
@@ -118,8 +117,7 @@ Apply SUFFIX to smudge-controller-prefixed functions, applying ARGS."
       (run-at-time 1 nil #'smudge-controller-player-status))))
 
 (defun smudge-controller-update-metadata (metadata)
-  "Compose the playing status string to be displayed in the mode-line
-from METADATA."
+  "Build the playing status to be displayed in the mode-line from METADATA."
   (let* ((player-status smudge-player-status-format)
          (duration-format "%m:%02s")
          (json-object-type 'hash-table)
@@ -171,8 +169,7 @@ This corresponds to the current REPEATING state."
   (and (boundp 'smudge-controller-timer) (timerp smudge-controller-timer)))
 
 (defun smudge-controller-start-player-status-timer ()
-  "Start the timer that will update the mode line according to the Spotify
-player status."
+  "Start the timer that will update the mode line with Spotify player status."
   (when (and (not (smudge-controller-timerp)) (> smudge-player-status-refresh-interval 0))
     (setq smudge-controller-timer
           (run-at-time t smudge-player-status-refresh-interval #'smudge-controller-player-status))))
