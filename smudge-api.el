@@ -6,8 +6,8 @@
 
 ;;; Commentary:
 
-;; This library is the interface to the Spotify RESTful API.  It also does some custom handling of
-;; the OAuth code exchange via 'simple-httpd
+;; This library is the interface to the Spotify RESTful API.  It also does some
+;; custom handling of the OAuth code exchange via 'simple-httpd
 
 ;;; Code:
 
@@ -608,14 +608,14 @@ Call CALLBACK if provided."
    callback))
 
 (defun smudge-api-queue-add-tracks (track-ids &optional callback)
-  "Add given TRACK-IDs to the queue"
+  "Add given TRACK-IDS to the queue"
   ;; Spotify's API doesn't provide a endpoint that would enable us to
   ;; add multiple tracks to the queue at the same time.
   ;; Thus we have to synchronously add the tracks
   ;; one by one to the queue.
   (if (car track-ids)
       (smudge-api-queue-add-track (car track-ids)
-		                  (lambda (response)
+		                  (lambda (_)
 		                    (smudge-api-queue-add-tracks (cdr track-ids)
 						                 nil)))
     (funcall callback)))

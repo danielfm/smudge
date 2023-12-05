@@ -6,8 +6,9 @@
 
 ;;; Commentary:
 
-;; This library handles controlling Spotify via Applescript commands.  It implements a set of
-;; multimethod-like functions that are dispatched in smudge-controller.el.
+;; This library handles controlling Spotify via Applescript commands. It
+;; implements a set of multimethod-like functions that are dispatched in
+;; smudge-controller.el.
 
 ;;; Code:
 

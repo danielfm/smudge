@@ -6,9 +6,9 @@
 
 ;;; Commentary:
 
-;; This library uses the "connect" APIs to control transport functions of remote and local instances
-;; of Spotify clients.  It implements a set of multimethod-like functions that are dispatched in
-;; smudge-controller.el.
+;; This library uses the "connect" APIs to control transport functions of
+;; remote and local instances of Spotify clients.  It implements a set of
+;; multimethod-like functions that are dispatched in smudge-controller.el.
 
 ;; smudge-connect.el --- Smudge transport for the Spotify Connect API
 
@@ -125,9 +125,9 @@ Returns a JSON string in the format:
       (let ((volume (smudge-connect-get-volume status)))
         (if (eq volume 0)
             (smudge-api-set-volume (smudge-connect-get-device-id status) 100
-                                    (lambda (_) (message "Volume unmuted")))
+                                   (lambda (_) (message "Volume unmuted")))
           (smudge-api-set-volume (smudge-connect-get-device-id status) 0
-                                  (lambda (_) (message "Volume muted")))))))))
+                                 (lambda (_) (message "Volume muted")))))))))
 
 (defun smudge-connect-toggle-repeat ()
   "Toggle repeat for the current track."
@@ -156,7 +156,7 @@ Returns a JSON string in the format:
 (defun smudge-connect--is-shuffling (player-status)
   "Business logic for shuffling state of PLAYER-STATUS."
   (and player-status
-         (not (eq (gethash 'shuffle_state player-status) :json-false))))
+       (not (eq (gethash 'shuffle_state player-status) :json-false))))
 
 (defun smudge-connect--is-repeating (player-status)
   "Business logic for repeat state of PLAYER-STATUS."
