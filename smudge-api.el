@@ -605,8 +605,8 @@ Call CALLBACK if provided."
 	   (url-build-query-string `((uri ,track-id))
 				   nil t))
    nil
-   callback)
-)
+   callback))
+
 (defun smudge-api-queue-add-tracks (track-ids &optional callback)
   "Add given TRACK-IDs to the queue"
   ;; Spotify's API doesn't provide a endpoint that would enable us to
@@ -614,13 +614,11 @@ Call CALLBACK if provided."
   ;; Thus we have to synchronously add the tracks
   ;; one by one to the queue.
   (if (car track-ids)
-    (smudge-api-queue-add-track (car track-ids)
-		  (lambda (response)
-		    (smudge-api-queue-add-tracks (cdr track-ids)
-						 nil)))
-    (funcall callback)
-  )
-)
+      (smudge-api-queue-add-track (car track-ids)
+		                  (lambda (response)
+		                    (smudge-api-queue-add-tracks (cdr track-ids)
+						                 nil)))
+    (funcall callback)))
 
 (provide 'smudge-api)
 ;;; smudge-api.el ends here
