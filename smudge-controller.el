@@ -6,8 +6,9 @@
 
 ;;; Commentary:
 
-;; This library defines a set of commands for controlling an instance of a Spotify client.  The
-;; commands are sent via a multimethod-like dispatch to the chosen transport.
+;; This library defines a set of commands for controlling an instance of a
+;; Spotify client. The commands are sent via a multimethod-like dispatch to
+;; the chosen transport.
 
 ;;; Code:
 
@@ -33,8 +34,8 @@
   "How the commands should be sent to Spotify process.
 Defaults to 'connect, as it provides a consistent UX across all OSes."
   :type '(choice (symbol :tag "AppleScript" apple)
-                 (symbol :tag "D-Bus" dbus)
-                 (symbol :tag "Connect" connect))
+          (symbol :tag "D-Bus" dbus)
+          (symbol :tag "Connect" connect))
   :group 'smudge)
 
 (defcustom smudge-player-status-refresh-interval 5

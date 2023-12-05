@@ -6,7 +6,8 @@
 
 ;;; Commentary:
 
-;; This library implements UI and a major mode for searching and acting on Spotify playlists.
+;; This library implements UI and a major mode for searching and acting on
+;; Spotify playlists.
 
 ;;; Code:
 
