@@ -21,7 +21,7 @@
   :type 'string)
 
 (defcustom smudge-status-location 'modeline
-  "Specify where to show the player status: one of '(modeline title-bar nil)."
+  "Specify where to show the player status: one of \\='(modeline title-bar nil)."
   :type '(choice (const :tag "Modeline" modeline)
           (const :tag "Title Bar" title-bar)
           (const :tag "Do not show" nil))

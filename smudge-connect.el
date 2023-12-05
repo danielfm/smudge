@@ -118,7 +118,7 @@ Returns a JSON string in the format:
            (message "Volume decreased to %d%%" new-volume))))))))
 
 (defun smudge-connect-volume-mute-unmute ()
-  "Mute/unmute the volume on the actively playing device by setting the volume to 0."
+  "Mute/unmute the actively playing device by setting the volume to 0."
   (smudge-connect-when-device-active
    (smudge-api-get-player-status
     (lambda (status)

@@ -294,7 +294,7 @@ Default to sortin tracks by number when listing the tracks from an album."
       (smudge-api-queue-add-track
        track-id
        (lambda(_)
-	 (message (format "Added \"%s\" to your queue." (smudge-api-get-item-name selected-track))))))))
+	 (message "Added \"%s\" to your queue." (smudge-api-get-item-name selected-track)))))))
 
 
 (provide 'smudge-track)

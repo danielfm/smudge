@@ -15,7 +15,8 @@
 (require 'smudge-api)
 
 (defmacro smudge-if-gnu-linux (then else)
-  "Evaluate THEN form if Emacs is running in GNU/Linux, otherwise evaluate ELSE form."
+  "Evaluate THEN form if Emacs is running in GNU/Linux, otherwise evaluate
+ELSE form."
   `(if (eq system-type 'gnu/linux) ,then ,else))
 
 (defmacro smudge-when-gnu-linux (then)
@@ -32,7 +33,7 @@
 
 (defcustom smudge-transport 'connect
   "How the commands should be sent to Spotify process.
-Defaults to 'connect, as it provides a consistent UX across all OSes."
+Defaults to \\='connect, as it provides a consistent UX across all OSes."
   :type '(choice (symbol :tag "AppleScript" apple)
           (symbol :tag "D-Bus" dbus)
           (symbol :tag "Connect" connect))
@@ -94,7 +95,7 @@ The following placeholders are supported:
 * %t - Track name (truncated)
 * %n - Track #
 * %l - Track duration, in minutes (i.e. 01:35)
-* %p - Player status indicator for 'playing', 'paused', and 'stopped' states
+* %p - Player status indicator for playing, paused, and stopped states
 * %s - Player shuffling status indicator
 * %r - Player repeating status indicator"
   :type 'string
@@ -117,7 +118,8 @@ Apply SUFFIX to smudge-controller-prefixed functions, applying ARGS."
       (run-at-time 1 nil #'smudge-controller-player-status))))
 
 (defun smudge-controller-update-metadata (metadata)
-  "Compose the playing status string to be displayed in the mode-line from METADATA."
+  "Compose the playing status string to be displayed in the mode-line
+from METADATA."
   (let* ((player-status smudge-player-status-format)
          (duration-format "%m:%02s")
          (json-object-type 'hash-table)
@@ -169,7 +171,8 @@ This corresponds to the current REPEATING state."
   (and (boundp 'smudge-controller-timer) (timerp smudge-controller-timer)))
 
 (defun smudge-controller-start-player-status-timer ()
-  "Start the timer that will update the mode line according to the Spotify player status."
+  "Start the timer that will update the mode line according to the Spotify
+player status."
   (when (and (not (smudge-controller-timerp)) (> smudge-player-status-refresh-interval 0))
     (setq smudge-controller-timer
           (run-at-time t smudge-player-status-refresh-interval #'smudge-controller-player-status))))

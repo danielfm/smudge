@@ -598,7 +598,7 @@ Call CALLBACK if provided."
 
 
 (defun smudge-api-queue-add-track (track-id &optional callback)
-  "Add given TRACK-ID to the queue"
+  "Add given TRACK-ID to the queue and call CALLBACK afterwards."
   (smudge-api-call-async
    "POST"
    (concat "/me/player/queue?"
@@ -608,7 +608,7 @@ Call CALLBACK if provided."
    callback))
 
 (defun smudge-api-queue-add-tracks (track-ids &optional callback)
-  "Add given TRACK-IDS to the queue"
+  "Add given TRACK-IDS to the queue and call CALLBACK afterwards."
   ;; Spotify's API doesn't provide a endpoint that would enable us to
   ;; add multiple tracks to the queue at the same time.
   ;; Thus we have to synchronously add the tracks
