@@ -427,7 +427,7 @@ Removed by USER-ID. Call CALLBACK with results."
   (smudge-api-playlist-remove-tracks playlist-id (list track-id) callback))
 
 (defun smudge-api-playlist-remove-tracks (playlist-id track-ids callback)
-  "Remove TRACK-IDs from PLAYLIST-ID for USER-ID.
+  "Remove TRACK-IDS from PLAYLIST-ID for USER-ID.
 Call CALLBACK with results."
   (let ((tracks (format "%s" (mapconcat
                               (lambda (x) (format "{\"uri\": %s}" (smudge-api-format-id "track" x)))
