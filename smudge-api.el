@@ -421,10 +421,10 @@ Call CALLBACK with results."
      (format "{\"uris\": [ %s ]}" tracks)
      callback)))
 
-(defun smudge-api-playlist-remove-track (user-id playlist-id track-id callback)
+(defun smudge-api-playlist-remove-track (playlist-id track-id callback)
   "Remove TRACK-ID from PLAYLIST-ID.
 Removed by USER-ID. Call CALLBACK with results."
-  (smudge-api-playlist-remove-tracks user-id playlist-id (list track-id) callback))
+  (smudge-api-playlist-remove-tracks playlist-id (list track-id) callback))
 
 (defun smudge-api-playlist-remove-tracks (playlist-id track-ids callback)
   "Remove TRACK-IDs from PLAYLIST-ID for USER-ID.
