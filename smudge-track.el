@@ -6,7 +6,8 @@
 
 ;;; Commentary:
 
-;; This library implements UI and a major mode for searching and acting on Spotify playlists.
+;; This library implements UI and a major mode for searching and acting on
+;; Spotify playlists.
 
 ;;; Code:
 
@@ -28,6 +29,7 @@
     (define-key map (kbd "g")     #'smudge-track-reload)
     (define-key map (kbd "f")     #'smudge-track-playlist-follow)
     (define-key map (kbd "u")     #'smudge-track-playlist-unfollow)
+    (define-key map (kbd "k")     #'smudge-track-add-to-queue)
     map)
   "Local keymap for `smudge-track-search-mode' buffers.")
 
@@ -297,6 +299,17 @@ Default to sortin tracks by number when listing the tracks from an album."
          (lambda (_)
            (message "Song removed."))))
     (message "Cannot remove a track from a playlist from here")))
+
+(defun smudge-track-add-to-queue ()
+  "Add the track under the cursor to the queue."
+  (interactive)
+  (let ((selected-track (tabulated-list-get-id)))
+    (let ((track-id (smudge-api-get-item-uri selected-track)))
+      (smudge-api-queue-add-track
+       track-id
+       (lambda(_)
+	 (message "Added \"%s\" to your queue." (smudge-api-get-item-name selected-track)))))))
+
 
 (provide 'smudge-track)
 ;;; smudge-track.el ends here

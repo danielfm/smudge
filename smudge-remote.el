@@ -6,8 +6,9 @@
 
 ;;; Commentary:
 
-;; This library implements a minor mode that allows for interacting with Spotify and displaying
-;; transport status.  This also includes a global minor mode definition.
+;; This library implements a minor mode that allows for interacting with
+;; Spotify and displaying transport status.  This also includes a global
+;; minor mode definition.
 
 ;;; Code:
 
@@ -20,10 +21,10 @@
   :type 'string)
 
 (defcustom smudge-status-location 'modeline
-  "Specify where to show the player status: one of '(modeline title-bar nil)."
+  "Specify where to show the player status: one of \\='(modeline title-bar nil)."
   :type '(choice (const :tag "Modeline" modeline)
-                 (const :tag "Title Bar" title-bar)
-                 (const :tag "Do not show" nil))
+          (const :tag "Title Bar" title-bar)
+          (const :tag "Do not show" nil))
   :group 'smudge)
 
 (defcustom smudge-title-bar-separator "    "
@@ -106,7 +107,7 @@ See commands \\[smudge-toggle-repeating] and
 (defvar smudge-remote-player-status-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "<mode-line> <mouse-1>")
-      'smudge-remote-popup-menu)
+                'smudge-remote-popup-menu)
     map)
   "Keymap for Smudge mode-line status.")
 

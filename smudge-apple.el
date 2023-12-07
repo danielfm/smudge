@@ -6,15 +6,13 @@
 
 ;;; Commentary:
 
-;; This library handles controlling Spotify via Applescript commands.  It implements a set of
-;; multimethod-like functions that are dispatched in smudge-controller.el.
+;; This library handles controlling Spotify via Applescript commands. It
+;; implements a set of multimethod-like functions that are dispatched in
+;; smudge-controller.el.
 
 ;;; Code:
 
 (require 'smudge-controller)
-
-(defvar smudge-apple-player-status-script)
-(defvar smudge-apple-player-status-script-file)
 
 (defcustom smudge-osascript-bin-path "/usr/bin/osascript"
   "Path to `osascript' binary."
@@ -22,7 +20,7 @@
   :type 'string)
 
 ;; Do not change this unless you know what you're doing
-(setq smudge-apple-player-status-script "
+(defconst smudge-apple-player-status-script "
 # Source: https://github.com/andrehaveman/smudge-node-applescript
 on escape_quotes(string_to_escape)
   set AppleScript's text item delimiters to the \"\\\"\"
@@ -49,8 +47,8 @@ end tell
 ")
 
 ;; Write script to a temp file
-(setq smudge-apple-player-status-script-file
-      (make-temp-file "smudge.el" nil nil smudge-apple-player-status-script))
+(defconst smudge-apple-player-status-script-file
+  (make-temp-file "smudge.el" nil nil smudge-apple-player-status-script))
 
 (defun smudge-apple-command-line (cmd)
   "Return a command line prefix for any Spotify command CMD."
