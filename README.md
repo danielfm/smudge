@@ -1,7 +1,8 @@
 # Smudge
 
-**Control Spotify app from within Emacs.** [![MELPA](https://melpa.org/packages/smudge-badge.svg)](https://melpa.org/#/smudge)
+[![MELPA](https://melpa.org/packages/smudge-badge.svg)](https://melpa.org/#/smudge)
 
+**Control Spotify app from within Emacs.**
 
 [![asciicast](https://asciinema.org/a/218654.svg)](https://asciinema.org/a/218654)
 
