@@ -51,11 +51,12 @@ Or put the following snippet into your Emacs configuration:
 Add the following to the `packages.el` file:
 
 ```el
-(package! smudge) ; from MELPA
+;; Fetch from MELPA
+(package! smudge)
 
-;; From GitHub
+;; Fetch from GitHub
 (package! smudge
-  :recipe (:host github :repo "danielfm/smudge")) ; from GitHub
+  :recipe (:host github :repo "danielfm/smudge"))
 ```
 
 Add the following to the `config.el` file:
