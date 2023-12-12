@@ -632,11 +632,12 @@ Call CALLBACK if provided."
   ;; Thus we have to synchronously add the tracks
   ;; one by one to the queue.
   (if (car track-ids)
-      (smudge-api-queue-add-track (car track-ids)
-		                  (lambda (_)
-		                    (smudge-api-queue-add-tracks (cdr track-ids)
-						                 nil)))
-    (funcall callback)))
+      (smudge-api-queue-add-track
+        (car track-ids)
+        (lambda (_)
+          (smudge-api-queue-add-tracks (cdr track-ids) callback)))
+      (when callback(funcall callback))
+  ))
 
 (provide 'smudge-api)
 ;;; smudge-api.el ends here

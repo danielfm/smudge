@@ -303,12 +303,33 @@ Default to sortin tracks by number when listing the tracks from an album."
 (defun smudge-track-add-to-queue ()
   "Add the track under the cursor to the queue."
   (interactive)
-  (let ((selected-track (tabulated-list-get-id)))
-    (let ((track-id (smudge-api-get-item-uri selected-track)))
-      (smudge-api-queue-add-track
+  ;; Check whether the mark is active and if so, queue all the tracks in the
+  ;; region. If not, queue the track under the cursor.
+  (if (null mark-active)
+   (let ((selected-track (tabulated-list-get-id)))
+	 (setq track-id (smudge-api-get-item-uri selected-track))
+     (smudge-api-queue-add-track
        track-id
        (lambda(_)
-	 (message "Added \"%s\" to your queue." (smudge-api-get-item-name selected-track)))))))
+         (message "Added \"%s\" to your queue." (smudge-api-get-item-name selected-track)))))
+   (let((start (region-beginning))
+         (end (region-end))
+         (tracks '()))
+     (save-excursion
+       (goto-char start)
+       (while (< (point) end)
+         (setq selected-track (tabulated-list-get-id))
+         (setq track-id (smudge-api-get-item-uri selected-track))
+         (setq tracks (cons track-id tracks))
+         (forward-line 1))
+     )
+     (smudge-api-queue-add-tracks
+       (reverse tracks)
+       nil)
+     (message "Added %d tracks to your queue." (length tracks)) ; Send the message here instead of in the callback
+                                                                 ; because the API call has to sequentially add each song which might take some time.
+     ))
+)
 
 
 (provide 'smudge-track)
