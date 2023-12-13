@@ -4,7 +4,7 @@
 
 ;; Keywords: multimedia, music, spotify, smudge
 ;; Package: smudge
-;; Package-Requires: ((emacs "27.1") (simple-httpd "1.5") (request "0.3") (oauth2 "0.16"))
+;; Package-Requires: ((emacs "27.1") (simple-httpd "20230821.1458") (request "0.3") (oauth2 "0.16"))
 ;; Version: 1.0.0
 ;; Homepage: https://github.com/danielfm/smudge
 
@@ -15,12 +15,13 @@
 ;; This mode requires at least GNU Emacs 24.4
 
 ;; Before using this mode, first go the Spotify Web API console
-;; <https://developer.spotify.com/my-applications> and create a new application, adding
-;; <http://localhost:8080/smudge-callback> as the redirect URI (or whichever port you have
-;; specified via customize).
+;; <https://developer.spotify.com/my-applications> and create a new application,
+;; adding <http://localhost:8080/smudge-callback> as the redirect URI (or
+;; whichever port you have specified via customize).
 
-;; After requiring `smudge', make sure to define the client id and client secrets, along with some
-;; other important settings.  See README.md for the complete list of settings and usage information.
+;; After requiring `smudge', make sure to define the client id and client
+;; secrets, along with some other important settings.  See README.md for the
+;; complete list of settings and usage information.
 
 ;;; Code:
 
@@ -152,7 +153,8 @@ Prompt for the NAME and whether it should be made PUBLIC."
     (define-key map (kbd "t s") #'smudge-track-search)
     (define-key map (kbd "d") #'smudge-select-device)
     map)
-  "Keymap for Spotify commands after 'smudge-keymap-prefix'.")
+  "Keymap for Spotify commands after \\='smudge-keymap-prefix\\='.")
+
 (fset 'smudge-command-map smudge-command-map)
 
 (defvar smudge-transient-command-map

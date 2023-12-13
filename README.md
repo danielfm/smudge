@@ -1,5 +1,7 @@
 # Smudge
 
+[![MELPA](https://melpa.org/packages/smudge-badge.svg)](https://melpa.org/#/smudge)
+
 **Control Spotify app from within Emacs.**
 
 [![asciicast](https://asciinema.org/a/218654.svg)](https://asciinema.org/a/218654)
@@ -24,52 +26,87 @@ Connect feature.
 
 ## Installation
 
-(Requires Emacs 27.1+)
+Smudge requires Emacs 27.1+.
+
+### Vanilla Emacs
 
 `package.el` is the built-in package manager in Emacs.
 
-Smudge is available on the two major package.el community maintained repos - MELPA Stable and MELPA.
+Smudge is available on the two major package.el community maintained repos MELP AStable and MELPA.
 
 You can install Smudge with the following command:
 
-M-x package-install [RET] smudge [RET]
+<kbd>M-x</kbd> package-install <kbd>[RET]</kbd> smudge <kbd>[RET]</kbd>
 
-To manually install Smudge instead, just clone this project somewhere in your
-disk, add that directory in the `load-path`, and require the `smudge` module:
+Or put the following snippet into your Emacs configuration:
 
-````el
-(add-to-list 'load-path "<smudge-dir>")
-(require 'smudge)
-````
+```el
+(use-package smudge
+  :bind-keymap ("C-c ." . smudge-command-map)
+  :config
+  (setq smudge-oauth2-client-secret "..."
+        smudge-oauth2-client-id "..."))
+```
+
+### Doom Emacs
+
+Add the following to the `packages.el` file:
+
+```el
+;; Fetch from MELPA
+(package! smudge)
+
+;; Fetch from GitHub
+(package! smudge
+  :recipe (:host github :repo "danielfm/smudge"))
+```
+
+Add the following to the `config.el` file:
+
+``` el
+(use-package! smudge
+  :bind-keymap ("C-c ." . smudge-command-map)
+  :custom
+  (smudge-oauth2-client-secret "...")
+  (smudge-oauth2-client-id "...")
+  ;; optional: enable transient map for frequent commands
+  (smudge-player-use-transient-map t))
+```
 
 ## Configuration
 
-````el
-;; Settings
+```el
 (setq smudge-oauth2-client-secret "<spotify-app-client-secret>")
 (setq smudge-oauth2-client-id "<spotify-app-client-id>")
+
 (define-key smudge-mode-map (kbd "C-c .") 'smudge-command-map)
-````
+```
 
-That keymap prefix is just a suggestion, following the conventions suggested for minor modes as
-defined in the Emacs manual [Key Binding
-Conventions](https://www.gnu.org/software/emacs/manual/html_node/elisp/Key-Binding-Conventions.html#Key-Binding-Conventions). Previous
-versions of this package used "M-p"
+That <kbd>C-c .</kbd> keymap prefix is just a suggestion, following the
+conventions suggested for minor modes as defined in the Emacs manual
+[Key Binding Conventions](https://www.gnu.org/software/emacs/manual/html_node/elisp/Key-Binding-Conventions.html#Key-Binding-Conventions).
+Previous versions of this package used <kbd>M-p</kbd>.
 
-A transient map can be enabled to allow repeating frequent commands (defined in
-`smudge-transient-command-map`) without having to repeat the prefix key for `smudge-command-map`.
-````el
+A transient map can be enabled to allow repeating frequent commands
+(defined in `smudge-transient-command-map`) without having to repeat the
+prefix key for `smudge-command-map`.
+
+```el
 (setq smudge-player-use-transient-map t)
-````
+```
 
-In order to get the the client ID and client secret, you need to create
-[a Spotify app](https://developer.spotify.com/my-applications), specifying
-<http://localhost:8080/smudge-api-callback> as the redirect URI (or whichever port you have specified via customize).
-The OAuth2 exchange is handled by `simple-httpd`. If you are not already using this package for something else, you should not need to customize this port. Otherwise, you'll want to set it to whatever port you are running on.
+In order to get the client ID and client secret, you need to create a
+[Spotify app](https://developer.spotify.com/my-applications), specifying
+<http://localhost:8080/smudge-api-callback> as the redirect URI (or whichever
+port you have specified via customize). The OAuth2 exchange is handled by
+`simple-httpd`. If you are not already using this package for something else,
+you should not need to customize this port. Otherwise, you'll want to set it
+to whatever port you are running on.
 
-To use the "Spotify Connect" transport (vs. controlling only your local instance - though you can
-also control your local instance as well), set `smudge-transport` to `'connect` as follows. This
-feature requires a Spotify premium subscription.
+To use the "Spotify Connect" transport (vs. controlling only your local
+instance - though you can also control your local instance as well), set
+`smudge-transport` to `'connect` as follows. **This feature requires a Spotify
+premium subscription.**
 
 ````el
 (setq smudge-transport 'connect)
@@ -100,24 +137,24 @@ At this point, the client ID and the client secret are available, so set those v
 Whenever you enable the `global-smudge-remote-mode` minor mode you get the following
 key bindings:
 
-| Key                  | Function                               | Description                                |
-|:---------------------|:---------------------------------------|:-------------------------------------------|
-| <kbd>C-c . M-s</kbd> | `smudge-controller-toggle-shuffle`     | Turn shuffle on/off [1]                    |
-| <kbd>C-c . M-r</kbd> | `smudge-controller-toggle-repeat`      | Turn repeat on/off [1]                     |
-| <kbd>C-c . M-p</kbd> | `smudge-controller-toggle-play`        | Play/pause                                 |
-| <kbd>C-c . M-f</kbd> | `smudge-controller-next-track`         | Next track                                 |
-| <kbd>C-c . M-b</kbd> | `smudge-controller-previous-track`     | Previous track                             |
-| <kbd>C-c . p m</kbd> | `smudge-my-playlists`                  | Show your playlists                        |
-| <kbd>C-c . p f</kbd> | `smudge-featured-playlists`            | Show the featured playlists                |
-| <kbd>C-c . p s</kbd> | `smudge-playlist-search`               | Search for playlists                       |
-| <kbd>C-c . p u</kbd> | `smudge-user-playlists`                | Show playlists for the given user          |
-| <kbd>C-c . p c</kbd> | `smudge-create-playlist`               | Create a new playlist                      |
-| <kbd>C-c . t r</kbd> | `smudge-recently-played`               | List of recently played tracks             |
-| <kbd>C-c . t s</kbd> | `smudge-track-search`                  | Search for tracks                          |
-| <kbd>C-c . v u</kbd> | `smudge-controller-volume-up`          | Increase the volume [2]                    |
-| <kbd>C-c . v d</kbd> | `smudge-controller-volume-down`        | Decrease the volume [2]                    |
-| <kbd>C-c . v m</kbd> | `smudge-controller-volume-mute-unmute` | Alternate the volume between 0 and 100 [2] |
-| <kbd>C-c . d</kbd>   | `smudge-select-device`                 | Select a playback device [2]               |
+| Key                     | Function                               | Description                                |
+|:------------------------|:---------------------------------------|:-------------------------------------------|
+| <kbd>[prefix] M-s</kbd> | `smudge-controller-toggle-shuffle`     | Turn shuffle on/off [1]                    |
+| <kbd>[prefix] M-r</kbd> | `smudge-controller-toggle-repeat`      | Turn repeat on/off [1]                     |
+| <kbd>[prefix] M-p</kbd> | `smudge-controller-toggle-play`        | Play/pause                                 |
+| <kbd>[prefix] M-f</kbd> | `smudge-controller-next-track`         | Next track                                 |
+| <kbd>[prefix] M-b</kbd> | `smudge-controller-previous-track`     | Previous track                             |
+| <kbd>[prefix] p m</kbd> | `smudge-my-playlists`                  | Show your playlists                        |
+| <kbd>[prefix] p f</kbd> | `smudge-featured-playlists`            | Show the featured playlists                |
+| <kbd>[prefix] p s</kbd> | `smudge-playlist-search`               | Search for playlists                       |
+| <kbd>[prefix] p u</kbd> | `smudge-user-playlists`                | Show playlists for the given user          |
+| <kbd>[prefix] p c</kbd> | `smudge-create-playlist`               | Create a new playlist                      |
+| <kbd>[prefix] t r</kbd> | `smudge-recently-played`               | List of recently played tracks             |
+| <kbd>[prefix] t s</kbd> | `smudge-track-search`                  | Search for tracks                          |
+| <kbd>[prefix] v u</kbd> | `smudge-controller-volume-up`          | Increase the volume [2]                    |
+| <kbd>[prefix] v d</kbd> | `smudge-controller-volume-down`        | Decrease the volume [2]                    |
+| <kbd>[prefix] v m</kbd> | `smudge-controller-volume-mute-unmute` | Alternate the volume between 0 and 100 [2] |
+| <kbd>[prefix] d</kbd>   | `smudge-select-device`                 | Select a playback device [2]               |
 
 The current song being played by Smudge is displayed in the mode
 line along with the player status (playing, paused). The interval in which the
@@ -222,6 +259,7 @@ key bindings:
 | <kbd>a</kbd>     | Adds track to a playlist                                         |
 | <kbd>l</kbd>     | Loads the next page of results (pagination)                      |
 | <kbd>g</kbd>     | Clears the results and reloads the first page of results         |
+| <kbd>k</kbd>     | Adds track to the queue                                          |
 | <kbd>M-RET</kbd> | Plays the track under the cursor in the context of its album [1] |
 
 [1] D-Bus implementation for GNU/Linux do not support passing the context, so
@@ -263,11 +301,11 @@ playlists from Spotify en_US.
 Change the following variables in order to customize the locale and region for
 the featured playlists endpoint:
 
-````el
+```el
 ;; Spanish (Mexico)
 (setq smudge-api-locale "es_MX")
 (setq smudge-api-country "MX")
-````
+```
 
 All these commands will display results in a separate buffer with the following
 key bindings:
@@ -287,10 +325,12 @@ bindings in the resulting buffer:
 | Key              | Description                                                         |
 |:-----------------|:--------------------------------------------------------------------|
 | <kbd>a</kbd>     | Adds track to a playlist                                            |
+| <kbd>r</kbd>     | Removes track from current playlist
 | <kbd>l</kbd>     | Loads the next page of results (pagination)                         |
 | <kbd>g</kbd>     | Clears the results and reloads the first page of results            |
 | <kbd>f</kbd>     | Follows the current playlist                                        |
 | <kbd>u</kbd>     | Unfollows the current playlist                                      |
+| <kbd>k</kbd>     | Adds track to the queue                                             |
 | <kbd>M-RET</kbd> | Plays the track under the cursor in the context of the playlist [1] |
 
 Both buffers load the `global-smudge-remote-mode` by default.
@@ -317,10 +357,9 @@ By default, the player status (playing, paused, track name, time, shuffle, repea
 in the modeline. If you want to display the status in the title bar when using a graphical display,
 you can set the following:
 
-````el
+```el
 (setq smudge-status-location 'title-bar)
-
-````
+```
 
 Valid values include `'title-bar`, `'modeline` and `nil`, where nil turns off the display of the
 player status completely. If the value is set to `title-bar` but you are not using a graphical
@@ -328,9 +367,11 @@ display, the player status will be displayed in the mode line instead.
 
 If you want to customize the separator between the existing title bar text and the player status,
 you can set the following, i.e.:
-````el
+
+```el
 (setq smudge-title-bar-separator "----")
-````
+```
+
 Otherwise, it defaults to 4 spaces.
 
 ## License

@@ -6,12 +6,13 @@
 
 ;;; Commentary:
 
-;; This library handles controlling Spotify via the D-Bus interface.  It implements a set of
-;; multimethod-like functions that are dispatched in smudge-controller.el.
+;; This library handles controlling Spotify via the D-Bus interface.  It
+;; implements a set of multimethod-like functions that are dispatched in
+;; smudge-controller.el.
 
-;; Somehow shuffling, setting volume and loop status do not work as expected.  Querying the
-;; attribute does not return the expected value and setting it has no effect.  The dbus interface of
-;; Spotify seems to be broken.
+;; Somehow shuffling, setting volume and loop status do not work as expected.
+;; Querying the attribute does not return the expected value and setting it
+;; has no effect.  The dbus interface of Spotify seems to be broken.
 
 ;;; Code:
 

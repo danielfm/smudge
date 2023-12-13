@@ -6,14 +6,15 @@
 
 ;;; Commentary:
 
-;; This library is the interface to the Spotify RESTful API.  It also does some custom handling of
-;; the OAuth code exchange via 'simple-httpd
+;; This library is the interface to the Spotify RESTful API.  It also does some
+;; custom handling of the OAuth code exchange via 'simple-httpd
 
 ;;; Code:
 
 (require 'simple-httpd)
 (require 'request)
 (require 'oauth2)
+(require 'browse-url)
 
 (defcustom smudge-oauth2-client-id ""
   "The unique identifier for your application.
@@ -420,6 +421,23 @@ Call CALLBACK with results."
      (format "{\"uris\": [ %s ]}" tracks)
      callback)))
 
+(defun smudge-api-playlist-remove-track (playlist-id track-id callback)
+  "Remove TRACK-ID from PLAYLIST-ID.
+Removed by USER-ID. Call CALLBACK with results."
+  (smudge-api-playlist-remove-tracks playlist-id (list track-id) callback))
+
+(defun smudge-api-playlist-remove-tracks (playlist-id track-ids callback)
+  "Remove TRACK-IDS from PLAYLIST-ID for USER-ID.
+Call CALLBACK with results."
+  (let ((tracks (format "%s" (mapconcat
+                              (lambda (x) (format "{\"uri\": %s}" (smudge-api-format-id "track" x)))
+                              track-ids ","))))
+    (smudge-api-call-async
+     "DELETE"
+     (format "/playlists/%s/tracks" (url-hexify-string playlist-id))
+     (format "{\"tracks\": [ %s ]}" tracks)
+     callback)))
+
 (defun smudge-api-playlist-follow (playlist callback)
   "Add the current user as a follower of PLAYLIST.
 Call CALLBACK with results."
@@ -595,6 +613,30 @@ Call CALLBACK if provided."
                                    nil t))
    nil
    callback))
+
+
+(defun smudge-api-queue-add-track (track-id &optional callback)
+  "Add given TRACK-ID to the queue and call CALLBACK afterwards."
+  (smudge-api-call-async
+   "POST"
+   (concat "/me/player/queue?"
+	   (url-build-query-string `((uri ,track-id))
+				   nil t))
+   nil
+   callback))
+
+(defun smudge-api-queue-add-tracks (track-ids &optional callback)
+  "Add given TRACK-IDS to the queue and call CALLBACK afterwards."
+  ;; Spotify's API doesn't provide a endpoint that would enable us to
+  ;; add multiple tracks to the queue at the same time.
+  ;; Thus we have to synchronously add the tracks
+  ;; one by one to the queue.
+  (if (car track-ids)
+      (smudge-api-queue-add-track (car track-ids)
+		                  (lambda (_)
+		                    (smudge-api-queue-add-tracks (cdr track-ids)
+						                 nil)))
+    (funcall callback)))
 
 (provide 'smudge-api)
 ;;; smudge-api.el ends here
