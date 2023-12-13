@@ -157,6 +157,15 @@ Prompt for the NAME and whether it should be made PUBLIC."
 
 (fset 'smudge-command-map smudge-command-map)
 
+(defvar smudge-transient-command-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "M-b") #'smudge-controller-previous-track)
+    (define-key map (kbd "M-f") #'smudge-controller-next-track)
+    (define-key map (kbd "M-u") #'smudge-controller-volume-up)
+    (define-key map (kbd "M-d") #'smudge-controller-volume-down)
+    map)
+  "Transient keymap for commands that are likely to be repeated.")
+
 (easy-menu-add-item nil '("Tools")
                     '("Smudge"
                       ["Play/Pause"     smudge-controller-toggle-play    :active global-smudge-remote-mode]

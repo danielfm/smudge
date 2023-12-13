@@ -66,9 +66,11 @@ Add the following to the `config.el` file:
 ``` el
 (use-package! smudge
   :bind-keymap ("C-c ." . smudge-command-map)
-  :config
-  (setq smudge-oauth2-client-secret "..."
-        smudge-oauth2-client-id "..."))
+  :custom
+  (smudge-oauth2-client-secret "...")
+  (smudge-oauth2-client-id "...")
+  ;; optional: enable transient map for frequent commands
+  (smudge-player-use-transient-map t))
 ```
 
 ## Configuration
@@ -84,6 +86,14 @@ That <kbd>C-c .</kbd> keymap prefix is just a suggestion, following the
 conventions suggested for minor modes as defined in the Emacs manual
 [Key Binding Conventions](https://www.gnu.org/software/emacs/manual/html_node/elisp/Key-Binding-Conventions.html#Key-Binding-Conventions).
 Previous versions of this package used <kbd>M-p</kbd>.
+
+A transient map can be enabled to allow repeating frequent commands
+(defined in `smudge-transient-command-map`) without having to repeat the
+prefix key for `smudge-command-map`.
+
+```el
+(setq smudge-player-use-transient-map t)
+```
 
 In order to get the client ID and client secret, you need to create a
 [Spotify app](https://developer.spotify.com/my-applications), specifying
