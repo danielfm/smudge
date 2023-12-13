@@ -301,13 +301,13 @@ Default to sortin tracks by number when listing the tracks from an album."
     (message "Cannot remove a track from a playlist from here")))
 
 (defun smudge-track-add-to-queue ()
-  "Add the track under the cursor to the queue."
+  "Add the track(s) under the cursor (or inside the active region) to the queue."
   (interactive)
   ;; Check whether the mark is active and if so, queue all the tracks in the
   ;; region. If not, queue the track under the cursor.
   (if (null mark-active)
    (let ((selected-track (tabulated-list-get-id)))
-	 (setq track-id (smudge-api-get-item-uri selected-track))
+     (setq track-id (smudge-api-get-item-uri selected-track))
      (smudge-api-queue-add-track
        track-id
        (lambda(_)
@@ -321,15 +321,13 @@ Default to sortin tracks by number when listing the tracks from an album."
          (setq selected-track (tabulated-list-get-id))
          (setq track-id (smudge-api-get-item-uri selected-track))
          (setq tracks (cons track-id tracks))
-         (forward-line 1))
-     )
+         (forward-line 1)))
      (smudge-api-queue-add-tracks
        (reverse tracks)
        nil)
-     (message "Added %d tracks to your queue." (length tracks)) ; Send the message here instead of in the callback
-                                                                 ; because the API call has to sequentially add each song which might take some time.
-     ))
-)
+     ;; Send the message here instead of in the callback
+     ;; because the API call has to sequentially add each song which might take some time.
+     (message "Added %d tracks to your queue." (length tracks)))))
 
 
 (provide 'smudge-track)

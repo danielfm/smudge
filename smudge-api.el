@@ -636,8 +636,7 @@ Call CALLBACK if provided."
         (car track-ids)
         (lambda (_)
           (smudge-api-queue-add-tracks (cdr track-ids) callback)))
-      (when callback(funcall callback))
-  ))
+      (when callback (funcall callback))))
 
 (provide 'smudge-api)
 ;;; smudge-api.el ends here
