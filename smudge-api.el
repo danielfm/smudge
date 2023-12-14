@@ -72,11 +72,10 @@ globally relevant."
 (defvar smudge-api-oauth2-ts    nil
   "Unix timestamp in which the OAuth2 token was retrieved.
 This is used to manually refresh the token when it's about to expire.")
-(defvar smudge-api-oauth2-token-directory (concat (file-name-as-directory user-emacs-directory) ".cache/smudge")
+(defvar smudge-api-oauth2-token-directory (locate-user-emacs-file "smudge/" ".smudge/")
   "Directory where the OAuth2 token is serialized.")
-(defvar smudge-api-oauth2-token-file (concat smudge-api-oauth2-token-directory "/" "token")
+(defvar smudge-api-oauth2-token-file (concat smudge-api-oauth2-token-directory "token")
   "Location where the OAuth2 token is serialized.")
-
 (defvar smudge-is-authorizing nil
   "Whether smudge is in the process of obtaining an OAuth2 token.")
 
