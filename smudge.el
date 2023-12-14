@@ -168,22 +168,22 @@ Prompt for the NAME and whether it should be made PUBLIC."
 
 (easy-menu-add-item nil '("Tools")
                     '("Smudge"
-                      ["Play/Pause"     smudge-controller-toggle-play    :active global-smudge-remote-mode]
-                      ["Previous Track" smudge-controller-previous-track :active global-smudge-remote-mode]
-                      ["Next Track"     smudge-controller-next-track     :active global-smudge-remote-mode]
+                      ["Play/Pause"     smudge-controller-toggle-play]
+                      ["Previous Track" smudge-controller-previous-track]
+                      ["Next Track"     smudge-controller-next-track]
                       "--"
-                      ["Select Device"  smudge-select-device      :active global-smudge-remote-mode]
-                      ["Mute/Unmute"    smudge-controller-volume-mute-unmute :active global-smudge-remote-mode]
+                      ["Select Device"  smudge-select-device]
+                      ["Mute/Unmute"    smudge-controller-volume-mute-unmute]
                       "--"
-                      ["Shuffle" smudge-controller-toggle-shuffle :active global-smudge-remote-mode]
-                      ["Repeat"  smudge-controller-toggle-repeat  :active global-smudge-remote-mode]
+                      ["Shuffle" smudge-controller-toggle-shuffle]
+                      ["Repeat"  smudge-controller-toggle-repeat]
                       "--"
-                      ["Search Tracks..."    smudge-track-search       :active global-smudge-remote-mode]
-                      ["Featured Playlists"  smudge-featured-playlists :active global-smudge-remote-mode]
-                      ["My Playlists"        smudge-my-playlists       :active global-smudge-remote-mode]
-                      ["User Playlists..."   smudge-user-playlists     :active global-smudge-remote-mode]
-                      ["Search Playlists..." smudge-playlist-search    :active global-smudge-remote-mode]
-                      ["Create Playlist..."  smudge-create-playlist    :active global-smudge-remote-mode]
+                      ["Search Tracks..."    smudge-track-search]
+                      ["Featured Playlists"  smudge-featured-playlists]
+                      ["My Playlists"        smudge-my-playlists]
+                      ["User Playlists..."   smudge-user-playlists]
+                      ["Search Playlists..." smudge-playlist-search]
+                      ["Create Playlist..."  smudge-create-playlist]
                       "--"
                       ["Smudge Remote Mode" global-smudge-remote-mode :style toggle :selected global-smudge-remote-mode]))
 
