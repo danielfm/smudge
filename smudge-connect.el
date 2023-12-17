@@ -61,7 +61,8 @@ Returns a JSON string in the format:
                (devices (gethash 'devices json))
                (active (> (length (seq-filter (lambda (dev) (eq (gethash 'is_active dev) t)) devices)) 0)))
           (progn ,body)
-        (message "No active device")))))
+        (when (y-or-n-p "No active device. Would you like to select one?")
+          (smudge-select-device))))))
 
 (defun smudge-connect-player-play-track (uri &optional context)
   "Play a track URI via Spotify Connect in an optional CONTEXT."
