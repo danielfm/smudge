@@ -101,7 +101,7 @@ The following placeholders are supported:
   :group 'smudge)
 
 (defcustom smudge-player-use-transient-map nil
-  "Whether a transient map should be activated after commands that are likely to be repeated."
+  "Whether to activate a transient map for commands likely to be repeated."
   :type 'bool
   :group 'smudge)
 
