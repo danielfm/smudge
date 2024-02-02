@@ -78,6 +78,15 @@
       (smudge-track-recently-played-tracks-update 1))))
 
 ;;;###autoload
+(defun smudge-my-library ()
+  "Display the songs saved in the current user's Liked Songs."
+  (interactive)
+  (let ((buffer (get-buffer-create "*Liked Songs*")))
+    (with-current-buffer buffer
+      (smudge-track-search-mode)
+      (smudge-track-my-library-update 1))))
+
+;;;###autoload
 (defun smudge-my-playlists ()
   "Display the current user's playlists."
   (interactive)
