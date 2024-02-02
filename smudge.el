@@ -160,6 +160,8 @@ Prompt for the NAME and whether it should be made PUBLIC."
     (define-key map (kbd "p s") #'smudge-playlist-search)
     (define-key map (kbd "p c") #'smudge-create-playlist)
     (define-key map (kbd "t s") #'smudge-track-search)
+    (define-key map (kbd "t +") #'smudge-save-playing-track-to-library)
+    (define-key map (kbd "t -") #'smudge-remove-playing-track-from-library)
     (define-key map (kbd "d") #'smudge-select-device)
     map)
   "Keymap for Spotify commands after \\='smudge-keymap-prefix\\='.")
