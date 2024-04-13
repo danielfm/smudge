@@ -236,7 +236,7 @@ Call CALLBACK with the parsed JSON response."
 		,(format "Bearer %s" (oauth2-token-access-token (smudge-api-retrieve-oauth2-token))))
 	       ("Accept" . "application/json")
 	       ("Content-Type" . "application/json")
-	       ("Content-Length" . ,(length data)))
+	       ("Content-Length" . ,(number-to-string (length data))))
     :type method
     :parser (lambda ()
 	      (let ((json-object-type 'hash-table)
