@@ -82,7 +82,7 @@ This is used to manually refresh the token when it's about to expire.")
 (defconst smudge-api-endpoint     "https://api.spotify.com/v1")
 (defconst smudge-api-oauth2-auth-url  "https://accounts.spotify.com/authorize")
 (defconst smudge-api-oauth2-token-url "https://accounts.spotify.com/api/token")
-(defconst smudge-api-oauth2-scopes    "playlist-read-private playlist-read-collaborative playlist-modify-public playlist-modify-private user-read-private user-read-playback-state user-modify-playback-state user-read-playback-state user-read-recently-played")
+(defconst smudge-api-oauth2-scopes    "playlist-read-private playlist-read-collaborative playlist-modify-public playlist-modify-private user-read-private user-read-playback-state user-modify-playback-state user-read-playback-state user-read-recently-played user-library-read user-library-modify")
 (defconst smudge-api-oauth2-callback  (concat "http://localhost:" smudge-oauth2-callback-port smudge-oauth2-callback-endpoint))
 
 (defun smudge-api-httpd-stop ()
@@ -636,6 +636,38 @@ Call CALLBACK if provided."
         (lambda (_)
           (smudge-api-queue-add-tracks (cdr track-ids) callback)))
       (when callback (funcall callback))))
+
+(defun smudge-api-save-tracks-to-my-library (track-ids &optional callback)
+  "Save one or more TRACK-IDS to the user's \"Liked Songs\" library.
+
+Up to 50 tracks can be specified per API call."
+  (smudge-api-call-async
+   "PUT"
+   (concat "/me/tracks?ids=" (string-join track-ids ","))
+   nil
+   callback))
+
+(defun smudge-api-remove-tracks-from-my-library (track-ids &optional callback)
+  "Save one or more TRACK-IDS to the user's \"Liked Songs\" library.
+
+Up to 50 tracks can be specified per API call."
+  (smudge-api-call-async
+   "DELETE"
+   (concat "/me/tracks?ids=" (string-join track-ids ","))
+   nil
+   callback))
+
+(defun smudge-api-get-my-library-tracks (page callback)
+  "Get a list of songs saved in the user's \"Liked Songs\"library."
+  (let ((offset (* smudge-api-search-limit (1- page))))
+    (smudge-api-call-async
+     "GET"
+     (concat "/me/tracks?"
+             (url-build-query-string `((limit ,smudge-api-search-limit)
+                                       (offset ,offset)
+                                       (market from_token))))
+     nil
+     callback)))
 
 (provide 'smudge-api)
 ;;; smudge-api.el ends here

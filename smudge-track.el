@@ -18,6 +18,7 @@
 (defvar smudge-query)
 (defvar smudge-selected-album)
 (defvar smudge-recently-played)
+(defvar smudge-my-library)
 
 (defvar smudge-track-search-mode-map
   (let ((map (make-sparse-keymap)))
@@ -110,6 +111,8 @@ without a context."
   (interactive)
   (cond ((bound-and-true-p smudge-recently-played)
          (smudge-track-recently-played-tracks-update 1))
+        ((bound-and-true-p smudge-my-library)
+         (smudge-track-recently-played-tracks-update 1))
         ((bound-and-true-p smudge-selected-playlist)
          (smudge-track-playlist-tracks-update 1))
         ((bound-and-true-p smudge-query)
@@ -122,6 +125,8 @@ without a context."
   (interactive)
   (cond ((bound-and-true-p smudge-recently-played)
          (smudge-track-recently-played-tracks-update (1+ smudge-current-page)))
+        ((bound-and-true-p smudge-my-library)
+         (smudge-track-my-library-update (1+ smudge-current-page)))
         ((bound-and-true-p smudge-selected-playlist)
          (smudge-track-playlist-tracks-update (1+ smudge-current-page)))
         ((bound-and-true-p smudge-selected-album)
@@ -190,6 +195,23 @@ without a context."
              (setq-local smudge-recently-played t)
              (pop-to-buffer buffer)
              (smudge-track-search-print items page)
+             (message "Track view updated"))
+         (message "No more tracks"))))))
+
+(defun smudge-track-my-library-update (page)
+  "Fetch PAGE of results from the user's Liked Songs."
+  (let ((buffer (current-buffer)))
+    (smudge-api-get-my-library-tracks
+     page
+     (lambda (json)
+       (if-let ((items (smudge-api-get-items json))
+                (tracks (mapcar (lambda (item) (gethash 'track item))
+                                items)))
+           (with-current-buffer buffer
+             (setq-local smudge-current-page page)
+             (setq-local smudge-my-library t)
+             (pop-to-buffer buffer)
+             (smudge-track-search-print tracks page)
              (message "Track view updated"))
          (message "No more tracks"))))))
 
@@ -328,6 +350,36 @@ Default to sortin tracks by number when listing the tracks from an album."
      ;; Send the message here instead of in the callback
      ;; because the API call has to sequentially add each song which might take some time.
      (message "Added %d tracks to your queue." (length tracks)))))
+
+(defun smudge-save-playing-track-to-library ()
+  "Save the currently playing track to Liked Songs."
+  (interactive)
+  (smudge-api-get-player-status
+   (lambda (status)
+     (when-let* ((status status)
+                 (track (gethash 'item status))
+                 (id (gethash 'id track)))
+       (smudge-api-save-tracks-to-my-library
+        (list id)
+        (lambda (json)
+          (message "Liked song: %s - %s"
+                   (gethash 'name (car (gethash 'artists track)))
+                   (gethash 'name track))))))))
+
+(defun smudge-remove-playing-track-from-library ()
+  "Save the currently playing track to Liked Songs."
+  (interactive)
+  (smudge-api-get-player-status
+   (lambda (status)
+     (when-let* ((status status)
+                 (track (gethash 'item status))
+                 (id (gethash 'id track)))
+       (smudge-api-remove-tracks-from-my-library
+        (list id)
+        (lambda (json)
+          (message "Removed song: %s - %s"
+                   (gethash 'name (car (gethash 'artists track)))
+                   (gethash 'name track))))))))
 
 
 (provide 'smudge-track)
