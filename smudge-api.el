@@ -493,6 +493,14 @@ Call CALLBACK with results."
      nil
      callback)))
 
+(defun smudge-api-album (album-id callback)
+  "Call CALLBACK with info for album with ALBUM-ID."
+  (smudge-api-call-async
+   "GET"
+   (format "/albums/%s" (url-hexify-string album-id))
+   nil
+   callback))
+
 (defun smudge-api-album-tracks (album page callback)
   "Call CALLBACK with PAGE of tracks for ALBUM."
   (let ((album-id (smudge-api-get-item-id album))
