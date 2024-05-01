@@ -195,7 +195,7 @@ without a context."
 
 (defun smudge-track-search-set-list-format ()
   "Configure the column data for the typical track view.
-Default to sortin tracks by number when listing the tracks from an album."
+Default to sorting tracks by number when listing the tracks from an album."
   (let* ((base-width (truncate (/ (- (window-width) 30) 3)))
          (default-width (if (bound-and-true-p smudge-selected-album) (+ base-width 4) base-width )))
     (unless (bound-and-true-p smudge-selected-playlist)
