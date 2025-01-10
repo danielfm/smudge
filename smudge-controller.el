@@ -115,7 +115,6 @@ The following placeholders are supported:
 
 (defvar smudge-transient-command-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "SPC") #'smudge-controller-toggle-play)
     (define-key map (kbd "p") #'smudge-controller-previous-track)
     (define-key map (kbd "n") #'smudge-controller-next-track)
     (define-key map (kbd "u") #'smudge-controller-volume-up)

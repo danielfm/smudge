@@ -166,6 +166,7 @@ Prompt for the NAME and whether it should be made PUBLIC."
     (define-key map (kbd "SPC") #'smudge-controller-toggle-play)
     (define-key map (kbd "p") #'smudge-controller-previous-track)
     (define-key map (kbd "n") #'smudge-controller-next-track)
+    (define-key map (kbd "m") #'smudge-controller-volume-mute-unmute)
     (define-key map (kbd "u") #'smudge-controller-volume-up)
     (define-key map (kbd "d") #'smudge-controller-volume-down)
     map)
