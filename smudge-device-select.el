@@ -35,7 +35,7 @@
   (let ((buffer (current-buffer)))
     (smudge-api-device-list
      (lambda (json)
-       (if-let ((devices (gethash 'devices json))
+       (if-let ((devices (gethash "devices" json))
                 (line (string-to-number (format-mode-line "%l"))))
            (progn
              (pop-to-buffer buffer)
@@ -49,7 +49,7 @@
   "Set the selected device to the active device per the API."
   (smudge-api-device-list
    (lambda (json)
-     (when-let ((devices (gethash 'devices json)))
+     (when-let ((devices (gethash "devices" json)))
        (while (let* ((device (car devices))
                      (is-active (smudge-device-get-device-is-active device)))
                 (progn
@@ -101,23 +101,23 @@
 
 (defun smudge-device-get-device-name (device)
   "Return the name from the given DEVICE hash."
-  (gethash 'name device))
+  (gethash "name" device))
 
 (defun smudge-device-get-device-is-active (device)
   "Return whether the DEVICE is currently playing content."
-  (eq (and device (gethash 'is_active device)) t))
+  (eq (and device (gethash "is_active" device)) t))
 
 (defun smudge-device-get-device-volume (device)
   "Return the volume of the DEVICE."
-  (gethash 'volume_percent device))
+  (gethash "volume_percent" device))
 
 (defun smudge-device-get-device-is-restricted (device)
   "Return whether the DEVICE can receive commands."
-  (eq (gethash 'is_restricted device) t))
+  (eq (gethash "is_restricted" device) t))
 
 (defun smudge-device-get-device-id (device)
   "Return the unique id of DEVICE."
-  (gethash 'id device))
+  (gethash "id" device))
 
 (provide 'smudge-device-select)
 ;;; smudge-device-select.el ends here

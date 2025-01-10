@@ -44,10 +44,10 @@ If the cursor is on a button representing an artist or album, start playing that
   (interactive)
   (let ((button-type (smudge-track-selected-button-type)))
     (cond ((eq 'artist button-type)
-	   (smudge-track-artist-select))
-	  ((eq 'album button-type)
-	   (smudge-track-album-select))
-	  (t (smudge-track-select-default)))))
+           (smudge-track-artist-select))
+          ((eq 'album button-type)
+           (smudge-track-album-select))
+          (t (smudge-track-select-default)))))
 
 (defun smudge-track-select-default ()
   "Play the track under the cursor.
@@ -205,7 +205,7 @@ without a context."
      page
      (lambda (json)
        (if-let ((items (smudge-api-get-items json))
-                (tracks (mapcar (lambda (item) (gethash 'track item))
+                (tracks (mapcar (lambda (item) (gethash "track" item))
                                 items)))
            (with-current-buffer buffer
              (setq-local smudge-current-page page)
@@ -254,13 +254,13 @@ Default to sortin tracks by number when listing the tracks from an album."
                                           'follow-link t
                                           'action `(lambda (_) (smudge-track-search ,(format "artist:\"%s\"" artist-name)))
                                           'help-echo (format "Show %s's tracks" artist-name)
-					  'artist-or-album 'artist))
+                                          'artist-or-album 'artist))
                               (cons album-name
                                     (list 'face 'link
                                           'follow-link t
                                           'action `(lambda (_) (smudge-track-album-tracks ,album))
                                           'help-echo (format "Show %s's tracks" album-name)
-					  'artist-or-album 'album))
+                                          'artist-or-album 'album))
                               (smudge-api-get-track-duration-formatted song)
                               (unless (bound-and-true-p smudge-selected-album)
                                 (smudge-api-popularity-bar (smudge-api-get-track-popularity song)))))
@@ -357,14 +357,14 @@ Default to sortin tracks by number when listing the tracks from an album."
   (smudge-api-get-player-status
    (lambda (status)
      (when-let* ((status status)
-                 (track (gethash 'item status))
-                 (id (gethash 'id track)))
+                 (track (gethash "item" status))
+                 (id (gethash "id" track)))
        (smudge-api-save-tracks-to-my-library
         (list id)
         (lambda (_)
           (message "Liked song: %s - %s"
-                   (gethash 'name (car (gethash 'artists track)))
-                   (gethash 'name track))))))))
+                   (gethash "name" (car (gethash "artists" track)))
+                   (gethash "name" track))))))))
 
 (defun smudge-remove-playing-track-from-library ()
   "Save the currently playing track to Liked Songs."
@@ -372,14 +372,14 @@ Default to sortin tracks by number when listing the tracks from an album."
   (smudge-api-get-player-status
    (lambda (status)
      (when-let* ((status status)
-                 (track (gethash 'item status))
-                 (id (gethash 'id track)))
+                 (track (gethash "item" status))
+                 (id (gethash "id" track)))
        (smudge-api-remove-tracks-from-my-library
         (list id)
         (lambda (_)
           (message "Removed song: %s - %s"
-                   (gethash 'name (car (gethash 'artists track)))
-                   (gethash 'name track))))))))
+                   (gethash "name" (car (gethash "artists" track)))
+                   (gethash "name" track))))))))
 
 
 (provide 'smudge-track)

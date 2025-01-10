@@ -148,23 +148,22 @@ Apply SUFFIX to smudge-controller-prefixed functions, applying ARGS."
   "Build the playing status to be displayed in the mode-line from METADATA."
   (let* ((player-status smudge-player-status-format)
          (duration-format "%m:%02s")
-         (json-object-type 'hash-table)
-         (json-key-type 'symbol)
          (json (condition-case nil
-                   (json-read-from-string metadata)
-                 (error (smudge-controller-update-player-status "")
-                        nil))))
+                   (json-parse-string
+                    metadata
+                    :array-type 'list
+                    :object-type 'hash-table)
+                 (json-parse-error nil))))
     (when json
-      (progn
-        (setq player-status (replace-regexp-in-string "%a" (truncate-string-to-width (gethash 'artist json) smudge-player-status-truncate-length 0 nil "...") player-status))
-        (setq player-status (replace-regexp-in-string "%t" (truncate-string-to-width (gethash 'name json) smudge-player-status-truncate-length 0 nil "...") player-status))
-        (setq player-status (replace-regexp-in-string "%n" (number-to-string (gethash 'track_number json)) player-status))
-        (setq player-status (replace-regexp-in-string "%l" (format-seconds duration-format (/ (gethash 'duration json) 1000)) player-status))
-        (setq player-status (replace-regexp-in-string "%s" (smudge-controller-player-status-shuffling-indicator (gethash 'player_shuffling json)) player-status))
-        (setq player-status (replace-regexp-in-string "%r" (smudge-controller-player-status-repeating-indicator (gethash 'player_repeating json)) player-status))
-        (setq player-status (replace-regexp-in-string "%p" (smudge-controller-player-status-playing-indicator (gethash 'player_state json)) player-status))
-        (smudge-controller-update-player-status player-status)
-        (setq smudge-controller-player-metadata json)))))
+      (setq player-status (replace-regexp-in-string "%a" (truncate-string-to-width (gethash "artist" json) smudge-player-status-truncate-length 0 nil "...") player-status)
+            player-status (replace-regexp-in-string "%t" (truncate-string-to-width (gethash "name" json) smudge-player-status-truncate-length 0 nil "...") player-status)
+            player-status (replace-regexp-in-string "%n" (number-to-string (gethash "track_number" json)) player-status)
+            player-status (replace-regexp-in-string "%l" (format-seconds duration-format (/ (gethash "duration" json) 1000)) player-status)
+            player-status (replace-regexp-in-string "%s" (smudge-controller-player-status-shuffling-indicator (gethash "player_shuffling" json)) player-status)
+            player-status (replace-regexp-in-string "%r" (smudge-controller-player-status-repeating-indicator (gethash "player_repeating" json)) player-status)
+            player-status (replace-regexp-in-string "%p" (smudge-controller-player-status-playing-indicator (gethash "player_state" json)) player-status))
+      (smudge-controller-update-player-status player-status)
+      (setq smudge-controller-player-metadata json))))
 
 (defun smudge-controller-update-player-status (str)
   "Set the given STR to the player status, prefixed with the mode identifier."

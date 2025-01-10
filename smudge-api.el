@@ -127,12 +127,12 @@ the user to paste it in."
 <script type='text/javascript'>setTimeout(function () {close()}, 1500);</script>"))
     (browse-url-default-browser
      (concat auth-url
-	     (if (string-match-p "\?" auth-url) "&" "?")
-	     "client_id=" (url-hexify-string client-id)
-	     "&response_type=code"
-	     "&redirect_uri=" (url-hexify-string (or redirect-uri "urn:ietf:wg:oauth:2.0:oob"))
-	     (if scope (concat "&scope=" (url-hexify-string scope)) "")
-	     (if state (concat "&state=" (url-hexify-string state)) "")))
+             (if (string-match-p "\?" auth-url) "&" "?")
+             "client_id=" (url-hexify-string client-id)
+             "&response_type=code"
+             "&redirect_uri=" (url-hexify-string (or redirect-uri "urn:ietf:wg:oauth:2.0:oob"))
+             (if scope (concat "&scope=" (url-hexify-string scope)) "")
+             (if state (concat "&state=" (url-hexify-string state)) "")))
     (let ((retries 0))
       (while (and (not oauth-code)
                   (< retries 10))
@@ -164,11 +164,11 @@ function that runs a local httpd for code -> token exchange."
   (and smudge-api-oauth2-token-file
        smudge-api-oauth2-token
        (progn
-	 (delete-file smudge-api-oauth2-token-file)
-	 (make-empty-file smudge-api-oauth2-token-file t)
-	 t)
+         (delete-file smudge-api-oauth2-token-file)
+         (make-empty-file smudge-api-oauth2-token-file t)
+         t)
        (with-temp-file smudge-api-oauth2-token-file
-	 (prin1 `(,smudge-api-oauth2-token ,smudge-api-oauth2-ts) (current-buffer)))))
+         (prin1 `(,smudge-api-oauth2-token ,smudge-api-oauth2-ts) (current-buffer)))))
 
 (defun smudge-api-deserialize-token ()
   "Read OAuth2 token from file."
@@ -177,12 +177,12 @@ function that runs a local httpd for code -> token exchange."
    (with-temp-buffer
      (insert-file-contents smudge-api-oauth2-token-file)
      (if (= 0 (buffer-size (current-buffer)))
-	 nil
+         nil
        (progn
-	 (goto-char (point-min))
-	 (pcase-let ((`(,token ,ts) (read (current-buffer))))
-	   (setq smudge-api-oauth2-token token)
-	   (setq smudge-api-oauth2-ts ts)))))))
+         (goto-char (point-min))
+         (pcase-let ((`(,token ,ts) (read (current-buffer))))
+           (setq smudge-api-oauth2-token token)
+           (setq smudge-api-oauth2-ts ts)))))))
 
 (defun smudge-api-persist-token (token now)
   "Persist TOKEN and current time NOW to disk and set in memory too."
@@ -198,60 +198,61 @@ OAuth2 protocol.  Refresh if expired.  Spin and wait if already in the process
 of fetching via another call to this method."
   (let ((now (string-to-number (format-time-string "%s"))))
     (if (null (or smudge-api-oauth2-token (smudge-api-deserialize-token)))
-	(if smudge-is-authorizing
-	    (progn
-	      (while (not smudge-api-oauth2-token)
-		(message "sleeping")
-		(sleep-for 1))
-	      smudge-api-oauth2-token)
-	  (setq smudge-is-authorizing t)
-	  (let ((token (smudge-api-oauth2-auth smudge-api-oauth2-auth-url
-					       smudge-api-oauth2-token-url
-					       smudge-oauth2-client-id
-					       smudge-oauth2-client-secret
-					       smudge-api-oauth2-scopes
-					       nil
-					       smudge-api-oauth2-callback)))
-	    (setq smudge-is-authorizing nil)
-	    (smudge-api-persist-token token now)
-	    (if (null token)
-		(user-error "OAuth2 authentication failed")
-	      token)))
+        (if smudge-is-authorizing
+            (progn
+              (while (not smudge-api-oauth2-token)
+                (message "sleeping")
+                (sleep-for 1))
+              smudge-api-oauth2-token)
+          (setq smudge-is-authorizing t)
+          (let ((token (smudge-api-oauth2-auth smudge-api-oauth2-auth-url
+                                               smudge-api-oauth2-token-url
+                                               smudge-oauth2-client-id
+                                               smudge-oauth2-client-secret
+                                               smudge-api-oauth2-scopes
+                                               nil
+                                               smudge-api-oauth2-callback)))
+            (setq smudge-is-authorizing nil)
+            (smudge-api-persist-token token now)
+            (if (null token)
+                (user-error "OAuth2 authentication failed")
+              token)))
       ;; Spotify tokens appear to expire in 3600 seconds (60 min). We renew
       ;; at 3000 (50 min) to play it safe
       (if (> now (+ smudge-api-oauth2-ts 3000))
-	  (let* ((inhibit-message t)
-		 (token (oauth2-refresh-access smudge-api-oauth2-token)))
-	    (smudge-api-persist-token token now)
-	    (if (null token)
-		(user-error "Could not refresh OAuth2 token")
-	      token))
-	smudge-api-oauth2-token))))
+          (let* ((inhibit-message t)
+                 (token (oauth2-refresh-access smudge-api-oauth2-token)))
+            (smudge-api-persist-token token now)
+            (if (null token)
+                (user-error "Could not refresh OAuth2 token")
+              token))
+        smudge-api-oauth2-token))))
 
 (defun smudge-api-call-async (method uri &optional data callback)
   "Make a request to the given Spotify service endpoint URI via METHOD.
 Call CALLBACK with the parsed JSON response."
   (request (concat smudge-api-endpoint uri)
     :headers `(("Authorization" .
-		,(format "Bearer %s" (oauth2-token-access-token (smudge-api-retrieve-oauth2-token))))
-	       ("Accept" . "application/json")
-	       ("Content-Type" . "application/json")
-	       ("Content-Length" . ,(number-to-string (length data))))
+                ,(format "Bearer %s" (oauth2-token-access-token (smudge-api-retrieve-oauth2-token))))
+               ("Accept" . "application/json")
+               ("Content-Type" . "application/json")
+               ("Content-Length" . ,(number-to-string (length data))))
     :type method
     :parser (lambda ()
-	      (let ((json-object-type 'hash-table)
-		    (json-array-type 'list)
-		    (json-key-type 'symbol))
-		(when (> (buffer-size) 0)
-		  (json-read))))
+              (condition-case nil
+                  (json-parse-buffer
+                   :object-type 'hash-table
+                   :array-type 'list)
+                (json-parse-error nil)))
     :encoding 'utf-8
     :data data
     :success (cl-function
-	      (lambda (&rest data &key response &allow-other-keys)
-		(when callback (funcall callback (request-response-data response)))))
+              (lambda (&rest data &key response &allow-other-keys)
+                (when callback (funcall callback (request-response-data response)))))
+
     :error (cl-function
-	    (lambda (&rest args &key error-thrown &allow-other-keys)
-	      (message "Got error: %S" error-thrown)))))
+            (lambda (&rest args &key error-thrown &allow-other-keys)
+              (message "Got error: %S" error-thrown)))))
 
 (defun smudge-api-current-user (callback)
   "Call CALLBACK with the currently logged in user."
@@ -267,41 +268,41 @@ Call CALLBACK with the parsed JSON response."
 
 (defun smudge-api-get-items (json)
   "Return the list of items from the given JSON object."
-  (gethash 'items json))
+  (gethash "items" json))
 
 (defun smudge-api-get-search-track-items (json)
   "Return track items from the given search results JSON object."
-  (smudge-api-get-items (gethash 'tracks json)))
+  (smudge-api-get-items (gethash "tracks" json)))
 
 (defun smudge-api-get-search-playlist-items (json)
   "Return playlist items from the given search results JSON object."
-  (smudge-api-get-items (gethash 'playlists json)))
+  (smudge-api-get-items (gethash "playlists" json)))
 
 (defun smudge-api-get-message (json)
   "Return the message from the featured playlists JSON object."
-  (gethash 'message json))
+  (gethash "message" json))
 
 (defun smudge-api-get-playlist-tracks (json)
   "Return the list of tracks from the given playlist JSON object."
   (mapcar (lambda (item)
-            (gethash 'track item))
+            (gethash "track" item))
           (smudge-api-get-items json)))
 
 (defun smudge-api-get-track-album (json)
   "Return the simplified album object from the given track JSON object."
-  (gethash 'album json))
+  (gethash "album" json))
 
 (defun smudge-api-get-track-number (json)
   "Return the track number from the given track JSON object."
-  (gethash 'track_number json))
+  (gethash "track_number" json))
 
 (defun smudge-api-get-disc-number (json)
   "Return the disc number from the given track JSON object."
-  (gethash 'disc_number json))
+  (gethash "disc_number" json))
 
 (defun smudge-api-get-track-duration (json)
   "Return the track duration, in milliseconds, from the given track JSON object."
-  (gethash 'duration_ms json))
+  (gethash "duration_ms" json))
 
 (defun smudge-api-get-track-duration-formatted (json)
   "Return the formatted track duration from the given track JSON object."
@@ -313,7 +314,7 @@ Call CALLBACK with the parsed JSON response."
 
 (defun smudge-api-get-track-artist (json)
   "Return the first simplified artist object from the given track JSON object."
-  (car (gethash 'artists json)))
+  (car (gethash "artists" json)))
 
 (defun smudge-api-get-track-artist-name (json)
   "Return the first artist name from the given track JSON object."
@@ -321,31 +322,31 @@ Call CALLBACK with the parsed JSON response."
 
 (defun smudge-api-get-track-popularity (json)
   "Return the popularity from the given track/album/artist JSON object."
-  (gethash 'popularity json))
+  (gethash "popularity" json))
 
 (defun smudge-api-is-track-playable (json)
   "Return whether the given track JSON object is playable by the current user."
-  (not (eq :json-false (gethash 'is_playable json))))
+  (not (eq :false (gethash "is_playable" json))))
 
 (defun smudge-api-get-item-name (json)
   "Return the name from the given track/album/artist JSON object."
-  (gethash 'name json))
+  (gethash "name" json))
 
 (defun smudge-api-get-item-id (json)
   "Return the id from the given JSON object."
-  (gethash 'id json))
+  (gethash "id" json))
 
 (defun smudge-api-get-item-uri (json)
   "Return the uri from the given track/album/artist JSON object."
-  (gethash 'uri json))
+  (gethash "uri" json))
 
 (defun smudge-api-get-playlist-track-count (json)
   "Return the number of tracks of the given playlist JSON object."
-  (gethash 'total (gethash 'tracks json)))
+  (gethash "total" (gethash "tracks" json)))
 
 (defun smudge-api-get-playlist-owner-id (json)
   "Return the owner id of the given playlist JSON object."
-  (smudge-api-get-item-id (gethash 'owner json)))
+  (smudge-api-get-item-id (gethash "owner" json)))
 
 (defun smudge-api-search (type query page callback)
   "Search artists, albums, tracks or playlists.
@@ -619,8 +620,8 @@ Call CALLBACK if provided."
   (smudge-api-call-async
    "POST"
    (concat "/me/player/queue?"
-	   (url-build-query-string `((uri ,track-id))
-				   nil t))
+           (url-build-query-string `((uri ,track-id))
+                                   nil t))
    nil
    callback))
 

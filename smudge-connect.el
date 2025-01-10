@@ -32,23 +32,23 @@ Returns a JSON string in the format:
   (smudge-api-get-player-status
    (lambda (status)
      (if-let* ((status status)
-               (track (gethash 'item status))
+               (track (gethash "item" status))
                (json (concat
                       "{"
                       (format "\"artist\":\"%s\","
-                              (gethash 'name (car (gethash 'artists track))))
+                              (gethash "name" (car (gethash "artists" track))))
                       (format "\"duration\": %d,"
-                              (gethash 'duration_ms track))
+                              (gethash "duration_ms" track))
                       (format "\"track_number\":%d,"
-                              (gethash 'track_number track))
+                              (gethash "track_number" track))
                       (format "\"name\":\"%s\","
-                              (gethash 'name track))
+                              (gethash "name" track))
                       (format "\"player_state\":\"%s\","
-                              (if (eq (gethash 'is_playing status) :json-false) "paused" "playing"))
+                              (if (eq (gethash "is_playing" status) :false) "paused" "playing"))
                       (format "\"player_shuffling\":%s,"
-                              (if (not (eq (gethash 'shuffle_state status) :json-false))"true" "false"))
+                              (if (not (eq (gethash "shuffle_state" status) :false))"true" "false"))
                       (format "\"player_repeating\":%s"
-                              (if (string= (gethash 'repeat_state status) "off") "false" "true"))
+                              (if (string= (gethash "repeat_state" status) "off") "false" "true"))
                       "}")))
          (smudge-controller-update-metadata json)
        (smudge-controller-update-metadata nil)))))
@@ -59,7 +59,7 @@ Returns a JSON string in the format:
   (interactive)
   (smudge-api-current-user
    (lambda (user)
-     (if (not (string= (gethash 'product user) "premium"))
+     (if (not (string= (gethash "product" user) "premium"))
          (message "This feature requires a Spotify premium subscription.")
        (let ((buffer (get-buffer-create "*Devices*")))
          (with-current-buffer buffer
@@ -71,8 +71,8 @@ Returns a JSON string in the format:
   `(smudge-api-device-list
     (lambda (json)
       (if-let ((json json)
-               (devices (gethash 'devices json))
-               (active (> (length (seq-filter (lambda (dev) (eq (gethash 'is_active dev) t)) devices)) 0)))
+               (devices (gethash "devices" json))
+               (active (> (length (seq-filter (lambda (dev) (eq (gethash "is_active" dev) t)) devices)) 0)))
           (progn ,body)
         (when (y-or-n-p "No active device. Would you like to select one?")
           (smudge-select-device))))))
@@ -93,7 +93,7 @@ Returns a JSON string in the format:
    (smudge-api-get-player-status
     (lambda (status)
       (if status
-          (if (not (eq (gethash 'is_playing status) :json-false))
+          (if (not (eq (gethash "is_playing" status) :false))
               (smudge-api-pause)
             (smudge-api-play)))))))
 
@@ -160,21 +160,21 @@ Returns a JSON string in the format:
 (defun smudge-connect-get-device-id (player-status)
   "Get the id if from PLAYER-STATUS of the currently playing device, if any."
   (when player-status
-    (gethash 'id (gethash 'device player-status))))
+    (gethash "id" (gethash "device" player-status))))
 
 (defun smudge-connect-get-volume (player-status)
   "Get the volume from PLAYER-STATUS of the currently playing device, if any."
   (when player-status
-    (gethash 'volume_percent (gethash 'device player-status))))
+    (gethash "volume_percent" (gethash "device" player-status))))
 
 (defun smudge-connect--is-shuffling (player-status)
   "Business logic for shuffling state of PLAYER-STATUS."
   (and player-status
-       (not (eq (gethash 'shuffle_state player-status) :json-false))))
+       (not (eq (gethash "shuffle_state" player-status) :false))))
 
 (defun smudge-connect--is-repeating (player-status)
   "Business logic for repeat state of PLAYER-STATUS."
-  (string= (gethash 'repeat_state player-status) "context"))
+  (string= (gethash "repeat_state" player-status) "context"))
 
 
 (provide 'smudge-connect)
