@@ -328,21 +328,18 @@ Default to sortin tracks by number when listing the tracks from an album."
   ;; Check whether the mark is active and if so, queue all the tracks in the
   ;; region. If not, queue the track under the cursor.
   (if (null mark-active)
-      (let ((selected-track (tabulated-list-get-id)))
-        (setq track-id (smudge-api-get-item-uri selected-track))
+      (let ((track-at-point (tabulated-list-get-id)))
         (smudge-api-queue-add-track
-         track-id
+         (smudge-api-get-item-uri track-at-point)
          (lambda(_)
-           (message "Added \"%s\" to your queue." (smudge-api-get-item-name selected-track)))))
-    (let((start (region-beginning))
-         (end (region-end))
-         (tracks '()))
+           (message "Added \"%s\" to your queue." (smudge-api-get-item-name track-at-point)))))
+    (let ((start (region-beginning))
+          (end (region-end))
+          (tracks '()))
       (save-excursion
         (goto-char start)
         (while (< (point) end)
-          (setq selected-track (tabulated-list-get-id))
-          (setq track-id (smudge-api-get-item-uri selected-track))
-          (setq tracks (cons track-id tracks))
+          (setq tracks (cons (smudge-api-get-item-uri (tabulated-list-get-id)) tracks))
           (forward-line 1)))
       (smudge-api-queue-add-tracks
        (reverse tracks)
