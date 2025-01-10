@@ -133,42 +133,43 @@ Prompt for the NAME and whether it should be made PUBLIC."
 
 (defalias 'smudge-command-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "SPC") #'smudge-controller-toggle-play)
-    (define-key map (kbd "d") #'smudge-select-device)
-    (define-key map (kbd "r") #'smudge-controller-toggle-repeat)
-    (define-key map (kbd "s") #'smudge-controller-toggle-shuffle)
-    (define-key map (kbd "p") 'smudge-playlists)
-    (define-key map (kbd "t") 'smudge-tracks)
-    (define-key map (kbd "c") 'smudge-control)
+    (define-key map (kbd "SPC") '("play-pause" . smudge-controller-toggle-play))
+    (define-key map (kbd "d") '("select-device" . smudge-select-device))
+    (define-key map (kbd "r") '("toggle-repeat" . smudge-controller-toggle-repeat))
+    (define-key map (kbd "s") '("toggle-shuffle" . smudge-controller-toggle-shuffle))
+    (define-key map (kbd "p") '("playlists" . smudge-playlists))
+    (define-key map (kbd "t") '("tracks" . smudge-tracks))
+    (define-key map (kbd "c") '("player" . smudge-control))
     map)
   "Keymap for Spotify commands after \\='smudge-keymap-prefix\\='.")
 
 (defalias 'smudge-playlists
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "m") #'smudge-my-playlists)
-    (define-key map (kbd "f") #'smudge-featured-playlists)
-    (define-key map (kbd "u") #'smudge-user-playlists)
-    (define-key map (kbd "s") #'smudge-playlist-search)
-    (define-key map (kbd "c") #'smudge-create-playlist)
+    (define-key map (kbd "m") '("my-playlists" . smudge-my-playlists))
+    (define-key map (kbd "f") '("featured-playlists" . smudge-featured-playlists))
+    (define-key map (kbd "u") '("user-playlists" . smudge-user-playlists))
+    (define-key map (kbd "s") '("search-playlists" . smudge-playlist-search))
+    (define-key map (kbd "c") '("create-playlists" . smudge-create-playlist))
     map)
   "Playlist-related bindings.")
 
 (defalias 'smudge-tracks
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "s") #'smudge-track-search)
-    (define-key map (kbd "l") #'smudge-save-playing-track-to-library)
-    (define-key map (kbd "k") #'smudge-remove-playing-track-from-library)
+    (define-key map (kbd "s") '("search-tracks" . smudge-track-search))
+    (define-key map (kbd "r") '("recently-played" . smudge-recently-played))
+    (define-key map (kbd "l") '("save-to-library" . smudge-save-playing-track-to-library))
+    (define-key map (kbd "k") '("remove-from-library" . smudge-remove-playing-track-from-library))
     map)
   "Track-related bindings.")
 
 (defalias 'smudge-control
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "SPC") #'smudge-controller-toggle-play)
-    (define-key map (kbd "p") #'smudge-controller-previous-track)
-    (define-key map (kbd "n") #'smudge-controller-next-track)
-    (define-key map (kbd "m") #'smudge-controller-volume-mute-unmute)
-    (define-key map (kbd "u") #'smudge-controller-volume-up)
-    (define-key map (kbd "d") #'smudge-controller-volume-down)
+    (define-key map (kbd "SPC") '("play-pause" . smudge-controller-toggle-play))
+    (define-key map (kbd "p") '("previous-track" . smudge-controller-previous-track))
+    (define-key map (kbd "n") '("next-track" . smudge-controller-next-track))
+    (define-key map (kbd "m") '("mute-unmute" . smudge-controller-volume-mute-unmute))
+    (define-key map (kbd "u") '("volume-up" . smudge-controller-volume-up))
+    (define-key map (kbd "d") '("volume-down" . smudge-controller-volume-down))
     map)
   "Spotify player controller bindings.")
 
@@ -178,8 +179,8 @@ Prompt for the NAME and whether it should be made PUBLIC."
                       ["Previous Track" smudge-controller-previous-track]
                       ["Next Track"     smudge-controller-next-track]
                       "--"
-                      ["Select Device"  smudge-select-device]
-                      ["Mute/Unmute"    smudge-controller-volume-mute-unmute]
+                      ["Select Playing Device" smudge-select-device]
+                      ["Mute/Unmute"           smudge-controller-volume-mute-unmute]
                       "--"
                       ["Shuffle" smudge-controller-toggle-shuffle]
                       ["Repeat"  smudge-controller-toggle-repeat]
