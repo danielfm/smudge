@@ -361,7 +361,7 @@ Default to sortin tracks by number when listing the tracks from an album."
                  (id (gethash 'id track)))
        (smudge-api-save-tracks-to-my-library
         (list id)
-        (lambda (json)
+        (lambda (_)
           (message "Liked song: %s - %s"
                    (gethash 'name (car (gethash 'artists track)))
                    (gethash 'name track))))))))
@@ -376,7 +376,7 @@ Default to sortin tracks by number when listing the tracks from an album."
                  (id (gethash 'id track)))
        (smudge-api-remove-tracks-from-my-library
         (list id)
-        (lambda (json)
+        (lambda (_)
           (message "Removed song: %s - %s"
                    (gethash 'name (car (gethash 'artists track)))
                    (gethash 'name track))))))))

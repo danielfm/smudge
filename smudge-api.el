@@ -632,15 +632,17 @@ Call CALLBACK if provided."
   ;; one by one to the queue.
   (if (car track-ids)
       (smudge-api-queue-add-track
-        (car track-ids)
-        (lambda (_)
-          (smudge-api-queue-add-tracks (cdr track-ids) callback)))
-      (when callback (funcall callback))))
+       (car track-ids)
+       (lambda (_)
+         (smudge-api-queue-add-tracks (cdr track-ids) callback)))
+    (when callback (funcall callback))))
 
 (defun smudge-api-save-tracks-to-my-library (track-ids &optional callback)
   "Save one or more TRACK-IDS to the user's \"Liked Songs\" library.
 
-Up to 50 tracks can be specified per API call."
+Up to 50 tracks can be specified per API call.
+
+Calls CALLBACK function with the API response."
   (smudge-api-call-async
    "PUT"
    (concat "/me/tracks?ids=" (string-join track-ids ","))
@@ -650,7 +652,9 @@ Up to 50 tracks can be specified per API call."
 (defun smudge-api-remove-tracks-from-my-library (track-ids &optional callback)
   "Save one or more TRACK-IDS to the user's \"Liked Songs\" library.
 
-Up to 50 tracks can be specified per API call."
+Up to 50 tracks can be specified per API call.
+
+Calls CALLBACK function with the API response."
   (smudge-api-call-async
    "DELETE"
    (concat "/me/tracks?ids=" (string-join track-ids ","))
@@ -658,7 +662,9 @@ Up to 50 tracks can be specified per API call."
    callback))
 
 (defun smudge-api-get-my-library-tracks (page callback)
-  "Get a list of songs saved in the user's \"Liked Songs\"library."
+  "Get PAGE of songs saved in the user's \"Liked Songs\"library.
+
+Calls CALLBACK function with the API response."
   (let ((offset (* smudge-api-search-limit (1- page))))
     (smudge-api-call-async
      "GET"

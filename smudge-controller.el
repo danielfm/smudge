@@ -113,6 +113,16 @@ The following placeholders are supported:
 (defvar smudge-controller-player-metadata nil
   "The metadata about the currently playing track.")
 
+(defvar smudge-transient-command-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "SPC") #'smudge-controller-toggle-play)
+    (define-key map (kbd "p") #'smudge-controller-previous-track)
+    (define-key map (kbd "n") #'smudge-controller-next-track)
+    (define-key map (kbd "u") #'smudge-controller-volume-up)
+    (define-key map (kbd "d") #'smudge-controller-volume-down)
+    map)
+  "Transient keymap for commands that are likely to be repeated.")
+
 (defmacro defun-smudge-transient (&rest body)
   "Create a transient smudge command from BODY.
 
@@ -123,8 +133,8 @@ The transient map is enabled if `smudge-player-use-transient-map' is non-nil."
   (declare (doc-string 3)
            (indent defun))
   `(defun ,@body
-     (when smudge-player-use-transient-map
-       (set-transient-map smudge-transient-command-map))))
+       (when smudge-player-use-transient-map
+         (set-transient-map smudge-transient-command-map))))
 
 (defun smudge-controller-apply (suffix &rest args)
   "Simple facility to emulate multimethods.
@@ -215,7 +225,7 @@ This corresponds to the current REPEATING state."
    (when track (smudge-api-get-item-uri track))
    (when context (smudge-api-get-item-uri context))))
 
-(defun smudge-controller-toggle-play ()
+(defun-smudge-transient smudge-controller-toggle-play ()
   "Sends a `playpause' command to Spotify process."
   (interactive)
   (smudge-controller-apply "player-toggle-play"))

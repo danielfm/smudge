@@ -20,8 +20,7 @@
 ;; whichever port you have specified via customize).
 
 ;; After requiring `smudge', make sure to define the client id and client
-;; secrets, along with some other important settings.  See README.md for the
-;; complete list of settings and usage information.
+;; secrets, along with some other important settings.
 
 ;;; Code:
 
@@ -132,50 +131,45 @@ Prompt for the NAME and whether it should be made PUBLIC."
               (message "Playlist '%s' created" (smudge-api-get-item-name new-playlist))
             (message "Error creating the playlist"))))))))
 
-;;;###autoload
-(defun smudge-select-device ()
-  "Allow for the selection of a device via Spotify Connect for transport functions."
-  (interactive)
-  (smudge-api-current-user
-   (lambda (user)
-     (if (not (string= (gethash 'product user) "premium"))
-         (message "This feature requires a Spotify premium subscription.")
-       (let ((buffer (get-buffer-create "*Devices*")))
-         (with-current-buffer buffer
-           (smudge-device-select-mode)
-           (smudge-device-select-update)))))))
-
-(defvar smudge-command-map
+(defalias 'smudge-command-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "M-r") #'smudge-controller-toggle-repeat)
-    (define-key map (kbd "M-s") #'smudge-controller-toggle-shuffle)
-    (define-key map (kbd "M-p") #'smudge-controller-toggle-play)
-    (define-key map (kbd "M-b") #'smudge-controller-previous-track)
-    (define-key map (kbd "M-u") #'smudge-controller-volume-up)
-    (define-key map (kbd "M-d") #'smudge-controller-volume-down)
-    (define-key map (kbd "M-f") #'smudge-controller-next-track)
-    (define-key map (kbd "p m") #'smudge-my-playlists)
-    (define-key map (kbd "p f") #'smudge-featured-playlists)
-    (define-key map (kbd "p u") #'smudge-user-playlists)
-    (define-key map (kbd "p s") #'smudge-playlist-search)
-    (define-key map (kbd "p c") #'smudge-create-playlist)
-    (define-key map (kbd "t s") #'smudge-track-search)
-    (define-key map (kbd "t +") #'smudge-save-playing-track-to-library)
-    (define-key map (kbd "t -") #'smudge-remove-playing-track-from-library)
+    (define-key map (kbd "SPC") #'smudge-controller-toggle-play)
     (define-key map (kbd "d") #'smudge-select-device)
+    (define-key map (kbd "r") #'smudge-controller-toggle-repeat)
+    (define-key map (kbd "s") #'smudge-controller-toggle-shuffle)
+    (define-key map (kbd "p") 'smudge-playlists)
+    (define-key map (kbd "t") 'smudge-tracks)
+    (define-key map (kbd "c") 'smudge-control)
     map)
   "Keymap for Spotify commands after \\='smudge-keymap-prefix\\='.")
 
-(fset 'smudge-command-map smudge-command-map)
-
-(defvar smudge-transient-command-map
+(defalias 'smudge-playlists
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "M-b") #'smudge-controller-previous-track)
-    (define-key map (kbd "M-f") #'smudge-controller-next-track)
-    (define-key map (kbd "M-u") #'smudge-controller-volume-up)
-    (define-key map (kbd "M-d") #'smudge-controller-volume-down)
+    (define-key map (kbd "m") #'smudge-my-playlists)
+    (define-key map (kbd "f") #'smudge-featured-playlists)
+    (define-key map (kbd "u") #'smudge-user-playlists)
+    (define-key map (kbd "s") #'smudge-playlist-search)
+    (define-key map (kbd "c") #'smudge-create-playlist)
     map)
-  "Transient keymap for commands that are likely to be repeated.")
+  "Playlist-related bindings.")
+
+(defalias 'smudge-tracks
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "s") #'smudge-track-search)
+    (define-key map (kbd "l") #'smudge-save-playing-track-to-library)
+    (define-key map (kbd "k") #'smudge-remove-playing-track-from-library)
+    map)
+  "Track-related bindings.")
+
+(defalias 'smudge-control
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "SPC") #'smudge-controller-toggle-play)
+    (define-key map (kbd "p") #'smudge-controller-previous-track)
+    (define-key map (kbd "n") #'smudge-controller-next-track)
+    (define-key map (kbd "u") #'smudge-controller-volume-up)
+    (define-key map (kbd "d") #'smudge-controller-volume-down)
+    map)
+  "Spotify player controller bindings.")
 
 (easy-menu-add-item nil '("Tools")
                     '("Smudge"

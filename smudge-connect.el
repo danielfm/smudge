@@ -53,6 +53,19 @@ Returns a JSON string in the format:
          (smudge-controller-update-metadata json)
        (smudge-controller-update-metadata nil)))))
 
+;;;###autoload
+(defun smudge-select-device ()
+  "Allow for the selection of a device via Spotify Connect for transport functions."
+  (interactive)
+  (smudge-api-current-user
+   (lambda (user)
+     (if (not (string= (gethash 'product user) "premium"))
+         (message "This feature requires a Spotify premium subscription.")
+       (let ((buffer (get-buffer-create "*Devices*")))
+         (with-current-buffer buffer
+           (smudge-device-select-mode)
+           (smudge-device-select-update)))))))
+
 (defmacro smudge-connect-when-device-active (body)
   "Evaluate BODY when there is an active device, otherwise show an error message."
   `(smudge-api-device-list
