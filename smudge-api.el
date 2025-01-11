@@ -243,7 +243,8 @@ Call CALLBACK with the parsed JSON response."
                   (json-parse-buffer
                    :object-type 'hash-table
                    :array-type 'list)
-                (json-parse-error nil)))
+                (json-parse-error nil)
+                (json-end-of-file nil)))
     :encoding 'utf-8
     :data data
     :success (cl-function
