@@ -174,7 +174,8 @@ Returns a JSON string in the format:
 
 (defun smudge-connect--is-repeating (player-status)
   "Business logic for repeat state of PLAYER-STATUS."
-  (string= (gethash "repeat_state" player-status) "context"))
+  (and player-status
+       (string= (gethash "repeat_state" player-status) "context")))
 
 
 (provide 'smudge-connect)

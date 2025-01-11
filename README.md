@@ -116,11 +116,11 @@ The default bindings provided by the `smudge-command-map` is as follows:
 | <kbd>[prefix] SPC</kbd> | `smudge-controller-toggle-play`            | Play/pause                                       |
 | <kbd>[prefix] s</kbd>   | `smudge-controller-toggle-shuffle`         | Turn shuffle on/off [1]                          |
 | <kbd>[prefix] r</kbd>   | `smudge-controller-toggle-repeat`          | Turn repeat on/off [1]                           |
-| <kbd>[prefix] c f</kbd> | `smudge-controller-next-track`             | Next track                                       |
-| <kbd>[prefix] c b</kbd> | `smudge-controller-previous-track`         | Previous track                                   |
-| <kbd>[prefix] c u</kbd> | `smudge-controller-volume-up`              | Increase the volume [2]                          |
-| <kbd>[prefix] c d</kbd> | `smudge-controller-volume-down`            | Decrease the volume [2]                          |
-| <kbd>[prefix] c m</kbd> | `smudge-controller-volume-mute-unmute`     | Alternate the volume between 0 and 100 [2]       |
+| <kbd>[prefix] n</kbd>   | `smudge-controller-next-track`             | Next track                                       |
+| <kbd>[prefix] b</kbd>   | `smudge-controller-previous-track`         | Previous track                                   |
+| <kbd>[prefix] v u</kbd> | `smudge-controller-volume-up`              | Increase the volume [2]                          |
+| <kbd>[prefix] v d</kbd> | `smudge-controller-volume-down`            | Decrease the volume [2]                          |
+| <kbd>[prefix] v m</kbd> | `smudge-controller-volume-mute-unmute`     | Alternate the volume between 0 and 100 [2]       |
 | <kbd>[prefix] p m</kbd> | `smudge-my-playlists`                      | Show your playlists                              |
 | <kbd>[prefix] p f</kbd> | `smudge-featured-playlists`                | Show the featured playlists                      |
 | <kbd>[prefix] p s</kbd> | `smudge-playlist-search`                   | Search for playlists                             |

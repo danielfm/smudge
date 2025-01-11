@@ -115,7 +115,7 @@ The following placeholders are supported:
 
 (defvar smudge-transient-command-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "p") #'smudge-controller-previous-track)
+    (define-key map (kbd "b") #'smudge-controller-previous-track)
     (define-key map (kbd "n") #'smudge-controller-next-track)
     (define-key map (kbd "u") #'smudge-controller-volume-up)
     (define-key map (kbd "d") #'smudge-controller-volume-down)
@@ -152,7 +152,7 @@ Apply SUFFIX to smudge-controller-prefixed functions, applying ARGS."
                     metadata
                     :array-type 'list
                     :object-type 'hash-table)
-                 (json-parse-error nil))))
+                 (error nil))))
     (when json
       (setq player-status (replace-regexp-in-string "%a" (truncate-string-to-width (gethash "artist" json) smudge-player-status-truncate-length 0 nil "...") player-status)
             player-status (replace-regexp-in-string "%t" (truncate-string-to-width (gethash "name" json) smudge-player-status-truncate-length 0 nil "...") player-status)
