@@ -1,6 +1,6 @@
 ;;; smudge-track.el --- Smudge track search major mode  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2014-2018 Daniel Fernandes Martins
+;; Copyright (C) 2014-2025 Daniel Martins
 
 ;; SPDX-License-Identifier:  GPL-3.0-or-later
 

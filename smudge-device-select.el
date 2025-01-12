@@ -1,6 +1,6 @@
 ;;; smudge-device-select.el --- Smudge device selection major mode  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2019 Jason Dufair
+;; Copyright (C) 2019-2025 Jason Dufair, Daniel Martins
 
 ;; SPDX-License-Identifier:  GPL-3.0-or-later
 

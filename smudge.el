@@ -1,6 +1,6 @@
 ;;; smudge.el --- Control the Spotify app  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2014-2018 Daniel Fernandes Martins
+;; Copyright (C) 2014-2025 Daniel Martins
 
 ;; Keywords: multimedia, music, spotify, smudge
 ;; Package: smudge
@@ -12,7 +12,7 @@
 
 ;;; Commentary:
 
-;; This mode requires at least GNU Emacs 24.4
+;; This mode requires at least GNU Emacs 27.1
 
 ;; Before using this mode, first go the Spotify Web API console
 ;; <https://developer.spotify.com/my-applications> and create a new application,
@@ -24,8 +24,8 @@
 
 ;;; Code:
 
-(when (version< emacs-version "24.4")
-  (error "Smudge requires at least GNU Emacs 24.4"))
+(when (version< emacs-version "27.1")
+  (error "Smudge requires at least GNU Emacs 27.1"))
 
 (require 'subr-x)
 (require 'json)

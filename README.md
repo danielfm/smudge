@@ -379,7 +379,7 @@ Otherwise, it defaults to 4 spaces.
 
 ## License
 
-Copyright (C) Daniel Fernandes Martins
+Copyright (C) Daniel Martins
 
 Distributed under the GPL v3 License. See COPYING for further details.
 

@@ -1,6 +1,6 @@
 ;;; smudge-apple.el --- Apple-specific code for Smudge  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2014-2019 Daniel Fernandes Martins
+;; Copyright (C) 2014-2025 Daniel Martins
 
 ;; SPDX-License-Identifier:  GPL-3.0-or-later
 

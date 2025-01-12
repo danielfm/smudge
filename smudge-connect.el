@@ -1,6 +1,6 @@
 ;;; smudge-connect.el --- Control remote and local Spotify instances  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2019 Jason Dufair
+;; Copyright (C) 2019-2025 Jason Dufair, Daniel Martins
 
 ;; SPDX-License-Identifier:  GPL-3.0-or-later
 
