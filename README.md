@@ -43,9 +43,11 @@ Or put the following snippet into your Emacs configuration:
 ```elisp
 (use-package smudge
   :bind-keymap ("C-c ." . smudge-command-map)
-  :config
-  (setq smudge-oauth2-client-secret "..."
-        smudge-oauth2-client-id "..."))
+  :custom
+  (smudge-oauth2-client-secret "...")
+  (smudge-oauth2-client-id "...")
+  ;; optional: enable transient map for frequent commands
+  (smudge-player-use-transient-map t))
 ```
 
 ### Doom Emacs
