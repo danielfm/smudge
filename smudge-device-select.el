@@ -100,9 +100,9 @@
 (defun smudge-device-set-list-format ()
   "Configures the column data for the device view."
   (setq tabulated-list-format
-        (vector `("Device" ,(- (window-width) 22) t)
-                '("Active" 12 t)
-                '("Volume" 8 nil :right-align t))))
+        (vector `("Device" ,(- (window-width) 24) nil)
+                '("Active" 12 nil)
+                '("Volume" 8 nil :right-align nil))))
 
 (defun smudge-device-get-device-name (device)
   "Return the name from the given DEVICE hash."
