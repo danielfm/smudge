@@ -365,20 +365,6 @@ Call CALLBACK with PAGE of items that match QUERY, depending on TYPE."
      nil
      callback)))
 
-(defun smudge-api-featured-playlists (page callback)
-  "Call CALLBACK with the given PAGE of Spotify's featured playlists."
-  (let ((offset (* smudge-api-search-limit (1- page))))
-    (smudge-api-call-async
-     "GET"
-     (concat "/browse/featured-playlists?"
-             (url-build-query-string `((locale  ,smudge-api-locale)
-                                       (country ,smudge-api-country)
-                                       (limit   ,smudge-api-search-limit)
-                                       (offset  ,offset))
-                                     nil t))
-     nil
-     callback)))
-
 (defun smudge-api-user-playlists (user-id page callback)
   "Call CALLBACK with the PAGE of playlists for the given USER-ID."
   (let ((offset (* smudge-api-search-limit (1- page))))

@@ -45,17 +45,15 @@
   "Reloads the first page of results for the current playlist view."
   (interactive)
   (let ((page 1))
-    (cond ((bound-and-true-p smudge-query)          (smudge-playlist-search-update smudge-query page))
-          ((bound-and-true-p smudge-browse-message) (smudge-playlist-featured-playlists-update page))
-          (t                                         (smudge-playlist-user-playlists-update smudge-user-id page)))))
+    (cond ((bound-and-true-p smudge-query) (smudge-playlist-search-update smudge-query page))
+          (t (smudge-playlist-user-playlists-update smudge-user-id page)))))
 
 (defun smudge-playlist-load-more ()
   "Load the next page of results for the current playlist view."
   (interactive)
   (let ((next-page (1+ smudge-current-page)))
-    (cond ((bound-and-true-p smudge-query)          (smudge-playlist-search-update smudge-query next-page))
-          ((bound-and-true-p smudge-browse-message) (smudge-playlist-featured-playlists-update next-page))
-          (t                                         (smudge-playlist-user-playlists-update smudge-user-id next-page)))))
+    (cond ((bound-and-true-p smudge-query) (smudge-playlist-search-update smudge-query next-page))
+          (t (smudge-playlist-user-playlists-update smudge-user-id next-page)))))
 
 (defun smudge-playlist-follow ()
   "Add the current user as the follower of the playlist under the cursor."
@@ -107,22 +105,6 @@
            (with-current-buffer buffer
              (setq-local smudge-user-id user-id)
              (setq-local smudge-current-page page)
-             (pop-to-buffer buffer)
-             (smudge-playlist-search-print items page)
-             (message "Playlist view updated"))
-         (message "No more playlists"))))))
-
-(defun smudge-playlist-featured-playlists-update (page)
-  "Fetch PAGE of results using of Spotify's featured playlists."
-  (let ((buffer (current-buffer)))
-    (smudge-api-featured-playlists
-     page
-     (lambda (json)
-       (if-let ((items (smudge-api-get-search-playlist-items json))
-                (msg (smudge-api-get-message json)))
-           (with-current-buffer buffer
-             (setq-local smudge-current-page page)
-             (setq-local smudge-browse-message msg)
              (pop-to-buffer buffer)
              (smudge-playlist-search-print items page)
              (message "Playlist view updated"))

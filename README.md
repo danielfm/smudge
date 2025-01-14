@@ -19,7 +19,7 @@ Connect feature.
 * Communicates with the Spotify API via Oauth2
 * Displays the current track in mode line or title bar
 * Create playlists (public or private)
-* Browse the Spotify featured playlists, your own playlists, and their tracks
+* Browse your own playlists, and their tracks
 * Search for tracks and playlists that match the given keywords
 * Easily control basic Spotify player features like, play/pause, previous,
   next, shuffle, and repeat with the Smudge Remote minor mode
@@ -47,7 +47,10 @@ Or put the following snippet into your Emacs configuration:
   (smudge-oauth2-client-secret "...")
   (smudge-oauth2-client-id "...")
   ;; optional: enable transient map for frequent commands
-  (smudge-player-use-transient-map t))
+  (smudge-player-use-transient-map t)
+  :config
+  ;; optional: display current song in mode line
+  (global-smudge-remote-mode))
 ```
 
 ### Doom Emacs
@@ -72,7 +75,10 @@ Add the following to the `config.el` file:
   (smudge-oauth2-client-secret "...")
   (smudge-oauth2-client-id "...")
   ;; optional: enable transient map for frequent commands
-  (smudge-player-use-transient-map t))
+  (smudge-player-use-transient-map t)
+  :config
+  ;; optional: display current song in mode line
+  (global-smudge-remote-mode))
 ```
 
 ## Configuration
@@ -124,7 +130,6 @@ The default bindings provided by the `smudge-command-map` is as follows:
 | <kbd>[prefix] v d</kbd> | `smudge-controller-volume-down`            | Decrease the volume [2]                          |
 | <kbd>[prefix] v m</kbd> | `smudge-controller-volume-mute-unmute`     | Alternate the volume between 0 and 100 [2]       |
 | <kbd>[prefix] p m</kbd> | `smudge-my-playlists`                      | Show your playlists                              |
-| <kbd>[prefix] p f</kbd> | `smudge-featured-playlists`                | Show the featured playlists                      |
 | <kbd>[prefix] p s</kbd> | `smudge-playlist-search`                   | Search for playlists                             |
 | <kbd>[prefix] p u</kbd> | `smudge-user-playlists`                    | Show playlists for the given user                |
 | <kbd>[prefix] p c</kbd> | `smudge-create-playlist`                   | Create a new playlist                            |
@@ -147,13 +152,11 @@ Spotify, _although this is isn't officially supported:_
 ^^^^^^^^-----------------------------------------------------------------
 _t_: Track               _SPC_: Play/Pause        _+_: Volume up
 _m_: My Playlists        _n_  : Next Track        _-_: Volume down
-_f_: Featured Playlists  _p_  : Previous Track    _x_: Mute
 _u_: User Playlists      _r_  : Repeat            _d_: Device
 ^^                       _s_  : Shuffle           _q_: Quit
 "
     ("t" smudge-track-search :exit t)
     ("m" smudge-my-playlists :exit t)
-    ("f" smudge-featured-playlists :exit t)
     ("u" smudge-user-playlists :exit t)
     ("SPC" smudge-controller-toggle-play :exit nil)
     ("n" smudge-controller-next-track :exit nil)
@@ -300,17 +303,6 @@ To return the playlists for the current user, run
 <kbd>M-x smudge-user-playlists</kbd> to list the public playlists for some
 given user. To search playlists that match the given search criteria, run
 <kbd>M-x smudge-playlist-search CRITERIA</kbd>. Also, run
-<kbd>M-x smudge-featured-playlists</kbd> in order to browse the featured
-playlists from Spotify en_US.
-
-Change the following variables in order to customize the locale and region for
-the featured playlists endpoint:
-
-```elisp
-;; Spanish (Mexico)
-(setq smudge-api-locale "es_MX")
-(setq smudge-api-country "MX")
-```
 
 All these commands will display results in a separate buffer with the following
 key bindings:

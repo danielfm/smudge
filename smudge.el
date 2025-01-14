@@ -103,15 +103,6 @@
       (smudge-playlist-user-playlists-update user-id 1))))
 
 ;;;###autoload
-(defun smudge-featured-playlists ()
-  "Display Spotify's featured playlists."
-  (interactive)
-  (let ((buffer (get-buffer-create "*Featured Playlists*")))
-    (with-current-buffer buffer
-      (smudge-playlist-search-mode)
-      (smudge-playlist-featured-playlists-update 1))))
-
-;;;###autoload
 (defun smudge-create-playlist (name public)
   "Create an empty playlist owned by the current user.
 Prompt for the NAME and whether it should be made PUBLIC."
@@ -133,23 +124,22 @@ Prompt for the NAME and whether it should be made PUBLIC."
 
 (defalias 'smudge-command-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "SPC") '("smudge/play-pause" . smudge-controller-toggle-play))
+    (define-key map (kbd "SPC") '("smudge/play-pause"     . smudge-controller-toggle-play))
     (define-key map (kbd "b")   '("smudge/previous-track" . smudge-controller-previous-track))
-    (define-key map (kbd "n")   '("smudge/next-track" . smudge-controller-next-track))
-    (define-key map (kbd "d")   '("smudge/select-device" . smudge-select-device))
-    (define-key map (kbd "r")   '("smudge/toggle-repeat" . smudge-controller-toggle-repeat))
+    (define-key map (kbd "n")   '("smudge/next-track"     . smudge-controller-next-track))
+    (define-key map (kbd "d")   '("smudge/select-device"  . smudge-select-device))
+    (define-key map (kbd "r")   '("smudge/toggle-repeat"  . smudge-controller-toggle-repeat))
     (define-key map (kbd "s")   '("smudge/toggle-shuffle" . smudge-controller-toggle-shuffle))
-    (define-key map (kbd "p")   '("smudge/playlists" . smudge-playlists))
-    (define-key map (kbd "t")   '("smudge/tracks" . smudge-tracks))
-    (define-key map (kbd "v")   '("smudge/volume" . smudge-volume))
+    (define-key map (kbd "p")   '("smudge/playlists"      . smudge-playlists))
+    (define-key map (kbd "t")   '("smudge/tracks"         . smudge-tracks))
+    (define-key map (kbd "v")   '("smudge/volume"         . smudge-volume))
     map)
   "Keymap for Spotify commands after \\='smudge-keymap-prefix\\='.")
 
 (defalias 'smudge-playlists
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "m") '("smudge/my-playlists" . smudge-my-playlists))
-    (define-key map (kbd "f") '("smudge/featured-playlists" . smudge-featured-playlists))
-    (define-key map (kbd "u") '("smudge/user-playlists" . smudge-user-playlists))
+    (define-key map (kbd "m") '("smudge/my-playlists"     . smudge-my-playlists))
+    (define-key map (kbd "u") '("smudge/user-playlists"   . smudge-user-playlists))
     (define-key map (kbd "s") '("smudge/search-playlists" . smudge-playlist-search))
     (define-key map (kbd "c") '("smudge/create-playlists" . smudge-create-playlist))
     map)
@@ -157,9 +147,9 @@ Prompt for the NAME and whether it should be made PUBLIC."
 
 (defalias 'smudge-tracks
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "s") '("smudge/search-tracks" . smudge-track-search))
-    (define-key map (kbd "r") '("smudge/recently-played" . smudge-recently-played))
-    (define-key map (kbd "l") '("smudge/save-to-library" . smudge-save-playing-track-to-library))
+    (define-key map (kbd "s") '("smudge/search-tracks"       . smudge-track-search))
+    (define-key map (kbd "r") '("smudge/recently-played"     . smudge-recently-played))
+    (define-key map (kbd "l") '("smudge/save-to-library"     . smudge-save-playing-track-to-library))
     (define-key map (kbd "k") '("smudge/remove-from-library" . smudge-remove-playing-track-from-library))
     map)
   "Track-related bindings.")
@@ -167,7 +157,7 @@ Prompt for the NAME and whether it should be made PUBLIC."
 (defalias 'smudge-volume
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "m")   '("smudge/mute-unmute" . smudge-controller-volume-mute-unmute))
-    (define-key map (kbd "u")   '("smudge/volume-up" . smudge-controller-volume-up))
+    (define-key map (kbd "u")   '("smudge/volume-up"   . smudge-controller-volume-up))
     (define-key map (kbd "d")   '("smudge/volume-down" . smudge-controller-volume-down))
     map)
   "Spotify player volume bindings.")
@@ -185,7 +175,6 @@ Prompt for the NAME and whether it should be made PUBLIC."
                       ["Repeat"  smudge-controller-toggle-repeat]
                       "--"
                       ["Search Tracks..."    smudge-track-search]
-                      ["Featured Playlists"  smudge-featured-playlists]
                       ["My Playlists"        smudge-my-playlists]
                       ["User Playlists..."   smudge-user-playlists]
                       ["Search Playlists..." smudge-playlist-search]
@@ -209,7 +198,6 @@ Prompt for the NAME and whether it should be made PUBLIC."
      ["Repeat"  smudge-controller-toggle-repeat]
      "--"
      ["Search Tracks..."    smudge-track-search]
-     ["Featured Playlists"  smudge-featured-playlists]
      ["My Playlists"        smudge-my-playlists]
      ["User Playlists..."   smudge-user-playlists]
      ["Search Playlists..." smudge-playlist-search]
