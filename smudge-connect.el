@@ -148,14 +148,24 @@ Returns a JSON string in the format:
   (smudge-connect-when-device-active
    (smudge-api-get-player-status
     (lambda (status)
-      (smudge-api-repeat (if (smudge-connect--is-repeating status) "off" "context"))))))
+      (let ((is-repeating (smudge-connect--is-repeating status)))
+        (smudge-api-repeat (if is-repeating "off" "context")
+                           (lambda (_)
+                             (if is-repeating
+                                 (message "Repeat turned off")
+                               (message "Repeat turned on")))))))))
 
 (defun smudge-connect-toggle-shuffle ()
   "Toggle shuffle for the current track."
   (smudge-connect-when-device-active
    (smudge-api-get-player-status
     (lambda (status)
-      (smudge-api-shuffle (if (smudge-connect--is-shuffling status) "false" "true"))))))
+      (let ((is-shuffling (smudge-connect--is-shuffling status)))
+        (smudge-api-shuffle (if is-shuffling "false" "true")
+                            (lambda (_)
+                              (if is-shuffling
+                                  (message "Shuffling turned off")
+                                (message "Shuffling turned on")))))))))
 
 (defun smudge-connect-get-device-id (player-status)
   "Get the id if from PLAYER-STATUS of the currently playing device, if any."
