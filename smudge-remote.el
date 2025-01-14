@@ -106,8 +106,7 @@ See commands \\[smudge-toggle-repeating] and
 
 (defvar smudge-remote-player-status-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "<mode-line> <mouse-1>")
-                'smudge-remote-popup-menu)
+    (define-key map (kbd "<mode-line> <mouse-1>") 'smudge-remote-popup-menu)
     map)
   "Keymap for Smudge mode-line status.")
 

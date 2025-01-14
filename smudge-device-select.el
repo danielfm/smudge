@@ -22,7 +22,12 @@
 (defvar smudge-device-select-mode-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map tabulated-list-mode-map)
-    (define-key map (kbd "g")     'smudge-device-select-update)
+    (define-key map (kbd "g") 'smudge-device-select-update)
+    (define-key map (kbd "u") 'smudge-controller-volume-up)
+    (define-key map (kbd "d") 'smudge-controller-volume-down)
+    (define-key map (kbd "m") 'smudge-controller-volume-mute-unmute)
+    (define-key map (kbd "r") 'smudge-controller-toggle-repeat)
+    (define-key map (kbd "s") 'smudge-controller-toggle-shuffle)
     map)
   "Local keymap for `smudge-device-select-mode' buffers.")
 
