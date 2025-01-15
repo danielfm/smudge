@@ -241,7 +241,7 @@ Default to sortin tracks by number when listing the tracks from an album."
   "Append SONGS to the PAGE of track view."
   (let (entries)
     (dolist (song songs)
-      (when (smudge-api-is-track-playable song)
+      (when (and (hash-table-p song) (smudge-api-is-track-playable song))
         (let* ((artist-name (smudge-api-get-track-artist-name song))
                (album (or (smudge-api-get-track-album song) smudge-selected-album))
                (album-name (smudge-api-get-item-name album))

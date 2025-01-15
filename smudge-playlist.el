@@ -134,8 +134,9 @@
   "Append PLAYLISTS to PAGE of the current playlist view."
   (let (entries)
     (dolist (playlist playlists)
-      (let ((user-id (smudge-api-get-playlist-owner-id playlist))
-            (playlist-name (smudge-api-get-item-name playlist)))
+      (when-let ((_ (hash-table-p playlist))
+                 (user-id (smudge-api-get-playlist-owner-id playlist))
+                 (playlist-name (smudge-api-get-item-name playlist)))
         (push (list playlist
                     (vector (cons playlist-name
                                   (list 'face 'link
