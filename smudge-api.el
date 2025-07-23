@@ -52,15 +52,34 @@ globally relevant."
   :group 'smudge
   :type 'string)
 
+(defcustom smudge-oauth2-callback-scheme "http"
+  "The scheme for the httpd to listen on for the OAuth2 callback."
+  :group 'smudge
+  :type 'string)
+
+(defcustom smudge-oauth2-callback-host "127.0.0.1"
+  "The host for the httpd to listen on for the OAuth2 callback."
+  :group 'smudge
+  :type 'string)
+
 (defcustom smudge-oauth2-callback-port "8080"
   "The port for the httpd to listen on for the OAuth2 callback."
   :group 'smudge
   :type 'string)
 
-(defcustom smudge-oauth2-callback-endpoint "/smudge-api-callback"
-  "The endpoint for the httpd to listen on for the OAuth2 callback."
+(defcustom smudge-oauth2-callback-endpoint "smudge_api_callback"
+  "The endpoint for the httpd to listen on for the OAuth2 callback.
+Note: This must match the httpd endpoint in `smudge-api-oauth2-request-authorization'."
   :group 'smudge
   :type 'string)
+
+(defun smudge-api-oauth2-callback ()
+  "Return oauth2 callback url."
+  (format "%s://%s:%s/%s"
+          smudge-oauth2-callback-scheme
+          smudge-oauth2-callback-host
+          smudge-oauth2-callback-port
+          smudge-oauth2-callback-endpoint))
 
 (declare-function oauth2-request-access "oauth2")
 (declare-function oauth2-refresh-access "oauth2")
@@ -79,11 +98,26 @@ This is used to manually refresh the token when it's about to expire.")
 (defvar smudge-is-authorizing nil
   "Whether smudge is in the process of obtaining an OAuth2 token.")
 
-(defconst smudge-api-endpoint     "https://api.spotify.com/v1")
-(defconst smudge-api-oauth2-auth-url  "https://accounts.spotify.com/authorize")
-(defconst smudge-api-oauth2-token-url "https://accounts.spotify.com/api/token")
-(defconst smudge-api-oauth2-scopes    "playlist-read-private playlist-read-collaborative playlist-modify-public playlist-modify-private user-read-private user-read-playback-state user-modify-playback-state user-read-playback-state user-read-recently-played user-library-read user-library-modify")
-(defconst smudge-api-oauth2-callback  (concat "http://localhost:" smudge-oauth2-callback-port smudge-oauth2-callback-endpoint))
+(defconst smudge-api-endpoint
+  "https://api.spotify.com/v1")
+(defconst smudge-api-oauth2-auth-url
+  "https://accounts.spotify.com/authorize")
+(defconst smudge-api-oauth2-token-url
+  "https://accounts.spotify.com/api/token")
+(defconst smudge-api-oauth2-scopes
+  (string-join
+   '("playlist-read-private"
+     "playlist-read-collaborative"
+     "playlist-modify-public"
+     "playlist-modify-private"
+     "user-read-private"
+     "user-read-playback-state"
+     "user-modify-playback-state"
+     "user-read-playback-state"
+     "user-read-recently-played"
+     "user-library-read"
+     "user-library-modify")
+   " "))
 
 (defun smudge-api-httpd-stop ()
   "Workaround due to bug in simple-httpd `httpd-stop`."
@@ -92,7 +126,7 @@ This is used to manually refresh the token when it's about to expire.")
        (seq-filter
         (lambda (p)
           (let ((name (process-name p)))
-            (or (string-prefix-p "httpd" name) (string-prefix-p "localhost" name))))
+            (or (string-prefix-p "httpd" name) (string-prefix-p smudge-oauth2-callback-host name))))
         (process-list)))
     (delete-process process)))
 
@@ -121,9 +155,9 @@ built-in OAuth lib by running a local httpd to parse the code instead of asking
 the user to paste it in."
   (let ((is-already-running (smudge-api-start-httpd))
         (oauth-code nil))
-    (defservlet* smudge-api-callback text/html (code)
+    (defservlet* smudge_api_callback text/html (code)
       (setq oauth-code code)
-      (insert "<p>Smudge is connected. You can return to Emacs</p>
+      (insert "<p>Smudge is connected! You can close this and return to Emacs.</p>
 <script type='text/javascript'>setTimeout(function () {close()}, 1500);</script>"))
     (browse-url-default-browser
      (concat auth-url
@@ -138,7 +172,8 @@ the user to paste it in."
                   (< retries 10))
         (sleep-for 1)
         (setq retries (1+ retries))))
-    (message "smudge connected")
+    (when oauth-code
+      (message "smudge connected"))
     (unless is-already-running
       (run-at-time 1 nil #'smudge-api-httpd-stop))
     oauth-code))
@@ -211,7 +246,7 @@ of fetching via another call to this method."
                                                smudge-oauth2-client-secret
                                                smudge-api-oauth2-scopes
                                                nil
-                                               smudge-api-oauth2-callback)))
+                                               (smudge-api-oauth2-callback))))
             (setq smudge-is-authorizing nil)
             (smudge-api-persist-token token now)
             (if (null token)
