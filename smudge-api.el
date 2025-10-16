@@ -185,6 +185,7 @@ Replaces functionality from built-in OAuth lib to call smudge-specific
 function that runs a local httpd for code -> token exchange."
   (let ((inhibit-message t))
     (oauth2-request-access
+     auth-url
      token-url
      client-id
      client-secret
