@@ -89,7 +89,7 @@ Add the following to the `config.el` file:
 ```
 
 In order to get the client ID and client secret, you need to create a
-[Spotify app][app-list], specifying <http://localhost:8080/smudge_api_callback>
+[Spotify app][app-list], specifying <http://127.0.0.1:8080/smudge_api_callback>
 as the redirect URI (or whichever port you have specified via customize). The
 OAuth2 exchange is handled by `simple-httpd`. If you are not already using
 this package for something else, you should not need to customize this port.
@@ -188,7 +188,7 @@ a description:
 ![Creating a Spotify App 1/3](./img/spotify-app-01.png)
 
 After creating the new app, click the **Edit Settings**, scroll down a little bit,
-type <http://localhost:8080/smudge_api_callback> as the Redirect URI for the
+type <http://127.0.0.1:8080/smudge_api_callback> as the Redirect URI for the
 application, and click **Add**. Then, hit **Save**.
 
 **IMPORTANT**: After recent changes you must make sure the Redirect URI has underscores '_' and not hyphens '-'!
