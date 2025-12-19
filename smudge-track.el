@@ -220,7 +220,9 @@ without a context."
 Default to sortin tracks by number when listing the tracks from an album."
   (let* ((base-width (truncate (/ (- (window-width) 30) 3)))
          (default-width (if (bound-and-true-p smudge-selected-album) (+ base-width 4) base-width )))
-    (unless (bound-and-true-p smudge-selected-playlist)
+    (unless (or
+             (bound-and-true-p smudge-selected-playlist)
+             (bound-and-true-p smudge-my-library))
       (setq tabulated-list-sort-key `("#" . nil)))
     (setq tabulated-list-format
           (vconcat (vector `("#" 3 ,(lambda (row-1 row-2)
