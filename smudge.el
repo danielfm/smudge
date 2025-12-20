@@ -157,9 +157,9 @@ Prompt for the NAME and whether it should be made PUBLIC."
     (define-key map (kbd "d")   '("smudge/select-device"  . smudge-select-device))
     (define-key map (kbd "r")   '("smudge/toggle-repeat"  . smudge-controller-toggle-repeat))
     (define-key map (kbd "s")   '("smudge/toggle-shuffle" . smudge-controller-toggle-shuffle))
-    (define-key map (kbd "p")   '("smudge/playlists"      . smudge-playlists))
-    (define-key map (kbd "t")   '("smudge/tracks"         . smudge-tracks))
-    (define-key map (kbd "v")   '("smudge/volume"         . smudge-volume))
+    (define-key map (kbd "p")   smudge-playlists)
+    (define-key map (kbd "t")   smudge-tracks)
+    (define-key map (kbd "v")   smudge-volume)
     map)
   "Keymap for Spotify commands after \\='smudge-keymap-prefix\\='.")
 
