@@ -32,7 +32,7 @@ Smudge requires Emacs 27.1+.
 
 `package.el` is the built-in package manager in Emacs.
 
-Smudge is available on the two major package.el community maintained repos MELP AStable and MELPA.
+Smudge is available on the two major package.el community maintained repos MELPA Stable and MELPA.
 
 You can install Smudge with the following command:
 
