@@ -191,7 +191,8 @@ function that runs a local httpd for code -> token exchange."
      client-secret
      (smudge-api-oauth2-request-authorization
       auth-url client-id scope state redirect-uri)
-     redirect-uri)))
+     redirect-uri
+     smudge-api-endpoint)))
 
 (defun smudge-api-serialize-token ()
   "Save OAuth2 token to file."
@@ -257,7 +258,7 @@ of fetching via another call to this method."
       ;; at 3000 (50 min) to play it safe
       (if (> now (+ smudge-api-oauth2-ts 3000))
           (let* ((inhibit-message t)
-                 (token (oauth2-refresh-access smudge-api-oauth2-token)))
+                 (token (oauth2-refresh-access smudge-api-oauth2-token smudge-api-endpoint)))
             (smudge-api-persist-token token now)
             (if (null token)
                 (user-error "Could not refresh OAuth2 token")
