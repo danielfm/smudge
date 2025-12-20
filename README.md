@@ -41,8 +41,8 @@ You can install Smudge with the following command:
 Or put the following snippet into your Emacs configuration:
 
 ```elisp
-(use-package smudge
-  :bind ("C-c ." . smudge-command-map)
+(use-package! smudge
+  :bind-keymap ("C-c ." . smudge-command-map)
   :custom
   (smudge-oauth2-client-secret "...")
   (smudge-oauth2-client-id "...")
@@ -70,7 +70,7 @@ Add the following to the `config.el` file:
 
 ``` elisp
 (use-package! smudge
-  :bind ("C-c ." . smudge-command-map)
+  :bind-keymap ("C-c ." . smudge-command-map)
   :custom
   (smudge-oauth2-client-secret "...")
   (smudge-oauth2-client-id "...")
