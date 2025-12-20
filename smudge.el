@@ -122,6 +122,7 @@ Prompt for the NAME and whether it should be made PUBLIC."
               (message "Playlist '%s' created" (smudge-api-get-item-name new-playlist))
             (message "Error creating the playlist"))))))))
 
+;;;###autoload
 (defalias 'smudge-command-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "SPC") '("smudge/play-pause"     . smudge-controller-toggle-play))
