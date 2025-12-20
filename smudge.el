@@ -137,6 +137,7 @@ Prompt for the NAME and whether it should be made PUBLIC."
     map)
   "Keymap for Spotify commands after \\='smudge-keymap-prefix\\='.")
 
+;;;###autoload
 (defalias 'smudge-playlists
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "m") '("smudge/my-playlists"     . smudge-my-playlists))
@@ -146,6 +147,7 @@ Prompt for the NAME and whether it should be made PUBLIC."
     map)
   "Playlist-related bindings.")
 
+;;;###autoload
 (defalias 'smudge-tracks
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "s") '("smudge/search-tracks"       . smudge-track-search))
@@ -155,6 +157,7 @@ Prompt for the NAME and whether it should be made PUBLIC."
     map)
   "Track-related bindings.")
 
+;;;###autoload
 (defalias 'smudge-volume
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "m")   '("smudge/mute-unmute" . smudge-controller-volume-mute-unmute))
