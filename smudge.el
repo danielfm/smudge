@@ -4,7 +4,7 @@
 
 ;; Keywords: multimedia, music, spotify, smudge
 ;; Package: smudge
-;; Package-Requires: ((emacs "27.1") (simple-httpd "1.5.1") (request "0.3") (oauth2 "0.17"))
+;; Package-Requires: ((emacs "27.1") (simple-httpd "1.5.1") (request "0.3") (oauth2 "0.18"))
 ;; Version: 1.0.0
 ;; Homepage: https://github.com/danielfm/smudge
 
