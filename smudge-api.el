@@ -15,6 +15,7 @@
 (require 'request)
 (require 'oauth2)
 (require 'browse-url)
+(require 'plstore)
 
 (defcustom smudge-oauth2-client-id ""
   "The unique identifier for your application.
@@ -73,37 +74,33 @@ Note: This must match the httpd endpoint in `smudge-api-oauth2-request-authoriza
   :group 'smudge
   :type 'string)
 
-(defun smudge-api-oauth2-callback ()
-  "Return oauth2 callback url."
-  (format "%s://%s:%s/%s"
-          smudge-oauth2-callback-scheme
-          smudge-oauth2-callback-host
-          smudge-oauth2-callback-port
-          smudge-oauth2-callback-endpoint))
-
-(declare-function oauth2-request-access "oauth2")
-(declare-function oauth2-refresh-access "oauth2")
-
-(defvar smudge-user         nil
+(defvar smudge-user nil
   "Cached user object.")
+
 (defvar smudge-api-oauth2-token nil
   "Cached OAuth2 token.")
-(defvar smudge-api-oauth2-ts    nil
-  "Unix timestamp in which the OAuth2 token was retrieved.
-This is used to manually refresh the token when it's about to expire.")
-(defvar smudge-api-oauth2-token-directory (locate-user-emacs-file "smudge/" ".smudge/")
-  "Directory where the OAuth2 token is serialized.")
-(defvar smudge-api-oauth2-token-file (concat smudge-api-oauth2-token-directory "token")
-  "Location where the OAuth2 token is serialized.")
-(defvar smudge-is-authorizing nil
-  "Whether smudge is in the process of obtaining an OAuth2 token.")
+
+(defvar smudge-api-oauth2-auth-code nil
+  "Temporary storage for OAuth2 authorization code received from callback.")
+
+(defvar smudge-api-oauth2-callback-state nil
+  "Temporary storage for OAuth2 state parameter to validate callback.")
+
+(defvar smudge-api-oauth2-auth-in-progress nil
+  "Flag indicating whether OAuth2 authentication is currently in progress.")
 
 (defconst smudge-api-endpoint
-  "https://api.spotify.com/v1")
+  "https://api.spotify.com/v1"
+  "Spotify API endpoint.")
+
 (defconst smudge-api-oauth2-auth-url
-  "https://accounts.spotify.com/authorize")
+  "https://accounts.spotify.com/authorize"
+  "Spotify API authorization endpoint.")
+
 (defconst smudge-api-oauth2-token-url
-  "https://accounts.spotify.com/api/token")
+  "https://accounts.spotify.com/api/token"
+  "Spotify API token endpoint.")
+
 (defconst smudge-api-oauth2-scopes
   (string-join
    '("playlist-read-private"
@@ -117,160 +114,194 @@ This is used to manually refresh the token when it's about to expire.")
      "user-read-recently-played"
      "user-library-read"
      "user-library-modify")
-   " "))
+   " ")
+  "Spotify API scopes required by Smudge.")
 
-(defun smudge-api-httpd-stop ()
-  "Workaround due to bug in simple-httpd `httpd-stop`."
-  (dolist
-      (process
-       (seq-filter
-        (lambda (p)
-          (let ((name (process-name p)))
-            (or (string-prefix-p "httpd" name) (string-prefix-p smudge-oauth2-callback-host name))))
-        (process-list)))
-    (delete-process process)))
+(defun smudge-api-oauth2-generate-state ()
+  "Generate a random state string for OAuth2 CSRF protection."
+  (format "%04x%04x-%04x-%04x-%04x-%04x%04x%04x"
+          (random 65536) (random 65536)
+          (random 65536)
+          (random 65536)
+          (random 65536)
+          (random 65536) (random 65536) (random 65536)))
 
-(defun smudge-api-httpd-process-status ()
-  "Answer the process status of the httpd."
-  (let ((httpd-process (car (seq-filter
-                             (lambda (p)
-                               (let ((name (process-name p)))
-                                 (string-prefix-p "httpd" name)))
-                             (process-list)))))
-    (and httpd-process (process-status httpd-process))))
+(defun smudge-api-oauth2-start-server ()
+  "Start the HTTP server for OAuth2 callback.
+Uses the port and host configured in `smudge-oauth2-callback-port' and
+`smudge-oauth2-callback-host'."
+  (let ((port (string-to-number smudge-oauth2-callback-port)))
+    (setq httpd-port port)
+    (setq httpd-host smudge-oauth2-callback-host)
+    (httpd-start)))
 
-(defun smudge-api-start-httpd ()
-  "Start the httpd if not already running.  Answer status."
-  (let ((is-already-running (smudge-api-httpd-process-status)))
-    (unless is-already-running
-      (setq httpd-port smudge-oauth2-callback-port)
-      (httpd-start))
-    is-already-running))
+(defun smudge-api-oauth2-stop-server ()
+  "Stop the HTTP server for OAuth2 callback."
+  ;; Kill any remaining httpd connections
+  (dolist (proc (process-list))
+    (when (and (process-name proc)
+               (string-prefix-p "httpd" (process-name proc)))
+      (delete-process proc)))
+  (httpd-stop))
 
-(defun smudge-api-oauth2-request-authorization (auth-url client-id &optional scope state redirect-uri)
-  "Request OAuth authorization at AUTH-URL.
-Provide SCOPE and STATE to endpoint.  CLIENT-ID is the client id provided by the
-provider.  Return the code provided by the service.  Replaces functionality from
-built-in OAuth lib by running a local httpd to parse the code instead of asking
-the user to paste it in."
-  (let ((is-already-running (smudge-api-start-httpd))
-        (oauth-code nil))
-    (defservlet* smudge_api_callback text/html (code)
-      (setq oauth-code code)
-      (insert "<p>Smudge is connected! You can close this and return to Emacs.</p>
-<script type='text/javascript'>setTimeout(function () {close()}, 1500);</script>"))
-    (browse-url-default-browser
-     (concat auth-url
-             (if (string-match-p "\?" auth-url) "&" "?")
-             "client_id=" (url-hexify-string client-id)
-             "&response_type=code"
-             "&redirect_uri=" (url-hexify-string (or redirect-uri "urn:ietf:wg:oauth:2.0:oob"))
-             (if scope (concat "&scope=" (url-hexify-string scope)) "")
-             (if state (concat "&state=" (url-hexify-string state)) "")))
-    (let ((retries 0))
-      (while (and (not oauth-code)
-                  (< retries 10))
-        (sleep-for 1)
-        (setq retries (1+ retries))))
-    (when oauth-code
-      (message "smudge connected"))
-    (unless is-already-running
-      (run-at-time 1 nil #'smudge-api-httpd-stop))
-    oauth-code))
+(defservlet* smudge_api_callback text/html (code state error)
+  "Handle OAuth2 callback from Spotify authorization.
+Captures the authorization CODE and STATE parameters."
+  (cond
+   (error
+    (insert (format "<html><body><h1>Authorization Error</h1><p>%s</p><p>You can close this window.</p></body></html>" error)))
+   ((not (string= state smudge-api-oauth2-callback-state))
+    (insert "<html><body><h1>Authorization Error</h1><p>Invalid state parameter.</p><p>You can close this window.</p></body></html>"))
+   (t
+    (setq smudge-api-oauth2-auth-code code)
+    (insert "<html>
+<head>
+  <title>Authorization Successful</title>
+</head>
+<body>
+  <h1>Authorization Successful!</h1>
+  <p>You can return to Emacs.</p>
+  <p>This window will close in <span id=\"timer\">5</span> seconds...</p>
+  <p><button onclick=\"window.close()\">Close Now</button></p>
+  <script>
+    let seconds = 5;
+    const timerElement = document.getElementById('timer');
+    const countdown = setInterval(() => {
+      seconds--;
+      timerElement.textContent = seconds;
+      if (seconds <= 0) {
+        clearInterval(countdown);
+        window.close();
+      }
+    }, 1000);
+  </script>
+</body>
+</html>"))))
 
-(defun smudge-api-oauth2-auth (auth-url token-url client-id client-secret &optional scope state redirect-uri)
+(defun smudge-api-oauth2-auth (auth-url token-url client-id client-secret &optional scope redirect-uri)
   "Authenticate application via OAuth2.
 Send CLIENT-ID and CLIENT-SECRET to AUTH-URL.  Get code and send to TOKEN-URL.
-Replaces functionality from built-in OAuth lib to call smudge-specific
-function that runs a local httpd for code -> token exchange."
-  (let ((inhibit-message t))
-    (oauth2-request-access
-     auth-url
-     token-url
-     client-id
-     client-secret
-     (smudge-api-oauth2-request-authorization
-      auth-url client-id scope state redirect-uri)
-     redirect-uri
-     smudge-api-endpoint)))
+Starts a local HTTP server to capture the authorization code from the callback."
+  (let ((inhibit-message t)
+        (state (smudge-api-oauth2-generate-state)))
+    ;; Set flag to prevent concurrent auth flows
+    (setq smudge-api-oauth2-auth-in-progress t)
 
-(defun smudge-api-serialize-token ()
-  "Save OAuth2 token to file."
-  (unless (file-exists-p smudge-api-oauth2-token-directory)
-    (make-directory smudge-api-oauth2-token-directory t))
-  (and smudge-api-oauth2-token-file
-       smudge-api-oauth2-token
-       (progn
-         (delete-file smudge-api-oauth2-token-file)
-         (make-empty-file smudge-api-oauth2-token-file t)
-         t)
-       (with-temp-file smudge-api-oauth2-token-file
-         (prin1 `(,smudge-api-oauth2-token ,smudge-api-oauth2-ts) (current-buffer)))))
+    ;; Reset auth code from any previous attempt
+    (setq smudge-api-oauth2-auth-code nil)
+    (setq smudge-api-oauth2-callback-state state)
 
-(defun smudge-api-deserialize-token ()
-  "Read OAuth2 token from file."
-  (and
-   (file-exists-p smudge-api-oauth2-token-file)
-   (with-temp-buffer
-     (insert-file-contents smudge-api-oauth2-token-file)
-     (if (= 0 (buffer-size (current-buffer)))
-         nil
-       (progn
-         (goto-char (point-min))
-         (pcase-let ((`(,token ,ts) (read (current-buffer))))
-           (setq smudge-api-oauth2-token token)
-           (setq smudge-api-oauth2-ts ts)))))))
+    ;; Start the HTTP server to listen for the callback
+    (smudge-api-oauth2-start-server)
 
-(defun smudge-api-persist-token (token now)
-  "Persist TOKEN and current time NOW to disk and set in memory too."
-  (setq smudge-api-oauth2-token token)
-  (setq smudge-api-oauth2-ts now)
-  (smudge-api-serialize-token))
+    ;; Build authorization URL and open in browser
+    (let ((auth-request-url
+           (concat auth-url
+                   (if (string-match-p "\\?" auth-url) "&" "?")
+                   (url-build-query-string
+                    `((client_id ,client-id)
+                      (response_type "code")
+                      (redirect_uri ,redirect-uri)
+                      (scope ,scope)
+                      (state ,state))))))
+      (browse-url auth-request-url))
 
-;; Do not rely on the auto-refresh logic from oauth2.el, which seems broken for async requests
-(defun smudge-api-retrieve-oauth2-token ()
+    ;; Wait for the authorization code to be received by the callback
+    (message "Waiting for authorization callback...")
+    (while (not smudge-api-oauth2-auth-code)
+      (sleep-for 0.5))
+
+    ;; Exchange the authorization code for an access token using built-in oauth2 function
+    (let ((token (oauth2-request-access
+                  auth-url
+                  token-url
+                  client-id
+                  client-secret
+                  smudge-api-oauth2-auth-code
+                  redirect-uri)))
+
+      ;; Stop the HTTP server
+      (smudge-api-oauth2-stop-server)
+
+      ;; Store the token using built-in plstore function
+      (let ((plstore-id (oauth2-compute-id auth-url token-url scope client-id ""))
+            (plstore (plstore-open oauth2-token-file)))
+        (setf (oauth2-token-plstore-id token) plstore-id)
+        (oauth2--update-plstore plstore token)
+        (plstore-close plstore))
+
+      ;; Clean up temporary variables
+      (setq smudge-api-oauth2-auth-code nil)
+      (setq smudge-api-oauth2-callback-state nil)
+      (setq smudge-api-oauth2-auth-in-progress nil)
+
+      token)))
+
+(defun smudge-api-oauth2-load-token ()
+  "Load OAuth2 token from disk if it exists."
+  (let* ((plstore-id (oauth2-compute-id
+                      smudge-api-oauth2-auth-url
+                      smudge-api-oauth2-token-url
+                      smudge-api-oauth2-scopes
+                      smudge-oauth2-client-id
+                      ""))
+         (plstore (plstore-open oauth2-token-file))
+         (stored-data (plstore-get plstore plstore-id)))
+    (plstore-close plstore)
+    (when stored-data
+      (let* ((plist (cdr stored-data))
+             (token-data (plist-get plist :access-response))
+             (access-token (cdr (assoc 'access_token token-data)))
+             (refresh-token (cdr (assoc 'refresh_token token-data))))
+        (when access-token
+          (make-oauth2-token
+           :plstore-id plstore-id
+           :client-id smudge-oauth2-client-id
+           :client-secret smudge-oauth2-client-secret
+           :access-token access-token
+           :refresh-token refresh-token
+           :token-url smudge-api-oauth2-token-url
+           :access-response token-data))))))
+
+(defun smudge-api-oauth2-token ()
   "Retrieve the Oauth2 access token used to interact with the Spotify API.
 Use the first available token in order of: memory, disk, retrieve from API via
 OAuth2 protocol.  Refresh if expired.  Spin and wait if already in the process
 of fetching via another call to this method."
-  (let ((now (string-to-number (format-time-string "%s"))))
-    (if (null (or smudge-api-oauth2-token (smudge-api-deserialize-token)))
-        (if smudge-is-authorizing
-            (progn
-              (while (not smudge-api-oauth2-token)
-                (message "sleeping")
-                (sleep-for 1))
-              smudge-api-oauth2-token)
-          (setq smudge-is-authorizing t)
-          (let ((token (smudge-api-oauth2-auth smudge-api-oauth2-auth-url
-                                               smudge-api-oauth2-token-url
-                                               smudge-oauth2-client-id
-                                               smudge-oauth2-client-secret
-                                               smudge-api-oauth2-scopes
-                                               nil
-                                               (smudge-api-oauth2-callback))))
-            (setq smudge-is-authorizing nil)
-            (smudge-api-persist-token token now)
-            (if (null token)
-                (user-error "OAuth2 authentication failed")
-              token)))
-      ;; Spotify tokens appear to expire in 3600 seconds (60 min). We renew
-      ;; at 3000 (50 min) to play it safe
-      (if (> now (+ smudge-api-oauth2-ts 3000))
-          (let* ((inhibit-message t)
-                 (token (oauth2-refresh-access smudge-api-oauth2-token smudge-api-endpoint)))
-            (smudge-api-persist-token token now)
-            (if (null token)
-                (user-error "Could not refresh OAuth2 token")
-              token))
-        smudge-api-oauth2-token))))
+  (let ((inhibit-message t))
+    ;; If auth is already in progress, wait for it to complete
+    (while smudge-api-oauth2-auth-in-progress
+      (sleep-for 0.5))
+
+    ;; Get token from memory, disk, or start new auth flow
+    (unless smudge-api-oauth2-token
+      (setq smudge-api-oauth2-token
+            (or (smudge-api-oauth2-load-token)
+                (smudge-api-oauth2-auth
+                 smudge-api-oauth2-auth-url
+                 smudge-api-oauth2-token-url
+                 smudge-oauth2-client-id
+                 smudge-oauth2-client-secret
+                 smudge-api-oauth2-scopes
+                 (format "%s://%s:%s/%s"
+                         smudge-oauth2-callback-scheme
+                         smudge-oauth2-callback-host
+                         smudge-oauth2-callback-port
+                         smudge-oauth2-callback-endpoint)))))
+
+    ;; Refresh token if expired
+    (when smudge-api-oauth2-token
+      (setq smudge-api-oauth2-token
+            (oauth2-refresh-access smudge-api-oauth2-token "smudge")))
+
+    smudge-api-oauth2-token))
 
 (defun smudge-api-call-async (method uri &optional data callback)
   "Make a request to the given Spotify service endpoint URI via METHOD.
 Call CALLBACK with the parsed JSON response."
   (request (concat smudge-api-endpoint uri)
     :headers `(("Authorization" .
-                ,(format "Bearer %s" (oauth2-token-access-token (smudge-api-retrieve-oauth2-token))))
+                ,(format "Bearer %s" (oauth2-token-access-token (smudge-api-oauth2-token))))
                ("Accept" . "application/json")
                ("Content-Type" . "application/json")
                ("Content-Length" . ,(number-to-string (length data))))
