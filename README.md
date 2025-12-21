@@ -222,14 +222,14 @@ are supported:
 
 | Symbol | Description                | Example                        |
 |:------:|:---------------------------|:-------------------------------|
-| `%u`   | Track URI                  | `spotify:track:<id>`           |
-| `%a`   | Artist name (truncated)    | `Pink Floyd`                   |
-| `%t`   | Track name (truncated)     | `Us and Them`                  |
-| `%n`   | Track #                    | `7`                            |
-| `%l`   | Track duration, in minutes | `7:49`                         |
-| `%r`   | Player repeat status       | `R`, `-`                       |
-| `%s`   | Player shuffle status      | `S`, `-`                       |
-| `%p`   | Player playing status      | `Playing`, `Paused`, `Stopped` |
+|  `%u`  | Track URI                  | `spotify:track:<id>`           |
+|  `%a`  | Artist name (truncated)    | `Pink Floyd`                   |
+|  `%t`  | Track name (truncated)     | `Us and Them`                  |
+|  `%n`  | Track #                    | `7`                            |
+|  `%l`  | Track duration, in minutes | `7:49`                         |
+|  `%r`  | Player repeat status       | `R`, `-`                       |
+|  `%s`  | Player shuffle status      | `S`, `-`                       |
+|  `%p`  | Player playing status      | `Playing`, `Paused`, `Stopped` |
 
 The default format is `"[%p: %a - %t ◷ %l %r%s]"`.
 
@@ -245,13 +245,13 @@ via their corresponding variables:
 
 | Player State  | Variable                                  | Default Value |
 |:--------------|:------------------------------------------|:-------------:|
-| Playing       | `smudge-player-status-playing-text`       | `"Playing"`   |
-| Paused        | `smudge-player-status-paused-text`        | `"Paused"`    |
-| Stopped       | `smudge-player-status-stopped-text`       | `"Stopped"`   |
-| Repeating On  | `smudge-player-status-repeating-text`     | `"R"`         |
-| Repeating Off | `smudge-player-status-not-repeating-text` | `"-"`         |
-| Shuffling On  | `smudge-player-status-shuffling-text`     | `"S"`         |
-| Shuffling Off | `smudge-player-status-not-shuffling-text` | `"-"`         |
+| Playing       | `smudge-player-status-playing-text`       |  `"Playing"`  |
+| Paused        | `smudge-player-status-paused-text`        |  `"Paused"`   |
+| Stopped       | `smudge-player-status-stopped-text`       |  `"Stopped"`  |
+| Repeating On  | `smudge-player-status-repeating-text`     |     `"R"`     |
+| Repeating Off | `smudge-player-status-not-repeating-text` |     `"-"`     |
+| Shuffling On  | `smudge-player-status-shuffling-text`     |     `"S"`     |
+| Shuffling Off | `smudge-player-status-not-shuffling-text` |     `"-"`     |
 
 #### Global Remote Mode
 
