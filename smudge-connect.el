@@ -29,29 +29,37 @@ Returns a JSON string in the format:
   \"player_shuffling\": \"t\",
   \"player_repeating\": \"context\"
 }"
-  (smudge-api-get-player-status
-   (lambda (status)
-     (if-let* ((status status)
-               (track (gethash "item" status))
-               (json (concat
-                      "{"
-                      (format "\"artist\":\"%s\","
-                              (gethash "name" (car (gethash "artists" track))))
-                      (format "\"duration\": %d,"
-                              (gethash "duration_ms" track))
-                      (format "\"track_number\":%d,"
-                              (gethash "track_number" track))
-                      (format "\"name\":\"%s\","
-                              (gethash "name" track))
-                      (format "\"player_state\":\"%s\","
-                              (if (eq (gethash "is_playing" status) :false) "paused" "playing"))
-                      (format "\"player_shuffling\":%s,"
-                              (if (not (eq (gethash "shuffle_state" status) :false))"true" "false"))
-                      (format "\"player_repeating\":%s"
-                              (if (string= (gethash "repeat_state" status) "off") "false" "true"))
-                      "}")))
-         (smudge-controller-update-metadata json)
-       (smudge-controller-update-metadata nil)))))
+  (condition-case err
+      (smudge-api-get-player-status
+       (lambda (status)
+         (condition-case parse-err
+             (if-let* ((status status)
+                       (track (gethash "item" status))
+                       (json (concat
+                              "{"
+                              (format "\"artist\":\"%s\","
+                                      (gethash "name" (car (gethash "artists" track))))
+                              (format "\"duration\": %d,"
+                                      (gethash "duration_ms" track))
+                              (format "\"track_number\":%d,"
+                                      (gethash "track_number" track))
+                              (format "\"name\":\"%s\","
+                                      (gethash "name" track))
+                              (format "\"player_state\":\"%s\","
+                                      (if (eq (gethash "is_playing" status) :false) "paused" "playing"))
+                              (format "\"player_shuffling\":%s,"
+                                      (if (not (eq (gethash "shuffle_state" status) :false))"true" "false"))
+                              (format "\"player_repeating\":%s"
+                                      (if (string= (gethash "repeat_state" status) "off") "false" "true"))
+                              "}")))
+                 (smudge-controller-update-metadata json)
+               (smudge-controller-update-metadata nil))
+           (error
+            ;; Keep existing status on parse errors to avoid clearing modeline
+            nil))))
+    (error
+     ;; Silently ignore API errors to prevent timer from stopping
+     nil)))
 
 ;;;###autoload
 (defun smudge-select-device ()

@@ -140,8 +140,9 @@ The transient map is enabled if `smudge-player-use-transient-map' is non-nil."
 Apply SUFFIX to smudge-controller-prefixed functions, applying ARGS."
   (let ((func-name (format "smudge-%s-%s" smudge-transport suffix)))
     (apply (intern func-name) args)
+    ;; Schedule status update after control actions, with longer delay for API processing
     (unless (string= suffix "player-status")
-      (run-at-time 1 nil #'smudge-controller-player-status))))
+      (run-at-time 2 nil #'smudge-controller-player-status))))
 
 (defun smudge-controller-update-metadata (metadata)
   "Build the playing status to be displayed in the mode-line from METADATA."
