@@ -105,7 +105,8 @@ The following placeholders are supported:
   :type 'bool
   :group 'smudge)
 
-(defvar smudge-controller-timer nil)
+(defvar smudge-controller-timer nil
+  "Holds the timer object used to refresh the modeline.")
 
 (defvar smudge-controller-player-status ""
   "The text to be displayed in the global mode line or title bar.")
@@ -206,7 +207,8 @@ This corresponds to the current REPEATING state."
 (defun smudge-controller-stop-player-status-timer ()
   "Stop the timer that is updating the mode line."
   (when (smudge-controller-timerp)
-    (cancel-timer smudge-controller-timer)))
+    (cancel-timer smudge-controller-timer)
+    (setq smudge-controller-timer nil)))
 
 (defun smudge-controller-player-status ()
   "Update the mode line to display the current Spotify player status."
