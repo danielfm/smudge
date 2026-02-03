@@ -151,7 +151,7 @@ that auto-updates rely on the periodic player-status refresh (for example,
 when tracks advance on their own.
 
 Users of the package hydra may find the code below more convenient for managing
-Spotify, _although this is isn't officially supported:_
+Spotify, _although this isn't officially supported:_
 
 ```elisp
 ;; A hydra for controlling spotify.
