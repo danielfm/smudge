@@ -38,6 +38,7 @@
 (require 'smudge-device-select)
 (require 'smudge-controller)
 (require 'smudge-remote)
+(require 'smudge-lyrics)
 
 (smudge-when-darwin    (require 'smudge-apple))
 (smudge-when-gnu-linux (require 'smudge-dbus))
@@ -132,6 +133,7 @@ Prompt for the NAME and whether it should be made PUBLIC."
     (define-key map (kbd "s")   '("smudge/toggle-shuffle" . smudge-controller-toggle-shuffle))
     (define-key map (kbd "p")   '("smudge/playlists"      . smudge-playlists))
     (define-key map (kbd "t")   '("smudge/tracks"         . smudge-tracks))
+    (define-key map (kbd "l")   '("smudge/lyrics"         . smudge-lyrics-popup))
     (define-key map (kbd "v")   '("smudge/volume"         . smudge-volume))
     map)
   "Keymap for Spotify commands after \\='smudge-keymap-prefix\\='.")
@@ -170,6 +172,7 @@ Prompt for the NAME and whether it should be made PUBLIC."
                       ["Play/Pause"     smudge-controller-toggle-play]
                       ["Previous Track" smudge-controller-previous-track]
                       ["Next Track"     smudge-controller-next-track]
+                      ["Lyrics"         smudge-lyrics-popup]
                       "--"
                       ["Select Playing Device" smudge-select-device]
                       ["Mute/Unmute"           smudge-controller-volume-mute-unmute]
@@ -193,6 +196,7 @@ Prompt for the NAME and whether it should be made PUBLIC."
      ["Play/Pause" smudge-controller-toggle-play]
      ["Previous Track" smudge-controller-previous-track]
      ["Next Track" smudge-controller-next-track]
+     ["Lyrics" smudge-lyrics-popup]
      "--"
      ["Select Device" smudge-select-device]
      ["Mute/Unmute" smudge-controller-volume-mute-unmute]

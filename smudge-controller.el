@@ -105,6 +105,12 @@ The following placeholders are supported:
   :type 'bool
   :group 'smudge)
 
+(defcustom smudge-controller-metadata-hook nil
+  "Hook run after the player metadata is updated.
+Each function is called with one argument, the metadata hash table or nil."
+  :type 'hook
+  :group 'smudge)
+
 (defvar smudge-controller-timer nil
   "Holds the timer object used to refresh the modeline.")
 
@@ -165,8 +171,10 @@ Apply SUFFIX to smudge-controller-prefixed functions, applying ARGS."
                 player-status (replace-regexp-in-string "%r" (smudge-controller-player-status-repeating-indicator (gethash "player_repeating" json)) player-status)
                 player-status (replace-regexp-in-string "%p" (smudge-controller-player-status-playing-indicator (gethash "player_state" json)) player-status))
           (smudge-controller-update-player-status player-status)
-          (setq smudge-controller-player-metadata json))
-      (smudge-controller-update-player-status ""))))
+          (setq smudge-controller-player-metadata json)
+          (run-hook-with-args 'smudge-controller-metadata-hook json))
+      (smudge-controller-update-player-status "")
+      (run-hook-with-args 'smudge-controller-metadata-hook nil))))
 
 (defun smudge-controller-update-player-status (str)
   "Set the given STR to the player status, prefixed with the mode identifier."

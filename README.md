@@ -18,6 +18,7 @@ Connect feature.
 * Device playback display & selection using the Spotify Connect API (requires premium)
 * Communicates with the Spotify API via Oauth2
 * Displays the current track in mode line or title bar
+* Fetch lyrics for the current track via LRCLIB
 * Create playlists (public or private)
 * Browse your own playlists, and their tracks
 * Search for tracks and playlists that match the given keywords
@@ -126,6 +127,7 @@ The default bindings provided by the `smudge-command-map` is as follows:
 | <kbd>[prefix] r</kbd>   | `smudge-controller-toggle-repeat`          | Turn repeat on/off [1]                           |
 | <kbd>[prefix] n</kbd>   | `smudge-controller-next-track`             | Next track                                       |
 | <kbd>[prefix] b</kbd>   | `smudge-controller-previous-track`         | Previous track                                   |
+| <kbd>[prefix] l</kbd>   | `smudge-lyrics-popup`                       | Show lyrics for the current track                |
 | <kbd>[prefix] v u</kbd> | `smudge-controller-volume-up`              | Increase the volume [2]                          |
 | <kbd>[prefix] v d</kbd> | `smudge-controller-volume-down`            | Decrease the volume [2]                          |
 | <kbd>[prefix] v m</kbd> | `smudge-controller-volume-mute-unmute`     | Alternate the volume between 0 and 100 [2]       |
@@ -141,8 +143,15 @@ The default bindings provided by the `smudge-command-map` is as follows:
 [1] No proper support for this in D-Bus implementation for GNU/Linux
 [2] This feature uses Spotify Connect and requires a premium subscription
 
+Smudge can fetch lyrics for the current track using LRCLIB with
+`smudge-lyrics-popup` (bound to `[prefix] l` by default). Set
+`smudge-lyrics-auto-popup` to non-nil to fetch lyrics on track changes. Note
+that auto-updates rely on the periodic player-status refresh (for example,
+`global-smudge-remote-mode`), so enable that if you want lyrics to refresh
+when tracks advance on their own.
+
 Users of the package hydra may find the code below more convenient for managing
-Spotify, _although this is isn't officially supported:_
+Spotify, _although this isn't officially supported:_
 
 ```elisp
 ;; A hydra for controlling spotify.
