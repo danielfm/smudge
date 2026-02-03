@@ -97,7 +97,7 @@
                           (max 1 (round (/ dur-ms 1000.0)))))))))
 
 (defun smudge-lyrics--lrclib-url (artist title &optional duration)
-  "Return LRCLIB request URL for ARTIST and TITLE."
+  "Return LRCLIB request URL for ARTIST and TITLE, optionally including DURATION."
   (let* ((params `(("artist_name" . ,artist)
                    ("track_name" . ,title)))
          (params (if duration
